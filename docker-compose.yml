@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+
+  app:
+    build: ./app
+    ports:
+      - "5173:5173"
+    depends_on:
+      - http-server
+    networks:
+      - app-network
+
+  http-server:
+    image: nginx:alpine # Lightweight Apache HTTP server
+    container_name: http-server
+    ports:
+      - "8080:80" # Expose HTTP server on port 8080
+    volumes:
+      - ./data:/usr/share/nginx/html/ # Mount local data directory
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf # Mount custom Nginx config
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
