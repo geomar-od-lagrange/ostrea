@@ -17,7 +17,8 @@ import type {Feature, Polygon, MultiPolygon} from 'geojson';
 import ControlPanel from './control_panel';
 
 // Source data GeoJSON
-const DATA_URL ='/hex_features_real_00d-07d_05m.zip'; // eslint-disable-line
+const SERVER_URL = "http://localhost:8080"
+const DATA_URL = SERVER_URL + '/hex_features_real_00d-07d_05m.zip'; // eslint-disable-line
 const DATA_FILENAME ='hex_features_real_00d-07d_05m.geojson'; 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json'
 const DATA_FILE_MAP = {
@@ -28,8 +29,7 @@ const DATA_FILE_MAP = {
   "07d-14d_10m": "/hex_features_real_07d-14d_10m.zip",
   "07d-14d_15m": "/hex_features_real_07d-14d_15m.zip",
   "14d-28d_05m": "/hex_features_real_14d-28d_05m.zip",
-  "14d-28d_10m": "/hex_features_real_14d-28d_10m.zip",
-  "14d-28d_15m": "/hex_features_real_14d-28d_15m.zip",
+  "14d-28d_10m": "/hex_features_real_14d-28d_15m.zip",
 };
 
 export const COLOR_SCALE_CONNECTED = scaleThreshold<number, Color>()
@@ -199,24 +199,29 @@ export default function App({
   // Whenever selectedDataset changes, load the corresponding file:
   useEffect(() => {
     const loadGeoJson = async () => {
-      const url = DATA_FILE_MAP[selectedDataset];
+      const url =  SERVER_URL + DATA_FILE_MAP[selectedDataset];
       if (!url) {
         console.warn(`No URL found for dataset: ${selectedDataset}`);
         return;
       }
       try {
-        // Load the zip
-        const zip = await load(url, ZipLoader);
-        console.log('Keys in ZIP:', Object.keys(zip));
-        // The name inside the zip might be known:
-        // e.g. "hex_features_real_00d-07d_05m.geojson"
-        const filenameInsideZip = `hex_features_real_${selectedDataset}.geojson`;
-        console.log('Looking for inside zip:', filenameInsideZip);
-        const geojson = await parse(zip[filenameInsideZip], _GeoJSONLoader);
-        setGeoJsonData(geojson.features);
+   	try {
+    	// Fetch the ZIP file from the HTTP server
+    	const response = await fetch(url);
+    	if (!response.ok) {
+      	  throw new Error(`Failed to fetch file: ${response.statusText}`);
+    	}
+  	const zipBlob = await response.blob();
+  
+  	const zip = await load(zipBlob, ZipLoader);
+  	const geojson =  await parse(zip[DATA_FILENAME], _GeoJSONLoader);
+  	const features = geojson["features"]
       } catch (err) {
         console.error(`Failed to load dataset ${selectedDataset}`, err);
       }
+    }catch (error) {
+    	console.error("Error loading data:", error);
+    	}
     };
     loadGeoJson();
   }, [selectedDataset]);
@@ -335,13 +340,24 @@ export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  // const resp = await fetch(DATA_URL)
-  // const {features} = await resp.json();
-  const zip = await load(DATA_URL, ZipLoader);
+
+   try {
+    // Fetch the ZIP file from the HTTP server
+    const response = await fetch(DATA_URL);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file: ${response.statusText}`);
+    }
+  const zipBlob = await response.blob();
+  
+  const zip = await load(zipBlob, ZipLoader);
   const geojson =  await parse(zip[DATA_FILENAME], _GeoJSONLoader);
   const features = geojson["features"]
 
   root.render(<App data={features} />);
+  }catch (error) {
+    console.error("Error loading data:", error);
+    root.render(<App error="Failed to load data" />);
+  }
 }
 
 
