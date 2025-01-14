@@ -19,17 +19,17 @@ import ControlPanel from './control_panel';
 // Source data GeoJSON
 const SERVER_URL = "http://localhost:8080"
 const DATA_URL = SERVER_URL + '/hex_features_real_00d-07d_05m.zip'; // eslint-disable-line
-const DATA_FILENAME ='hex_features_real_00d-07d_05m.geojson'; 
+const STARTING_DATA_FILENAME ='hex_features_real_00d-07d_05m.geojson'; 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json'
 const DATA_FILE_MAP = {
-  "00d-07d_05m": "/hex_features_real_00d-07d_05m.zip",
-  "00d-07d_10m": "/hex_features_real_00d-07d_10m.zip",
-  "00d-07d_15m": "/hex_features_real_00d-07d_15m.zip",
-  "07d-14d_05m": "/hex_features_real_07d-14d_05m.zip",
-  "07d-14d_10m": "/hex_features_real_07d-14d_10m.zip",
-  "07d-14d_15m": "/hex_features_real_07d-14d_15m.zip",
-  "14d-28d_05m": "/hex_features_real_14d-28d_05m.zip",
-  "14d-28d_10m": "/hex_features_real_14d-28d_15m.zip",
+  "00d-07d_05m": "/hex_features_real_00d-07d_05m",
+  "00d-07d_10m": "/hex_features_real_00d-07d_10m",
+  "00d-07d_15m": "/hex_features_real_00d-07d_15m",
+  "07d-14d_05m": "/hex_features_real_07d-14d_05m",
+  "07d-14d_10m": "/hex_features_real_07d-14d_10m",
+  "07d-14d_15m": "/hex_features_real_07d-14d_15m",
+  "14d-28d_05m": "/hex_features_real_14d-28d_05m",
+  "14d-28d_10m": "/hex_features_real_14d-28d_15m",
 };
 
 export const COLOR_SCALE_CONNECTED = scaleThreshold<number, Color>()
@@ -205,23 +205,20 @@ export default function App({
         return;
       }
       try {
-   	try {
     	// Fetch the ZIP file from the HTTP server
-    	const response = await fetch(url);
+    	const response = await fetch(url + ".zip");
+    	console.log("Trying to fetch:", url + ".zip")
     	if (!response.ok) {
       	  throw new Error(`Failed to fetch file: ${response.statusText}`);
     	}
   	const zipBlob = await response.blob();
-  
+  	console.log("Trying to load:", DATA_FILE_MAP[selectedDataset] + ".geojson")
   	const zip = await load(zipBlob, ZipLoader);
-  	const geojson =  await parse(zip[DATA_FILENAME], _GeoJSONLoader);
+  	const geojson =  await parse(zip[DATA_FILE_MAP[selectedDataset] + ".geojson"], _GeoJSONLoader);
   	const features = geojson["features"]
       } catch (err) {
         console.error(`Failed to load dataset ${selectedDataset}`, err);
       }
-    }catch (error) {
-    	console.error("Error loading data:", error);
-    	}
     };
     loadGeoJson();
   }, [selectedDataset]);
@@ -350,7 +347,7 @@ export async function renderToDOM(container: HTMLDivElement) {
   const zipBlob = await response.blob();
   
   const zip = await load(zipBlob, ZipLoader);
-  const geojson =  await parse(zip[DATA_FILENAME], _GeoJSONLoader);
+  const geojson =  await parse(zip[STARTING_DATA_FILENAME], _GeoJSONLoader);
   const features = geojson["features"]
 
   root.render(<App data={features} />);
