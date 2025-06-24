@@ -1,27 +1,32 @@
-version: '3.8'
+version: '3'
 
 services:
+  db:
+    image: 'postgis/postgis:latest'
 
-  app:
-    build: ./app
     ports:
-      - "5173:5173"
-    depends_on:
-      - http-server
-    networks:
-      - app-network
+      - 5432:5432
 
-  http-server:
-    image: nginx:alpine # Lightweight Apache HTTP server
-    container_name: http-server
-    ports:
-      - "8080:80" # Expose HTTP server on port 8080
+    env_file:
+      - .env 
+     
     volumes:
-      - ./data:/usr/share/nginx/html/ # Mount local data directory
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf # Mount custom Nginx config
+      - ./db-data/:/var/lib/postgresql/data/
+
+  
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 15433:80
+    env_file:
+      - .env
+    depends_on:
+      - db
     networks:
-      - app-network
+      - postgres-network
+    volumes:
+      - ./pgadmin-data/:/var/lib/pgadmin/
 
 networks:
-  app-network:
+  postgres-network:
     driver: bridge

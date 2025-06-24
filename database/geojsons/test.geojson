@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [6.4, 55.1],
+            [6.4, 54.9],
+            [6.6, 54.9],
+            [6.6, 55.1],
+            [6.4, 55.1]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "North Sea Square",
+        "depth": 50
+      }
+    }
+  ]
+}
