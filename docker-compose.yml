@@ -3,30 +3,52 @@ version: '3'
 services:
   db:
     image: 'postgis/postgis:latest'
-
     ports:
       - 5432:5432
-
     env_file:
       - .env 
-     
     volumes:
       - ./db-data/:/var/lib/postgresql/data/
+    networks:
+      - postgres-network2
 
   
-  pgadmin:
-    image: dpage/pgadmin4
+#  pgadmin:
+#    image: dpage/pgadmin4
+#    ports:
+#      - 15433:80
+#    env_file:
+#      - .env
+#    depends_on:
+#      - db
+#    networks:
+#      - postgres-network
+#    volumes:
+#     - ./pgadmin-data/:/var/lib/pgadmin/
+
+  api:
+    build: ./api
     ports:
-      - 15433:80
+      - 3000:3000
     env_file:
       - .env
     depends_on:
       - db
     networks:
-      - postgres-network
+      - postgres-network2
+
+  frontend:
+    build:
+      context: ./frontend
     volumes:
-      - ./pgadmin-data/:/var/lib/pgadmin/
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - HOST=0.0.0.0
+
 
 networks:
-  postgres-network:
+  postgres-network2:
     driver: bridge

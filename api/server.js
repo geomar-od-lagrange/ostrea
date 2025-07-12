@@ -8,15 +8,15 @@ app.use(cors());
 
 // Create a connection pool using environment variables
 const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
-  database: process.env.DB_NAME || 'geodata',
+  host: 'db',
+  port: 5432,
+  user: 'user',
+  password: 'password',
+  database: 'db',
 });
 
 // Adjust table name if needed to match your import
-const TABLE_NAME = 'test_polygons';
+const TABLE_NAME = 'geo_table';
 
 // GET /features: return all polygons as a GeoJSON FeatureCollection
 app.get('/features', async (req, res) => {
