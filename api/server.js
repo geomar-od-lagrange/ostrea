@@ -24,7 +24,7 @@ app.get('/features', async (req, res) => {
     const queryText = `
       SELECT
         id,
-        ST_AsGeoJSON(geom) AS geometry,
+        ST_AsGeoJSON(geometry) AS geometry,
         name,
         depth
       FROM ${TABLE_NAME};

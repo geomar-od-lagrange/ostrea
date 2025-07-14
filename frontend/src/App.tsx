@@ -24,7 +24,7 @@ function App() {
     setFeature(null);
     //setError(null);
 
-    fetch('http://localhost:3000/feature?depth=${encodeURIComponent(selectedDepth)}')
+    fetch(`http://localhost:3000/feature?depth=${encodeURIComponent(selectedDepth)}`)
       .then((res) => {
         if (!res.ok) throw new Error(res.statusText);
         return res.json();

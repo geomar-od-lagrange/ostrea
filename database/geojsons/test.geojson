@@ -16,7 +16,28 @@
         ]
       },
       "properties": {
+      	"id": 0,
         "name": "North Sea Square",
+        "depth": 50
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [8.4, 55.1],
+            [6.4, 54.9],
+            [6.6, 54.9],
+            [6.6, 55.1],
+            [8.4, 55.1]
+          ]
+        ]
+      },
+      "properties": {
+      	"id": 1,
+        "name": "North Sea Poly",
         "depth": 50
       }
     }
