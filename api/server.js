@@ -24,9 +24,8 @@ app.get('/features', async (req, res) => {
     const queryText = `
       SELECT
         id,
-        ST_AsGeoJSON(geometry) AS geometry,
-        name,
-        depth
+        depth,
+        ST_AsGeoJSON(geometry) AS geometry
       FROM ${TABLE_NAME};
     `;
     const result = await pool.query(queryText);
@@ -55,9 +54,8 @@ app.get('/feature', async (req, res) => {
     const queryText = `
       SELECT
         id,
-        ST_AsGeoJSON(geometry) AS geometry,
-        name,
-        depth
+        depth,
+        ST_AsGeoJSON(geometry) AS geometry      
       FROM ${TABLE_NAME}
       WHERE depth = $1;
     `;

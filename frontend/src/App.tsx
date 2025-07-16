@@ -15,32 +15,33 @@ const MAP_STYLE = 'https://demotiles.maplibre.org/style.json';
 function App() {
   const [selectedDepth, setSelectedDepth] = useState<number>(50);
   const [feature, setFeature] = useState<any>(null);
-  //const [loading, setLoading] = useState<boolean>(false);
-  //const [error, setError] = useState<string | null>(null);
+  
+  const [hoveredId, setHoveredId] = useState(null);
 
   useEffect(() => {
     if (!selectedDepth) return;
-    //setLoading(true);
-    setFeature(null);
-    //setError(null);
 
     fetch(`http://localhost:3000/feature?depth=${encodeURIComponent(selectedDepth)}`)
-      .then((res) => {
+      .then(res => {
         if (!res.ok) throw new Error(res.statusText);
         return res.json();
       })
-      .then((data) => {
+      .then(data => {
         const geojson = data.type === 'FeatureCollection'
           ? data
           : { type: 'FeatureCollection', features: [data] };
+          geojson.features.map((f, i) => ({
+            index: i,
+            id: f.properties.id,
+            otherProps: Object.keys(f.properties)
+          }))
+        );                                                      // ← see which keys each has
+
         setFeature(geojson);
-        //setLoading(false);
-      });
-      //.catch((e) => {
-        //setError(e.message);
-        //setLoading(false);
-      //});
+      })
+      .catch(console.error);
   }, [selectedDepth]);
+
 
   const initialViewState = {
     longitude: 6.5,
@@ -57,9 +58,22 @@ function App() {
           data: feature,
           filled: true,
           stroked: true,
-          getFillColor: [0, 128, 255, 100],
+          getFillColor: d => d.properties.id === hoveredId ? [255, 255, 0] : [0, 0, 255],
+          updateTriggers: {
+            getFillColor: [hoveredId]
+          },
+          onHover: info => {
+            console.log("Hovered object: ", info.object);
+            setHoveredId(info.object ? info.object.properties.id : null);
+          },
           getLineColor: [0, 0, 128, 200],
-          lineWidthMinPixels: 2
+          lineWidthMinPixels: 2,
+          pickable: true,
+          onClick: info => {
+            if (info.object) {
+              console.log("Clicked object: ", info.object);
+            }
+          }
         })
       ]
     : [];
