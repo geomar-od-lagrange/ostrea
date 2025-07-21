@@ -16,33 +16,46 @@ const pool = new Pool({
 });
 
 // Adjust table name if needed to match your import
-const TABLE_NAME = 'geo_table';
+const GEO_TABLE_NAME = 'geo_table';
+const CONN_TABLE_NAME = "connectivity_table";
 
-// GET /features: return all polygons as a GeoJSON FeatureCollection
-app.get('/features', async (req, res) => {
+
+// GET /connectivity?id=<id>
+// returns an array of [otherId, value] tuples for the requested id
+app.get('/connectivity', async (req, res) => {
+  const { id } = req.query;
+  if (!id) {
+    return res.status(400).json({ error: 'Missing query parameter: id' });
+  }
+
   try {
     const queryText = `
-      SELECT
-        id,
-        depth,
-        ST_AsGeoJSON(geometry) AS geometry
-      FROM ${TABLE_NAME};
+      SELECT connectivity
+      FROM ${CONN_TABLE_NAME}
+      WHERE id = $1;
     `;
-    const result = await pool.query(queryText);
-    const features = result.rows.map(row => ({
-      type: 'Feature',
-      geometry: JSON.parse(row.geometry),
-      properties: {
-        name: row.name,
-        depth: row.depth,
-      },
-    }));
-    res.json({ type: 'FeatureCollection', features });
+    const result = await pool.query(queryText, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: `No entry for id=${id}` });
+    }
+
+    // If your column is TEXT instead of JSONB, uncomment the next line:
+    // const data = JSON.parse(result.rows[0].connectivity);
+    const data = result.rows[0].connectivity;
+
+    // Turn { "1":33, "2":34, "3":33 } into [ [1,33], [2,34], [3,33] ]
+    const responsePayload = Object.entries(data)
+      .map(([otherId, value]) => [Number(otherId), value]);
+
+    // 5) return it directly
+    res.json(responsePayload);
   } catch (err) {
-    console.error('Error in /features:', err);
+    console.error('Error in /connectivity:', err);
     res.status(500).json({ error: 'Database query error' });
   }
 });
+
 
 // GET /feature?depth=:depth - filter by depth
 app.get('/feature', async (req, res) => {
@@ -56,7 +69,7 @@ app.get('/feature', async (req, res) => {
         id,
         depth,
         ST_AsGeoJSON(geometry) AS geometry      
-      FROM ${TABLE_NAME}
+      FROM ${GEO_TABLE_NAME}
       WHERE depth = $1;
     `;
     const result = await pool.query(queryText, [depth]);
@@ -67,6 +80,7 @@ app.get('/feature', async (req, res) => {
       type: 'Feature',
       geometry: JSON.parse(row.geometry),
       properties: {
+        id: row.id,
         name: row.name,
         depth: row.depth,
       },

@@ -17,6 +17,7 @@ function App() {
   const [feature, setFeature] = useState<any>(null);
   
   const [hoveredId, setHoveredId] = useState(null);
+  const [clickId, setClickId] = useState(null);
 
   useEffect(() => {
     if (!selectedDepth) return;
@@ -34,9 +35,7 @@ function App() {
             index: i,
             id: f.properties.id,
             otherProps: Object.keys(f.properties)
-          }))
-        );                                                      // ← see which keys each has
-
+          }))              
         setFeature(geojson);
       })
       .catch(console.error);
@@ -46,7 +45,7 @@ function App() {
   const initialViewState = {
     longitude: 6.5,
     latitude: 55.0,
-    zoom: 7,
+    zoom: 5,
     pitch: 0,
     bearing: 0
   };
@@ -58,20 +57,32 @@ function App() {
           data: feature,
           filled: true,
           stroked: true,
-          getFillColor: d => d.properties.id === hoveredId ? [255, 255, 0] : [0, 0, 255],
           updateTriggers: {
-            getFillColor: [hoveredId]
+            getFillColor: [hoveredId],
+            getLineColor: [clickId]
           },
+          getFillColor: d => d.properties.id === hoveredId ? [255, 255, 0] : [0, 0, 255],
           onHover: info => {
             console.log("Hovered object: ", info.object);
             setHoveredId(info.object ? info.object.properties.id : null);
           },
-          getLineColor: [0, 0, 128, 200],
+          getLineColor: d => d.properties.id === clickId ? [255, 0, 0] : [0, 0, 128],
           lineWidthMinPixels: 2,
           pickable: true,
           onClick: info => {
             if (info.object) {
-              console.log("Clicked object: ", info.object);
+              fetch(`http://localhost:3000/connectivity?id=${encodeURIComponent(info.object.properties.id)}`)
+                .then(res => {
+                  if (!res.ok) throw new Error(res.statusText);
+                    return res.json();
+                })
+                .then(data => {
+                //######################################################### TODO: add onnclick functionality
+                  setClickId();
+                })
+                .catch(console.error);
+            }, [id]);
+
             }
           }
         })
