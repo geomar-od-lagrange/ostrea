@@ -12,6 +12,11 @@ import ControlPanel from './ControlPanel';
 // Open-source style URL (no Mapbox token required)
 const MAP_STYLE = 'https://demotiles.maplibre.org/style.json';
 
+type Connection = {
+  end_id: number;
+  weight: number
+}
+
 function App() {
   const [selectedDepth, setSelectedDepth] = useState<number>(50);
   const [feature, setFeature] = useState<any>(null);
@@ -49,7 +54,9 @@ function App() {
     pitch: 0,
     bearing: 0
   };
-
+  
+  const [connections, setConnections] = useState<Connection[]>([]);
+   
   const layers = feature
     ? [
         new GeoJsonLayer({
@@ -61,28 +68,37 @@ function App() {
             getFillColor: [hoveredId],
             getLineColor: [clickId]
           },
-          getFillColor: d => d.properties.id === hoveredId ? [255, 255, 0] : [0, 0, 255],
+          getFillColor: d => {
+            if (d.properties.id == hoveredId) {
+              return [255, 255, 0];
+            }
+            else if (connections != null) {
+              return [0, 0, 255]; //############################################################################################################################ TODO: have color affected by connectivity
+            }
+            else {
+              return [0, 0, 255];
+            }
+          },
+          
           onHover: info => {
-            console.log("Hovered object: ", info.object);
             setHoveredId(info.object ? info.object.properties.id : null);
           },
           getLineColor: d => d.properties.id === clickId ? [255, 0, 0] : [0, 0, 128],
           lineWidthMinPixels: 2,
           pickable: true,
           onClick: info => {
-            if (info.object) {
-              fetch(`http://localhost:3000/connectivity?id=${encodeURIComponent(info.object.properties.id)}`)
+            if (info.object != null) {
+              console.log("Request:", `http://localhost:3000/connectivity?start_id=${encodeURIComponent(info.object.properties.id)}`);
+              fetch(`http://localhost:3000/connectivity?start_id=${encodeURIComponent(info.object.properties.id)}`)
                 .then(res => {
-                  if (!res.ok) throw new Error(res.statusText);
-                    return res.json();
+                if (!res.ok) throw new Error(res.statusText);
+                  return res.json();
                 })
-                .then(data => {
-                //######################################################### TODO: add onnclick functionality
-                  setClickId();
+                .then((data: Connection[]) => {
+                  setConnections(data);
+                  console.log('connections after fetch', data);
                 })
-                .catch(console.error);
-            }, [id]);
-
+                .catch(error => console.error('Fetch error:', error));
             }
           }
         })

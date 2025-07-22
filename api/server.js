@@ -23,30 +23,27 @@ const CONN_TABLE_NAME = "connectivity_table";
 // GET /connectivity?id=<id>
 // returns an array of [otherId, value] tuples for the requested id
 app.get('/connectivity', async (req, res) => {
-  const { id } = req.query;
-  if (!id) {
+  const { start_id } = req.query;
+  if (!start_id) {
     return res.status(400).json({ error: 'Missing query parameter: id' });
   }
 
   try {
     const queryText = `
-      SELECT connectivity
+      SELECT end_id, weight
       FROM ${CONN_TABLE_NAME}
-      WHERE id = $1;
+      WHERE start_id = $1;
     `;
-    const result = await pool.query(queryText, [id]);
-
+    const result = await pool.query(queryText, [start_id]);
+    
+      console.log("Request for id", start_id);
+    
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: `No entry for id=${id}` });
+      return res.status(404).json({ error: `No entry for id=${start_id}` });
     }
 
-    // If your column is TEXT instead of JSONB, uncomment the next line:
-    // const data = JSON.parse(result.rows[0].connectivity);
-    const data = result.rows[0].connectivity;
 
-    // Turn { "1":33, "2":34, "3":33 } into [ [1,33], [2,34], [3,33] ]
-    const responsePayload = Object.entries(data)
-      .map(([otherId, value]) => [Number(otherId), value]);
+    const responsePayload = result.rows;
 
     // 5) return it directly
     res.json(responsePayload);
