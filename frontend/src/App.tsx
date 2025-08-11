@@ -3,6 +3,7 @@
 // npm install --save-dev @types/maplibre-gl
 
 import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import DeckGL from '@deck.gl/react';
 import { GeoJsonLayer } from '@deck.gl/layers';
 import StaticMap from 'react-map-gl';
@@ -56,7 +57,12 @@ function App() {
   };
   
   const [connections, setConnections] = useState<Connection[]>([]);
-   
+  
+  const weightMap = useMemo(
+    () => new Map(connections.map(c => [c.end_id, c.weight])),
+    [connections]
+  );
+  
   const layers = feature
     ? [
         new GeoJsonLayer({
@@ -69,12 +75,18 @@ function App() {
             getLineColor: [clickId]
           },
           getFillColor: d => {
+            const id = d.properties.id;
+            
             if (d.properties.id == hoveredId) {
               return [255, 255, 0];
             }
-            else if (connections != null) {
-              return [0, 0, 255]; //############################################################################################################################ TODO: have color affected by connectivity
+            
+            const w = weightMap.get(id);
+            if (w !== undefined) {
+              const red = Math.min(255, Math.round(w * 0.01 * 255));
+              return [red, 0, 0];
             }
+            
             else {
               return [0, 0, 255];
             }
@@ -88,6 +100,8 @@ function App() {
           pickable: true,
           onClick: info => {
             if (info.object != null) {
+              setClickId(info.object.properties.id);
+              
               console.log("Request:", `http://localhost:3000/connectivity?start_id=${encodeURIComponent(info.object.properties.id)}`);
               fetch(`http://localhost:3000/connectivity?start_id=${encodeURIComponent(info.object.properties.id)}`)
                 .then(res => {
