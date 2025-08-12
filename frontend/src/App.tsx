@@ -71,7 +71,7 @@ function App() {
           filled: true,
           stroked: true,
           updateTriggers: {
-            getFillColor: [hoveredId],
+            getFillColor: [hoveredId, connections],
             getLineColor: [clickId]
           },
           getFillColor: d => {
@@ -83,8 +83,8 @@ function App() {
             
             const w = weightMap.get(id);
             if (w !== undefined) {
-              const red = Math.min(255, Math.round(w * 0.01 * 255));
-              return [red, 0, 0];
+              const green = Math.min(255, Math.round(w * 0.01 * 255));
+              return [0, green, 0];
             }
             
             else {
@@ -101,8 +101,9 @@ function App() {
           onClick: info => {
             if (info.object != null) {
               setClickId(info.object.properties.id);
-              
-              console.log("Request:", `http://localhost:3000/connectivity?start_id=${encodeURIComponent(info.object.properties.id)}`);
+            }
+            if (info.object != null) {
+              //console.log("Request:", `http://localhost:3000/connectivity?start_id=${encodeURIComponent(info.object.properties.id)}`);
               fetch(`http://localhost:3000/connectivity?start_id=${encodeURIComponent(info.object.properties.id)}`)
                 .then(res => {
                 if (!res.ok) throw new Error(res.statusText);
@@ -117,6 +118,12 @@ function App() {
           }
         })
       ]
+    
+    //const layers = feature
+    //  ? [
+      
+      //]
+    
     : [];
 
   return (
