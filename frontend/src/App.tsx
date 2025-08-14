@@ -1,6 +1,3 @@
-// Make sure to install the following dependencies:
-// npm install @deck.gl/react @deck.gl/layers react-map-gl maplibre-gl
-// npm install --save-dev @types/maplibre-gl
 
 import { useEffect, useState } from 'react';
 import { useMemo } from 'react';
@@ -20,6 +17,7 @@ type Connection = {
 
 function App() {
   const [selectedDepth, setSelectedDepth] = useState<number>(50);
+  const [selectedTime, setSelectedTime] = useState<string>('0-7');
   const [feature, setFeature] = useState<any>(null);
   
   const [hoveredId, setHoveredId] = useState(null);
@@ -140,10 +138,12 @@ function App() {
           mapStyle={MAP_STYLE}
         />
       </DeckGL>
-    <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 1, background: 'rgba(255,255,255,0.9)', padding: '8px', borderRadius: '4px', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
+    <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 1, background: 'rgba(0,0,0,0.9)', padding: '8px', borderRadius: '4px', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
       <ControlPanel
         selectedDepth={selectedDepth}
         onDepthChange={setSelectedDepth}
+        selectedTime={selectedTime}
+        onTimeChange={setSelectedTime}
       />
     </div>
     </div>
