@@ -23,8 +23,8 @@ const CONN_TABLE_NAME = "connectivity_table";
 // GET /connectivity?id=<id>
 // returns an array of [otherId, value] tuples for the requested id
 app.get('/connectivity', async (req, res) => {
-  const { start_id } = req.query;
-  if (!start_id) {
+  const { depth, time_range, start_id } = req.query;
+  if ( !depth || !time_range || !start_id ) {
     return res.status(400).json({ error: 'Missing query parameter: id' });
   }
 
@@ -32,11 +32,11 @@ app.get('/connectivity', async (req, res) => {
     const queryText = `
       SELECT end_id, weight
       FROM ${CONN_TABLE_NAME}
-      WHERE start_id = $1;
-    `;
-    const result = await pool.query(queryText, [start_id]);
+      WHERE depth = $1 AND time_range = $2 AND start_id = $3; 
+    `; // time_range = $2 AND
+    const result = await pool.query(queryText, [depth, time_range, start_id]);
     
-      console.log("Request for id", start_id);
+      console.log("Request for id", depth, time_range, start_id);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ error: `No entry for id=${start_id}` });
@@ -54,44 +54,42 @@ app.get('/connectivity', async (req, res) => {
 });
 
 
-// GET /feature?depth=:depth - filter by depth
+// GET /feature
 app.get('/feature', async (req, res) => {
-  const { depth } = req.query;
-  if (!depth) {
-    return res.status(400).json({ error: 'Missing query parameter: depth' });
-  }
   try {
     const queryText = `
       SELECT
         id,
-        depth,
-        ST_AsGeoJSON(geometry) AS geometry      
-      FROM ${GEO_TABLE_NAME}
-      WHERE depth = $1;
+        ST_AsGeoJSON(geometry) AS geometry
+      FROM ${GEO_TABLE_NAME};
     `;
-    const result = await pool.query(queryText, [depth]);
+    const result = await pool.query(queryText);
+
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'No matching feature found' });
+      return res.status(404).json({ error: 'No features found' });
     }
+
     const features = result.rows.map(row => ({
       type: 'Feature',
       geometry: JSON.parse(row.geometry),
       properties: {
         id: row.id,
-        name: row.name,
         depth: row.depth,
       },
     }));
+
     // Return a single Feature if only one, else a FeatureCollection
     if (features.length === 1) {
       return res.json(features[0]);
     }
     res.json({ type: 'FeatureCollection', features });
+
   } catch (err) {
     console.error('Error in /feature:', err);
     res.status(500).json({ error: 'Database query error' });
   }
 });
+
 
 // Start server
 const PORT = process.env.PORT || 3000;

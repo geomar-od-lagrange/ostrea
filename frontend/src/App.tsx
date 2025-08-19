@@ -16,8 +16,8 @@ type Connection = {
 }
 
 function App() {
-  const [selectedDepth, setSelectedDepth] = useState<number>(50);
-  const [selectedTime, setSelectedTime] = useState<string>('0-7');
+  const [selectedDepth, setSelectedDepth] = useState<string>('05m');
+  const [selectedTime, setSelectedTime] = useState<string>('00d-07d');
   const [feature, setFeature] = useState<any>(null);
   
   const [hoveredId, setHoveredId] = useState(null);
@@ -26,7 +26,7 @@ function App() {
   useEffect(() => {
     if (!selectedDepth) return;
 
-    fetch(`http://localhost:3000/feature?depth=${encodeURIComponent(selectedDepth)}`)
+    fetch(`http://localhost:3000/feature`)
       .then(res => {
         if (!res.ok) throw new Error(res.statusText);
         return res.json();
@@ -81,7 +81,7 @@ function App() {
             
             const w = weightMap.get(id);
             if (w !== undefined) {
-              const green = Math.min(255, Math.round(w * 0.01 * 255));
+              const green = Math.min(255, Math.round(w * 255));
               return [0, green, 0];
             }
             
@@ -101,8 +101,9 @@ function App() {
               setClickId(info.object.properties.id);
             }
             if (info.object != null) {
-              //console.log("Request:", `http://localhost:3000/connectivity?start_id=${encodeURIComponent(info.object.properties.id)}`);
-              fetch(`http://localhost:3000/connectivity?start_id=${encodeURIComponent(info.object.properties.id)}`)
+              const fetchURL = `http://localhost:3000/connectivity?depth=${encodeURIComponent(selectedDepth)}&time_range=${encodeURIComponent(selectedTime)}&start_id=${encodeURIComponent(info.object.properties.id)}`
+              console.log("Request:", fetchURL);
+              fetch(fetchURL)
                 .then(res => {
                 if (!res.ok) throw new Error(res.statusText);
                   return res.json();

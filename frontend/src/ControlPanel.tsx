@@ -1,14 +1,14 @@
 import * as React from "react";
 
 interface ControlPanelProps {
-  selectedDepth: number;
-  onDepthChange: (newDepth: number) => void;
+  selectedDepth: string;
+  onDepthChange: (newDepth: string) => void;
   selectedTime: string;
   onTimeChange: (newTime: string) => void;
 }
 
-const depths = [5, 15, 25];
-const times = ['0-7', '7-14', '14-28'];
+const depths = ['05m', '10m', '15m'];
+const times = ['00d-07d', '07d-14d', '14d-28d'];
 
 export default function ControlPanel({
   selectedDepth,
@@ -17,7 +17,7 @@ export default function ControlPanel({
   onTimeChange,
 }: ControlPanelProps) {
   const handleDepthChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    onDepthChange(Number(e.target.value));
+    onDepthChange(String(e.target.value));
   
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     onTimeChange(String(e.target.value));

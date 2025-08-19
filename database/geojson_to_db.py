@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 
 engine = create_engine("postgresql://user:password@localhost:5432/db")
 
-gdf = gpd.read_file("geojsons/test.geojson")
+gdf = gpd.read_file("new_data/hexes.geojson")
 
 gdf.set_crs(epsg=4326, inplace=True)
 
