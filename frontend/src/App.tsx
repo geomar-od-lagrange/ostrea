@@ -26,7 +26,7 @@ function App() {
   useEffect(() => {
     if (!selectedDepth) return;
 
-    fetch(`http://localhost:3000/feature`)
+    fetch(`api/feature`)
       .then(res => {
         if (!res.ok) throw new Error(res.statusText);
         return res.json();
@@ -101,7 +101,7 @@ function App() {
               setClickId(info.object.properties.id);
             }
             if (info.object != null) {
-              const fetchURL = `http://localhost:3000/connectivity?depth=${encodeURIComponent(selectedDepth)}&time_range=${encodeURIComponent(selectedTime)}&start_id=${encodeURIComponent(info.object.properties.id)}`
+              const fetchURL = `api/connectivity?depth=${encodeURIComponent(selectedDepth)}&time_range=${encodeURIComponent(selectedTime)}&start_id=${encodeURIComponent(info.object.properties.id)}`
               console.log("Request:", fetchURL);
               fetch(fetchURL)
                 .then(res => {

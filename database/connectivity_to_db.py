@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.dialects.postgresql import FLOAT, INTEGER, TEXT
 
 # ---- config ----
-PARQUET_PATH = "new_data/connectivity.pq"   # or .parquet
+PARQUET_PATH = "new_data/connectivity.pq"
 TABLE_NAME   = "connectivity_table"
 PG_URL       = "postgresql://user:password@localhost:5432/db"
 CHUNKSIZE    = 100_000
@@ -25,11 +25,11 @@ df.columns = required  # normalize column names exactly
 df = df.rename(columns={"time": "time_range"})
 
 # Enforce dtypes
-df["start_id"] = pd.to_numeric(df["start_id"], errors="raise").astype("int64")
-df["end_id"]   = pd.to_numeric(df["end_id"], errors="raise").astype("int64")
+df["start_id"]       = pd.to_numeric(df["start_id"], errors="raise").astype("int64")
+df["end_id"]         = pd.to_numeric(df["end_id"], errors="raise").astype("int64")
 df["time_range"]     = df["time_range"].astype("string")
-df["depth"]    = df["depth"].astype("string")
-df["weight"]   = pd.to_numeric(df["weight"], errors="raise").astype("float64")
+df["depth"]          = df["depth"].astype("string")
+df["weight"]         = pd.to_numeric(df["weight"], errors="raise").astype("float64")
 
 # Write to Postgres
 engine = create_engine(PG_URL)
@@ -41,8 +41,8 @@ df.to_sql(
     dtype={
         "start_id": INTEGER,
         "end_id": INTEGER,
-        "time_range": TEXT,    # strings
-        "depth": TEXT,   # strings like "05m"
+        "time_range": TEXT,
+        "depth": TEXT,
         "weight": FLOAT,
     },
     chunksize=CHUNKSIZE,

@@ -39,7 +39,7 @@ app.get('/connectivity', async (req, res) => {
       console.log("Request for id", depth, time_range, start_id);
     
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: `No entry for id=${start_id}` });
+      return res.status(404).json({ error: `No entry for parameters: depth=${depth}&time_range=${time_range}&start_id=${start_id}` });
     }
 
 
@@ -53,6 +53,29 @@ app.get('/connectivity', async (req, res) => {
   }
 });
 
+//Only for debugging
+app.get('/all_connectivity', async (req, res) => {
+  try {
+    const queryText = `
+      SELECT start_id, end_id, weight
+      FROM ${CONN_TABLE_NAME}
+    `; 
+    const result = await pool.query(queryText);
+        
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: `No connectivity data` });
+    }
+
+
+    const responsePayload = result.rows;
+
+    // 5) return it directly
+    res.json(responsePayload);
+  } catch (err) {
+    console.error('Error in /connectivity:', err);
+    res.status(500).json({ error: 'Database query error' });
+  }
+});
 
 // GET /feature
 app.get('/feature', async (req, res) => {
@@ -64,11 +87,13 @@ app.get('/feature', async (req, res) => {
       FROM ${GEO_TABLE_NAME};
     `;
     const result = await pool.query(queryText);
+    
+    console.log("Request for features.")
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'No features found' });
     }
-
+    
     const features = result.rows.map(row => ({
       type: 'Feature',
       geometry: JSON.parse(row.geometry),
