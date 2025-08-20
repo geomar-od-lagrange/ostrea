@@ -33,7 +33,7 @@ app.get('/connectivity', async (req, res) => {
       SELECT end_id, weight
       FROM ${CONN_TABLE_NAME}
       WHERE depth = $1 AND time_range = $2 AND start_id = $3; 
-    `; // time_range = $2 AND
+    `;
     const result = await pool.query(queryText, [depth, time_range, start_id]);
     
       console.log("Request for id", depth, time_range, start_id);

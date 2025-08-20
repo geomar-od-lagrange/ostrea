@@ -81,19 +81,19 @@ function App() {
             
             const w = weightMap.get(id);
             if (w !== undefined) {
-              const green = Math.min(255, Math.round(w * 255));
+              const green = Math.min(255, Math.round(w * 100 * 255));
               return [0, green, 0];
             }
             
             else {
-              return [0, 0, 255];
+              return [0, 0, 255, 100];
             }
           },
           
           onHover: info => {
             setHoveredId(info.object ? info.object.properties.id : null);
           },
-          getLineColor: d => d.properties.id === clickId ? [255, 0, 0] : [0, 0, 128],
+          getLineColor: d => d.properties.id === clickId ? [255, 0, 0] : [0, 0, 128, 30],
           lineWidthMinPixels: 2,
           pickable: true,
           onClick: info => {
