@@ -19,6 +19,22 @@ const pool = new Pool({
 const GEO_TABLE_NAME = 'geo_table';
 const CONN_TABLE_NAME = "connectivity_table";
 
+function normalize(data) {
+  const weights = data.map(d => d.weight);
+  const min = Math.min(...weights);
+  const max = Math.max(...weights);
+  
+  if (max === min) {
+    // All values identical (or only one item)
+    return data.map(d => ({ ...d, weight: 1 }));
+  }
+
+  return data.map(d => ({
+    ...d,
+    weight: (Math.log(d.weight) - Math.log(min)) / (Math.log(max) - Math.log(min))
+  }));
+}
+
 
 // GET /connectivity?id=<id>
 // returns an array of [otherId, value] tuples for the requested id
@@ -36,14 +52,18 @@ app.get('/connectivity', async (req, res) => {
     `;
     const result = await pool.query(queryText, [depth, time_range, start_id]);
     
-      console.log("Request for id", depth, time_range, start_id);
+    console.log("Request for parameters: ", depth, time_range, start_id);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ error: `No entry for parameters: depth=${depth}&time_range=${time_range}&start_id=${start_id}` });
     }
 
 
-    const responsePayload = result.rows;
+    const rows = result.rows;
+    
+    const responsePayload = normalize(rows);
+    
+    //console.log("Output: ", responsePayload);
 
     // 5) return it directly
     res.json(responsePayload);
@@ -68,7 +88,7 @@ app.get('/all_connectivity', async (req, res) => {
 
 
     const responsePayload = result.rows;
-
+    
     // 5) return it directly
     res.json(responsePayload);
   } catch (err) {

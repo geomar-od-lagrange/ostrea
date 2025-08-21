@@ -1,31 +1,27 @@
-
-import { useEffect, useState } from 'react';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import DeckGL from '@deck.gl/react';
 import { GeoJsonLayer } from '@deck.gl/layers';
 import StaticMap from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import ControlPanel from './ControlPanel';
 
-// Open-source style URL (no Mapbox token required)
 const MAP_STYLE = 'https://demotiles.maplibre.org/style.json';
 
 type Connection = {
   end_id: number;
-  weight: number
-}
+  weight: number;
+};
 
 function App() {
   const [selectedDepth, setSelectedDepth] = useState<string>('05m');
   const [selectedTime, setSelectedTime] = useState<string>('00d-07d');
   const [feature, setFeature] = useState<any>(null);
-  
-  const [hoveredId, setHoveredId] = useState(null);
-  const [clickId, setClickId] = useState(null);
 
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [clickId, setClickId] = useState<number | null>(null);
+
+  // Fetch base feature(s) — unchanged logic (note: the map() result wasn't used)
   useEffect(() => {
-    if (!selectedDepth) return;
-
     fetch(`api/feature`)
       .then(res => {
         if (!res.ok) throw new Error(res.statusText);
@@ -35,16 +31,10 @@ function App() {
         const geojson = data.type === 'FeatureCollection'
           ? data
           : { type: 'FeatureCollection', features: [data] };
-          geojson.features.map((f, i) => ({
-            index: i,
-            id: f.properties.id,
-            otherProps: Object.keys(f.properties)
-          }))              
         setFeature(geojson);
       })
       .catch(console.error);
   }, [selectedDepth]);
-
 
   const initialViewState = {
     longitude: 6.5,
@@ -53,14 +43,40 @@ function App() {
     pitch: 0,
     bearing: 0
   };
-  
+
   const [connections, setConnections] = useState<Connection[]>([]);
-  
+
+  // Fetch connectivity whenever (clickId, selectedTime, selectedDepth) change
+  useEffect(() => {
+    if (clickId == null) return;
+
+    const ctrl = new AbortController();
+    const fetchURL = `api/connectivity?depth=${encodeURIComponent(
+      selectedDepth
+    )}&time_range=${encodeURIComponent(selectedTime)}&start_id=${encodeURIComponent(
+      clickId
+    )}`;
+
+    (async () => {
+      try {
+        const res = await fetch(fetchURL, { signal: ctrl.signal });
+        if (!res.ok) throw new Error(res.statusText);
+        const data: Connection[] = await res.json();
+        setConnections(data);
+      } catch (e: any) {
+        if (e.name !== 'AbortError') console.error('Fetch error:', e);
+      }
+    })();
+
+    return () => ctrl.abort();
+  }, [clickId, selectedTime, selectedDepth]);
+
+  // Derive weights from the latest connections; new Map reference whenever connections changes
   const weightMap = useMemo(
-    () => new Map(connections.map(c => [c.end_id, c.weight])),
+    () => new Map<number, number>(connections.map(c => [c.end_id, c.weight])),
     [connections]
   );
-  
+
   const layers = feature
     ? [
         new GeoJsonLayer({
@@ -68,61 +84,41 @@ function App() {
           data: feature,
           filled: true,
           stroked: true,
+          pickable: true,
+          lineWidthMinPixels: 2,
+
+          // Triggers: depend on what the accessor actually uses
           updateTriggers: {
-            getFillColor: [hoveredId, connections],
+            getFillColor: [hoveredId, weightMap],
             getLineColor: [clickId]
           },
-          getFillColor: d => {
-            const id = d.properties.id;
-            
-            if (d.properties.id == hoveredId) {
-              return [255, 255, 0];
-            }
-            
+
+          getFillColor: (d: any) => {
+            const id: number = d.properties.id;
+
+            if (id === hoveredId) return [255, 255, 0, 255];
+
             const w = weightMap.get(id);
             if (w !== undefined) {
-              const green = Math.min(255, Math.round(w * 100 * 255));
-              return [0, green, 0];
+              const green = Math.min(255, Math.round(w * 255));
+              return [0, green, 0, 255];
             }
-            
-            else {
-              return [0, 0, 255, 100];
-            }
+            return [0, 0, 255, 100];
           },
-          
-          onHover: info => {
+
+          getLineColor: (d: any) =>
+            d.properties.id === clickId ? [255, 0, 0, 255] : [0, 0, 128, 30],
+
+          onHover: (info: any) => {
             setHoveredId(info.object ? info.object.properties.id : null);
           },
-          getLineColor: d => d.properties.id === clickId ? [255, 0, 0] : [0, 0, 128, 30],
-          lineWidthMinPixels: 2,
-          pickable: true,
-          onClick: info => {
-            if (info.object != null) {
-              setClickId(info.object.properties.id);
-            }
-            if (info.object != null) {
-              const fetchURL = `api/connectivity?depth=${encodeURIComponent(selectedDepth)}&time_range=${encodeURIComponent(selectedTime)}&start_id=${encodeURIComponent(info.object.properties.id)}`
-              console.log("Request:", fetchURL);
-              fetch(fetchURL)
-                .then(res => {
-                if (!res.ok) throw new Error(res.statusText);
-                  return res.json();
-                })
-                .then((data: Connection[]) => {
-                  setConnections(data);
-                  console.log('connections after fetch', data);
-                })
-                .catch(error => console.error('Fetch error:', error));
-            }
+
+          onClick: (info: any) => {
+            if (!info.object) return;
+            setClickId(info.object.properties.id); // triggers the effect in UseEffect
           }
         })
       ]
-    
-    //const layers = feature
-    //  ? [
-      
-      //]
-    
     : [];
 
   return (
@@ -131,24 +127,33 @@ function App() {
         initialViewState={initialViewState}
         controller
         layers={layers}
-	style={{ position: 'absolute', top: '0px', left: '0px', width: '1920px', height: '1080px' }}
-     >
-        <StaticMap
-          reuseMaps
-          mapLib={maplibregl as any}
-          mapStyle={MAP_STYLE}
-        />
+        style={{ position: 'absolute', top: '0px', left: '0px', width: '1920px', height: '1080px' }}
+      >
+        <StaticMap reuseMaps mapLib={maplibregl as any} mapStyle={MAP_STYLE} />
       </DeckGL>
-    <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 1, background: 'rgba(0,0,0,0.9)', padding: '8px', borderRadius: '4px', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
-      <ControlPanel
-        selectedDepth={selectedDepth}
-        onDepthChange={setSelectedDepth}
-        selectedTime={selectedTime}
-        onTimeChange={setSelectedTime}
-      />
-    </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          top: 10,
+          left: 10,
+          zIndex: 1,
+          background: 'rgba(0,0,0,0.9)',
+          padding: '8px',
+          borderRadius: '4px',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.3)'
+        }}
+      >
+        <ControlPanel
+          selectedDepth={selectedDepth}
+          onDepthChange={setSelectedDepth}
+          selectedTime={selectedTime}
+          onTimeChange={setSelectedTime}
+        />
+      </div>
     </div>
   );
 }
 
 export default App;
+
