@@ -17,7 +17,8 @@ const pool = new Pool({
 
 // Adjust table name if needed to match your import
 const GEO_TABLE_NAME = 'geo_table';
-const CONN_TABLE_NAME = "connectivity_table";
+const CONN_TABLE_NAME = 'connectivity_table';
+const META_TABLE_NAME = 'metadata_table';
 
 function normalize(data) {
   const weights = data.map(d => d.weight);
@@ -73,26 +74,27 @@ app.get('/connectivity', async (req, res) => {
   }
 });
 
-//Only for debugging
-app.get('/all_connectivity', async (req, res) => {
+//metadata
+app.get('/metadata', async (req, res) => {
   try {
     const queryText = `
-      SELECT start_id, end_id, weight
-      FROM ${CONN_TABLE_NAME}
+      SELECT id, lon, lat, depth, disease, rest, aqc, pop
+      FROM ${META_TABLE_NAME}
     `; 
     const result = await pool.query(queryText);
         
+    console.log("Request for metadata") 
+    
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: `No connectivity data` });
+      return res.status(404).json({ error: `No metadata` });
     }
-
 
     const responsePayload = result.rows;
     
     // 5) return it directly
     res.json(responsePayload);
   } catch (err) {
-    console.error('Error in /connectivity:', err);
+    console.error('Error in /metadata:', err);
     res.status(500).json({ error: 'Database query error' });
   }
 });
@@ -108,7 +110,7 @@ app.get('/feature', async (req, res) => {
     `;
     const result = await pool.query(queryText);
     
-    console.log("Request for features.")
+    console.log("Request for features")
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'No features found' });

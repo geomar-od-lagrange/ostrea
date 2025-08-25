@@ -7,9 +7,6 @@ import ControlPanel from './ControlPanel';
 
 const MAP_STYLE = 'https://demotiles.maplibre.org/style.json';
 
-const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-const bg = prefersDark ? "rgba(0,0,0,0.85)" : "white";
-
 type Connection = {
   end_id: number;
   weight: number;
@@ -19,11 +16,12 @@ function App() {
   const [selectedDepth, setSelectedDepth] = useState<string>('05m');
   const [selectedTime, setSelectedTime] = useState<string>('00d-07d');
   const [feature, setFeature] = useState<any>(null);
+  const [metadata, setMetadata] = useState<any>(null);
 
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [clickId, setClickId] = useState<number | null>(null);
   const [tooltip, setTooltip] = useState<{x: number; y: number; content: string} | null>(null);
-  
+
   // Fetch base feature(s) — unchanged logic (note: the map() result wasn't used)
   useEffect(() => {
     fetch(`api/feature`)
@@ -38,10 +36,20 @@ function App() {
         setFeature(geojson);
       })
       .catch(console.error);
-  }, [selectedDepth]);
+    
+    fetch(`api/metadata`)
+      .then(res => {
+        if (!res.ok) throw new Error(res.statusText);
+        return res.json();
+      })
+      .then(data => {
+        setMetadata(data);
+      })
+      .catch(console.error);  
+  }, []);
 
   const initialViewState = {
-    longitude: 6.5,
+    longitude: 1,
     latitude: 55.0,
     zoom: 5,
     pitch: 0,
@@ -55,11 +63,7 @@ function App() {
     if (clickId == null) return;
 
     const ctrl = new AbortController();
-    const fetchURL = `api/connectivity?depth=${encodeURIComponent(
-      selectedDepth
-    )}&time_range=${encodeURIComponent(selectedTime)}&start_id=${encodeURIComponent(
-      clickId
-    )}`;
+    const fetchURL = `api/connectivity?depth=${encodeURIComponent(selectedDepth)}&time_range=${encodeURIComponent(selectedTime)}&start_id=${encodeURIComponent(clickId)}`;
 
     (async () => {
       try {
@@ -114,12 +118,22 @@ function App() {
             d.properties.id === clickId ? [255, 0, 0, 255] : [0, 0, 128, 30],
 
           onHover: (info: any) => {
+            setHoveredId(info.object ? info.object.properties.id : null);
+            
             if (info.object) {
+              console.log(metadata)
               setHoveredId(info.object.properties.id);
               setTooltip({
                 x: info.x,
                 y: info.y,
-                content: `ID: ${info.object.properties.id}`,
+                content: `Id: ${encodeURIComponent(metadata[info.object.properties.id].id)}
+                  lon: ${encodeURIComponent(metadata[info.object.properties.id].lon)}
+                  lat: ${encodeURIComponent(metadata[info.object.properties.id].lat)}
+                  Depth: ${encodeURIComponent(metadata[info.object.properties.id].depth)}
+                  Disease: ${encodeURIComponent(metadata[info.object.properties.id].disease)}
+                  rest: ${encodeURIComponent(metadata[info.object.properties.id].est)}
+                  aqc: ${encodeURIComponent(metadata[info.object.properties.id].aqc)}
+                  pop: ${encodeURIComponent(metadata[info.object.properties.id].pop)}`,
               });
             } else {
               setHoveredId(null);
@@ -152,7 +166,7 @@ function App() {
           top: 10,
           left: 10,
           zIndex: 1,
-          background: bg,
+          background: 'rgba(0,0,0,0.9)',
           padding: '8px',
           borderRadius: '4px',
           boxShadow: '0 1px 4px rgba(0,0,0,0.3)'
@@ -165,28 +179,28 @@ function App() {
           onTimeChange={setSelectedTime}
         />
       </div>
-      {tooltip && (
-        <div
-          style={{
-            position: "absolute",
-            // Slight offset so the cursor doesn't cover the tooltip
-            left: tooltip.x + 10,
-            top: tooltip.y + 10,
-            zIndex: 2,
-            pointerEvents: "none",
-            background: bg,
-            color: "#fff",
-            padding: "6px 8px",
-            borderRadius: "4px",
-            fontSize: 12,
-            maxWidth: 280,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {tooltip.content}
-        </div>
-      )}
+      
+    {tooltip && (
+      <div
+        style={{
+          position: "absolute",
+          left: tooltip.x + 10,
+          top: tooltip.y + 10,
+          zIndex: 2,
+          pointerEvents: "none",
+          background: "rgba(0,0,0,0.75)",
+          color: "#fff",
+          padding: "6px 8px",
+          borderRadius: "4px",
+          fontSize: 12,
+          maxWidth: 280,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
+          whiteSpace: "pre-line",
+        }}
+      >
+        {tooltip.content}
+      </div>
+    )}
     </div>
   );
 }
