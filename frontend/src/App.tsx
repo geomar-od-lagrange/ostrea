@@ -169,7 +169,8 @@ function App() {
           background: 'rgba(0,0,0,0.9)',
           padding: '8px',
           borderRadius: '4px',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.3)'
+          boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+          color: '#fff'
         }}
       >
         <ControlPanel
