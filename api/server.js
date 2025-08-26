@@ -40,29 +40,42 @@ function normalize(data) {
 // GET /connectivity?id=<id>
 // returns an array of [otherId, value] tuples for the requested id
 app.get('/connectivity', async (req, res) => {
-  const { depth, time_range, start_id } = req.query;
-  if ( !depth || !time_range || !start_id ) {
-    return res.status(400).json({ error: 'Missing query parameter: id' });
-  }
+
+  const depths = (req.query.depth || "").split(",");
+  const time_ranges = (req.query.time_range || "").split(",");
+  const start_id = req.query.start_id;
+  const op = req.query.op || "mean";
 
   try {
     const queryText = `
-      SELECT end_id, weight
+      SELECT end_id, depth, time_range, weight
       FROM ${CONN_TABLE_NAME}
-      WHERE depth = $1 AND time_range = $2 AND start_id = $3; 
+      WHERE start_id = $1
+        AND depth = ANY($2)
+        AND time_range = ANY($3); 
     `;
-    const result = await pool.query(queryText, [depth, time_range, start_id]);
+    const result = await pool.query(queryText, [start_id, depths, time_ranges]);
     
-    console.log("Request for parameters: ", depth, time_range, start_id);
+    console.log("Request for parameters: ", depths, time_ranges, start_id);
     
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: `No entry for parameters: depth=${depth}&time_range=${time_range}&start_id=${start_id}` });
+      return res.status(404).json({ error: `No entry for parameters: depths=${depths}&time_ranges=${time_ranges}&start_id=${start_id}` });
     }
-
-
-    const rows = result.rows;
+    const data = result.rows;
     
-    const responsePayload = normalize(rows);
+    const mean = xs => xs.reduce((a,b)=>a+b,0) / (xs.length || 1);
+
+    const byEndId = data.reduce((acc, r) => {
+      (acc[r.end_id] ??= []).push(r);
+      return acc;
+    }, {});
+
+    const aggregates = Object.entries(byEndId).map(([end_id, rows]) => ({
+      end_id: typeof rows[0].end_id === 'number' ? Number(end_id) : String(end_id),
+      weight: mean(rows.map(r => +r.weight)),
+    }));
+        
+    const responsePayload = normalize(aggregates);
     
     //console.log("Output: ", responsePayload);
 

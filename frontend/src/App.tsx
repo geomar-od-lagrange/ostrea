@@ -13,8 +13,8 @@ type Connection = {
 };
 
 function App() {
-  const [selectedDepth, setSelectedDepth] = useState<string>('05m');
-  const [selectedTime, setSelectedTime] = useState<string>('00d-07d');
+  const [selectedDepths, setSelectedDepths] = useState<string[]>(['05m']);
+  const [selectedTimes, setSelectedTimes] = useState<string[]>(['00d-07d']);
   const [feature, setFeature] = useState<any>(null);
   const [metadata, setMetadata] = useState<any>(null);
 
@@ -63,8 +63,9 @@ function App() {
     if (clickId == null) return;
 
     const ctrl = new AbortController();
-    const fetchURL = `api/connectivity?depth=${encodeURIComponent(selectedDepth)}&time_range=${encodeURIComponent(selectedTime)}&start_id=${encodeURIComponent(clickId)}`;
-
+    const fetchURL = `api/connectivity?depth=${encodeURIComponent(selectedDepths)}&time_range=${encodeURIComponent(selectedTimes)}&start_id=${encodeURIComponent(clickId)}&op=mean`;
+    console.log("Trying to fetch: ", fetchURL);
+    
     (async () => {
       try {
         const res = await fetch(fetchURL, { signal: ctrl.signal });
@@ -77,7 +78,7 @@ function App() {
     })();
 
     return () => ctrl.abort();
-  }, [clickId, selectedTime, selectedDepth]);
+  }, [clickId, selectedTimes, selectedDepths]);
 
   // Derive weights from the latest connections; new Map reference whenever connections changes
   const weightMap = useMemo(
@@ -121,7 +122,7 @@ function App() {
             setHoveredId(info.object ? info.object.properties.id : null);
             
             if (info.object) {
-              console.log(metadata)
+              //console.log(metadata)
               setHoveredId(info.object.properties.id);
               setTooltip({
                 x: info.x,
@@ -174,10 +175,10 @@ function App() {
         }}
       >
         <ControlPanel
-          selectedDepth={selectedDepth}
-          onDepthChange={setSelectedDepth}
-          selectedTime={selectedTime}
-          onTimeChange={setSelectedTime}
+          selectedDepths={selectedDepths}
+          onDepthChange={setSelectedDepths}
+          selectedTimes={selectedTimes}
+          onTimeChange={setSelectedTimes}
         />
       </div>
       
