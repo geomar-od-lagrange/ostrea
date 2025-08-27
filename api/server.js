@@ -43,23 +43,26 @@ app.get('/connectivity', async (req, res) => {
 
   const depths = (req.query.depth || "").split(",");
   const time_ranges = (req.query.time_range || "").split(",");
-  const start_id = req.query.start_id;
+  const start_ids = (req.query.start_id || '')
+    .split(',')
+    .filter(Boolean)
+    .map(x => Number(x));
   const op = req.query.op || "mean";
 
   try {
     const queryText = `
       SELECT end_id, depth, time_range, weight
       FROM ${CONN_TABLE_NAME}
-      WHERE start_id = $1
+      WHERE start_id = ANY($1)
         AND depth = ANY($2)
         AND time_range = ANY($3); 
     `;
-    const result = await pool.query(queryText, [start_id, depths, time_ranges]);
+    const result = await pool.query(queryText, [start_ids, depths, time_ranges]);
     
-    console.log("Request for parameters: ", depths, time_ranges, start_id);
+    console.log("Request for parameters: ", depths, time_ranges, start_ids);
     
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: `No entry for parameters: depths=${depths}&time_ranges=${time_ranges}&start_id=${start_id}` });
+      return res.status(404).json({ error: `No entry for parameters: depths=${depths}&time_ranges=${time_ranges}&start_id=${start_ids}` });
     }
     const data = result.rows;
     

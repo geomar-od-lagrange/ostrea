@@ -5,6 +5,7 @@ interface ControlPanelProps {
   onDepthChange: (newDepths: string[]) => void;
   selectedTimes: string[];
   onTimeChange: (newTimes: string[]) => void;
+  clearHex?: (payload: { depths: string[]; times: string[] }) => void;
 }
 
 const depths = ["05m", "10m", "15m"];
@@ -19,6 +20,7 @@ export default function ControlPanel({
   onDepthChange,
   selectedTimes,
   onTimeChange,
+  clearHex
 }: ControlPanelProps) {
   const handleDepthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onDepthChange(toggle(selectedDepths, e.target.value));
@@ -75,6 +77,12 @@ export default function ControlPanel({
           {t}
         </label>
       ))}
+      
+      <div style={{ marginTop: 12 }}>
+        <button type="button" onClick={clearHex} style={{ padding: "6px 10px", borderRadius: 6 }}>
+          Clear hex input
+        </button>
+      </div>
     </fieldset>
   );
 }

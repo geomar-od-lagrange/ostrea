@@ -19,7 +19,7 @@ function App() {
   const [metadata, setMetadata] = useState<any>(null);
 
   const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const [clickId, setClickId] = useState<number | null>(null);
+  const [clickIds, setClickIds] = useState<number[]>([]);
   const [tooltip, setTooltip] = useState<{x: number; y: number; content: string} | null>(null);
 
   // Fetch base feature(s) — unchanged logic (note: the map() result wasn't used)
@@ -60,25 +60,30 @@ function App() {
 
   // Fetch connectivity whenever (clickId, selectedTime, selectedDepth) change
   useEffect(() => {
-    if (clickId == null) return;
+    if (clickIds?.length) {
 
-    const ctrl = new AbortController();
-    const fetchURL = `api/connectivity?depth=${encodeURIComponent(selectedDepths)}&time_range=${encodeURIComponent(selectedTimes)}&start_id=${encodeURIComponent(clickId)}&op=mean`;
-    console.log("Trying to fetch: ", fetchURL);
+      const ctrl = new AbortController();
+      const fetchURL = `api/connectivity?depth=${encodeURIComponent(selectedDepths)}&time_range=${encodeURIComponent(selectedTimes)}&start_id=${encodeURIComponent(clickIds)}&op=mean`;
+      console.log("Trying to fetch: ", fetchURL);
     
-    (async () => {
-      try {
-        const res = await fetch(fetchURL, { signal: ctrl.signal });
-        if (!res.ok) throw new Error(res.statusText);
-        const data: Connection[] = await res.json();
-        setConnections(data);
-      } catch (e: any) {
-        if (e.name !== 'AbortError') console.error('Fetch error:', e);
-      }
-    })();
-
+      (async () => {
+        try {
+          const res = await fetch(fetchURL, { signal: ctrl.signal });
+          if (!res.ok) throw new Error(res.statusText);
+          const data: Connection[] = await res.json();
+          setConnections(data);
+        } catch (e: any) {
+          if (e.name !== 'AbortError') console.error('Fetch error:', e);
+        }
+      })();
     return () => ctrl.abort();
-  }, [clickId, selectedTimes, selectedDepths]);
+    }
+  }, [clickIds, selectedTimes, selectedDepths]);
+
+  const clearHex = () => {
+    setClickIds([]);
+    setConnections([]);
+  }
 
   // Derive weights from the latest connections; new Map reference whenever connections changes
   const weightMap = useMemo(
@@ -99,7 +104,7 @@ function App() {
           // Triggers: depend on what the accessor actually uses
           updateTriggers: {
             getFillColor: [hoveredId, weightMap],
-            getLineColor: [clickId]
+            getLineColor: [clickIds]
           },
 
           getFillColor: (d: any) => {
@@ -116,7 +121,7 @@ function App() {
           },
 
           getLineColor: (d: any) =>
-            d.properties.id === clickId ? [255, 0, 0, 255] : [0, 0, 128, 30],
+            clickIds.includes(d.properties.id) ? [255, 0, 0, 255] : [0, 0, 128, 30],
 
           onHover: (info: any) => {
             setHoveredId(info.object ? info.object.properties.id : null);
@@ -144,7 +149,14 @@ function App() {
 
           onClick: (info: any) => {
             if (!info.object) return;
-            setClickId(info.object.properties.id); // triggers the effect in UseEffect
+            if (clickIds.indexOf(info.object.properties.id) == -1) {
+              setClickIds([...clickIds, info.object.properties.id]);
+              //console.log(clickIds);
+            }
+            else {
+              setClickIds(prev => prev.filter(x => x !== info.object.properties.id));
+              //console.log(clickIds);
+            }
           }
         })
       ]
@@ -179,6 +191,7 @@ function App() {
           onDepthChange={setSelectedDepths}
           selectedTimes={selectedTimes}
           onTimeChange={setSelectedTimes}
+          clearHex={clearHex}
         />
       </div>
       
