@@ -17,7 +17,11 @@ function App() {
   const [selectedTimes, setSelectedTimes] = useState<string[]>(['00d-07d']);
   const [feature, setFeature] = useState<any>(null);
   const [metadata, setMetadata] = useState<any>(null);
-
+  
+  const [isAQCHighlighted, setAQC] = useState<boolean>(false);
+  const [isRestHighlighted, setRest] = useState<boolean>(false);
+  const [isDiseaseHighlighted, setDisease] = useState<boolean>(false);
+  
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [clickIds, setClickIds] = useState<number[]>([]);
   const [tooltip, setTooltip] = useState<{x: number; y: number; content: string} | null>(null);
@@ -104,7 +108,7 @@ function App() {
           // Triggers: depend on what the accessor actually uses
           updateTriggers: {
             getFillColor: [hoveredId, weightMap],
-            getLineColor: [clickIds]
+            getLineColor: [clickIds, isAQCHighlighted, isRestHighlighted, isDiseaseHighlighted]
           },
 
           getFillColor: (d: any) => {
@@ -120,9 +124,20 @@ function App() {
             return [0, 0, 255, 100];
           },
 
-          getLineColor: (d: any) =>
-            clickIds.includes(d.properties.id) ? [255, 0, 0, 255] : [0, 0, 128, 30],
-
+          getLineColor: (d: any) => {
+            if (isAQCHighlighted) {
+              return metadata[d.properties.id].aqc>0 ? [255, 255, 0, 255] : [0, 0, 128, 30]; // (((metadata[d.properties.id].aqc - 1)/68)+100)*
+            } 
+            if (isRestHighlighted) {
+              return metadata[d.properties.id].rest>0 ? [64, 224, 208, 255] : [0, 0, 128, 30]; // (((metadata[d.properties.id].aqc - 1)/68)+100)*
+            }
+            if (isDiseaseHighlighted) {
+              return metadata[d.properties.id].disease>0 ? [255, 0, 0, 255] : [0, 0, 128, 30]; // (((metadata[d.properties.id].aqc - 1)/68)+100)*
+            }
+            
+            return clickIds.includes(d.properties.id) ? [255, 128, 0, 255] : [0, 0, 128, 30];
+          },
+          
           onHover: (info: any) => {
             setHoveredId(info.object ? info.object.properties.id : null);
             
@@ -192,6 +207,10 @@ function App() {
           selectedTimes={selectedTimes}
           onTimeChange={setSelectedTimes}
           clearHex={clearHex}
+          isAQCHighlighted={isAQCHighlighted}
+          onAQCChange={setAQC}
+          onRestChange={setRest}
+          onDiseaseChange={setDisease}
         />
       </div>
       

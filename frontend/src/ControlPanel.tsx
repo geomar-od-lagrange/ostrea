@@ -6,6 +6,12 @@ interface ControlPanelProps {
   selectedTimes: string[];
   onTimeChange: (newTimes: string[]) => void;
   clearHex?: (payload: { depths: string[]; times: string[] }) => void;
+  isAQCHighlighted: boolean;
+  onAQCChange: (newAQC: boolean) => void;
+  isRestHighlighted: boolean;
+  onRestChange: (newRest: boolean) => void;
+  isDiseaseHighlighted: boolean;
+  onDiseaseChange: (newDisease: boolean) => void; 
 }
 
 const depths = ["05m", "10m", "15m"];
@@ -20,7 +26,13 @@ export default function ControlPanel({
   onDepthChange,
   selectedTimes,
   onTimeChange,
-  clearHex
+  clearHex,
+  isAQCHighlighted,
+  onAQCChange,
+  isRestHighlighted,
+  onRestChange,
+  isDiseaseHighlighted,
+  onDiseaseChange
 }: ControlPanelProps) {
   const handleDepthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onDepthChange(toggle(selectedDepths, e.target.value));
@@ -83,6 +95,40 @@ export default function ControlPanel({
           Clear hex input
         </button>
       </div>
+      
+      <label style={{ display: "inline-flex", alignItems: "center", marginRight: 12, cursor: "pointer" }}>
+        <input
+          type="checkbox"
+          name="aqc"
+          checked={isAQCHighlighted}
+          onChange={(e) => onAQCChange(e.target.checked)}
+          style={{ marginRight: 6, accentColor: "#16a34a" }}
+        />
+        Highlight aquacultures
+      </label>
+      
+      <label style={{ display: "inline-flex", alignItems: "center", marginRight: 12, cursor: "pointer" }}>
+        <input
+          type="checkbox"
+          name="rest"
+          checked={isRestHighlighted}
+          onChange={(e) => onRestChange(e.target.checked)}
+          style={{ marginRight: 6, accentColor: "#16a34a" }}
+        />
+        Highlight restoration sites
+      </label>
+      
+      <label style={{ display: "inline-flex", alignItems: "center", marginRight: 12, cursor: "pointer" }}>
+        <input
+          type="checkbox"
+          name="disease"
+          checked={isDiseaseHighlighted}
+          onChange={(e) => onDiseaseChange(e.target.checked)}
+          style={{ marginRight: 6, accentColor: "#16a34a" }}
+        />
+        Highlight confirmed outbreaks
+      </label>
+      
     </fieldset>
   );
 }
