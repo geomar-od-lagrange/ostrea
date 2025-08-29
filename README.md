@@ -1,4 +1,4 @@
-# Project Title
+# OYSTERS
 
 Visalizer for particle flow in the north sea
 
@@ -61,4 +61,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## Credits / Acknowledgements
 
 - See requirements.txt for used python libraries. Deckgl and maplibre for the frondend.
-- Contributors: Me
+- Contributors: Ingmar Eissfeldt, Willi Rath
