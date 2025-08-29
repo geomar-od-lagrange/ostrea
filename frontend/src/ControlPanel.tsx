@@ -41,8 +41,20 @@ export default function ControlPanel({
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onTimeChange(toggle(selectedTimes, e.target.value));
   };
+  
+  const stopScroll = (e: React.WheelEvent | React.TouchEvent) => {
+    e.preventDefault();
+  };
 
   return (
+    <div
+      onWheel={stopScroll}
+      onTouchMove={stopScroll}
+      style={{
+        overscrollBehavior: "none",
+        maxHeight: "100%",   // just in case, keep it bounded
+      }}
+    >
     <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
       <legend style={{ fontWeight: 600, marginBottom: 8 }}>ControlPanel</legend>
 
@@ -54,6 +66,7 @@ export default function ControlPanel({
             alignItems: "center", // "left/right" isn't valid; use flex-start/center
             marginRight: 12,
             cursor: "pointer",
+            overscrollBehavior: 'none',
           }}
         >
           <input
@@ -130,6 +143,7 @@ export default function ControlPanel({
       </label>
       
     </fieldset>
+    </div>
   );
 }
 

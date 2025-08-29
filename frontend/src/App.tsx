@@ -96,6 +96,7 @@ function App() {
     [connections]
   );
 
+
   const layers = feature
     ? [
         new GeoJsonLayer({
@@ -197,7 +198,7 @@ function App() {
         initialViewState={initialViewState}
         controller
         layers={layers}
-        style={{ position: 'absolute', top: '0px', left: '0px', width: '1920px', height: '1080px' }}
+        style={{ position: 'absolute', top: '0px', left: '0px', width: '100vw', height: '100vh', overscrollBehavior: 'none', }}
       >
         <StaticMap reuseMaps mapLib={maplibregl as any} mapStyle={MAP_STYLE} />
       </DeckGL>
@@ -244,6 +245,7 @@ function App() {
           maxWidth: 280,
           boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
           whiteSpace: "pre-line",
+          overscrollBehavior: 'none',
         }}
       >
         {tooltip.content}
