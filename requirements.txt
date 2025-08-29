@@ -1,0 +1,5 @@
+pandas
+geopandas
+pyarrow
+tqdm
+sqlalchemy
