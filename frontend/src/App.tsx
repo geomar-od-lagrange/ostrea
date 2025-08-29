@@ -82,6 +82,7 @@ function App() {
       })();
     return () => ctrl.abort();
     }
+    setConnections([]);
   }, [clickIds, selectedTimes, selectedDepths]);
 
   const clearHex = () => {
@@ -125,18 +126,31 @@ function App() {
           },
 
           getLineColor: (d: any) => {
-            if (isAQCHighlighted) {
-              return metadata[d.properties.id].aqc>0 ? [255, 255, 0, 255] : [0, 0, 128, 30]; // (((metadata[d.properties.id].aqc - 1)/68)+100)*
+            const id = d.properties.id;
+            const data = metadata[id];
+
+            const colors: number[][] = [];
+
+            if (isAQCHighlighted && data.aqc > 0) {
+              colors.push([255, 255, 0, 255]);   // yellow
+            }
+            if (isRestHighlighted && data.rest > 0) {
+              colors.push([64, 224, 208, 255]);  // turquoise
+            }
+            if (isDiseaseHighlighted && data.disease > 0) {
+              colors.push([255, 0, 0, 255]);     // red
+            }
+            if (clickIds.includes(id)) {
+              colors.push([255, 128, 0, 255]);   // orange
             } 
-            if (isRestHighlighted) {
-              return metadata[d.properties.id].rest>0 ? [64, 224, 208, 255] : [0, 0, 128, 30]; // (((metadata[d.properties.id].aqc - 1)/68)+100)*
-            }
-            if (isDiseaseHighlighted) {
-              return metadata[d.properties.id].disease>0 ? [255, 0, 0, 255] : [0, 0, 128, 30]; // (((metadata[d.properties.id].aqc - 1)/68)+100)*
-            }
-            
-            return clickIds.includes(d.properties.id) ? [255, 128, 0, 255] : [0, 0, 128, 30];
+
+            if (colors.length === 0) return [0, 0, 128, 30]; // default
+              // Blend
+            return colors[0].map((_, i) =>
+              Math.round(colors.reduce((sum, c) => sum + c[i], 0) / colors.length)
+            );
           },
+
           
           onHover: (info: any) => {
             setHoveredId(info.object ? info.object.properties.id : null);
