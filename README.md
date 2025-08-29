@@ -38,8 +38,6 @@ python database/connectivity_to_db.py #(might take a few minutes)
 
 ## Usage
 
-Examples of how to run or use your project:
-
 ```bash
 # Start the container
 docker compose up
@@ -56,20 +54,11 @@ docker compose build
 ```
 
 
-## Contributing
-(Optional if open source)
-1. Fork the repo
-2. Create a new branch (`git checkout -b feature-foo`)
-3. Commit changes (`git commit -m "Add foo"`)
-4. Push (`git push origin feature-foo`)
-5. Open a Pull Request
-
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Credits / Acknowledgements
 
-- Libraries used
-- Inspiration / references
-- Contributors
+- See requirements.txt for used python libraries. Deckgl and maplibre for the frondend.
+- Contributors: Me
