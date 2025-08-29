@@ -51,6 +51,12 @@ function App() {
       })
       .catch(console.error);  
   }, []);
+  
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
 
   const initialViewState = {
     longitude: 1,
