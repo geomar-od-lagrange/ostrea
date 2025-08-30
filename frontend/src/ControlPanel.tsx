@@ -52,7 +52,7 @@ export default function ControlPanel({
       onTouchMove={stopScroll}
       style={{
         overscrollBehavior: "none",
-        maxHeight: "100%",   // just in case, keep it bounded
+        maxHeight: "100%",
       }}
     >
     <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
@@ -63,7 +63,7 @@ export default function ControlPanel({
           key={d}
           style={{
             display: "inline-flex",
-            alignItems: "center", // "left/right" isn't valid; use flex-start/center
+            alignItems: "center",
             marginRight: 12,
             cursor: "pointer",
             overscrollBehavior: 'none',

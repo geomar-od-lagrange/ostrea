@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Create a connection pool using environment variables
+// environment variables
 const pool = new Pool({
   host: 'db',
   port: 5432,
@@ -15,7 +15,6 @@ const pool = new Pool({
   database: 'db',
 });
 
-// Adjust table name if needed to match your import
 const GEO_TABLE_NAME = 'geo_table';
 const CONN_TABLE_NAME = 'connectivity_table';
 const META_TABLE_NAME = 'metadata_table';
@@ -37,8 +36,9 @@ function normalize(data) {
 }
 
 
-// GET /connectivity?id=<id>
-// returns an array of [otherId, value] tuples for the requested id
+// most used fetch
+// takes a list of depths, time ranges, ids
+// returns a table of connectivity data, averaged over all perumations of the input
 app.get('/connectivity', async (req, res) => {
 
   const depths = (req.query.depth || "").split(",");
@@ -80,9 +80,6 @@ app.get('/connectivity', async (req, res) => {
         
     const responsePayload = normalize(aggregates);
     
-    //console.log("Output: ", responsePayload);
-
-    // 5) return it directly
     res.json(responsePayload);
   } catch (err) {
     console.error('Error in /connectivity:', err);
@@ -107,7 +104,6 @@ app.get('/metadata', async (req, res) => {
 
     const responsePayload = result.rows;
     
-    // 5) return it directly
     res.json(responsePayload);
   } catch (err) {
     console.error('Error in /metadata:', err);
@@ -115,7 +111,7 @@ app.get('/metadata', async (req, res) => {
   }
 });
 
-// GET /feature
+// features
 app.get('/feature', async (req, res) => {
   try {
     const queryText = `
@@ -141,10 +137,6 @@ app.get('/feature', async (req, res) => {
       },
     }));
 
-    // Return a single Feature if only one, else a FeatureCollection
-    if (features.length === 1) {
-      return res.json(features[0]);
-    }
     res.json({ type: 'FeatureCollection', features });
 
   } catch (err) {

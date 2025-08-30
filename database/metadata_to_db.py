@@ -6,6 +6,6 @@ TABLE = "metadata_table"
 FILE = "./new_data/meta.json"                                      
 
 engine = create_engine(ENGINE_URL)
-df = pd.read_json(FILE)           # expects an array of objects
+df = pd.read_json(FILE)
 df.to_sql(TABLE, engine, if_exists="append", index=False, method="multi")
 

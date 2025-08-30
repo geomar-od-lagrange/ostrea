@@ -26,7 +26,7 @@ function App() {
   const [clickIds, setClickIds] = useState<number[]>([]);
   const [tooltip, setTooltip] = useState<{x: number; y: number; content: string} | null>(null);
 
-  // Fetch base feature(s) — unchanged logic (note: the map() result wasn't used)
+  //fetch geojson features for display
   useEffect(() => {
     fetch(`api/feature`)
       .then(res => {
@@ -113,7 +113,6 @@ function App() {
           pickable: true,
           lineWidthMinPixels: 2,
 
-          // Triggers: depend on what the accessor actually uses
           updateTriggers: {
             getFillColor: [hoveredId, weightMap],
             getLineColor: [clickIds, isAQCHighlighted, isRestHighlighted, isDiseaseHighlighted]
@@ -163,7 +162,6 @@ function App() {
             setHoveredId(info.object ? info.object.properties.id : null);
             
             if (info.object) {
-              //console.log(metadata)
               setHoveredId(info.object.properties.id);
               setTooltip({
                 x: info.x,
@@ -187,11 +185,9 @@ function App() {
             if (!info.object) return;
             if (clickIds.indexOf(info.object.properties.id) == -1) {
               setClickIds([...clickIds, info.object.properties.id]);
-              //console.log(clickIds);
             }
             else {
               setClickIds(prev => prev.filter(x => x !== info.object.properties.id));
-              //console.log(clickIds);
             }
           }
         })
