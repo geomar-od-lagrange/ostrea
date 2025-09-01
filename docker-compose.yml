@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  db:
+    image: 'postgis/postgis:latest'
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env 
+    volumes:
+      - ./db-data/:/var/lib/postgresql/data/
+    networks:
+      - postgres-network
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - '8080:8080'
+    depends_on:
+      - db
+    networks:
+      - postgres-network
+
+  api:
+    build: ./api
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - postgres-network
+
+  frontend:
+    build:
+      context: ./frontend
+    # volumes:
+    #   - ./frontend:/app
+    #   - /app/node_modules
+    ports:
+      - '5173:5173'
+    environment:
+      - HOST=0.0.0.0
+    networks:
+      - postgres-network
+
+networks:
+  postgres-network:
+    driver: bridge
+
