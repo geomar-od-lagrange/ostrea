@@ -1,5 +1,6 @@
-pandas
 geopandas
+pandas
 pyarrow
-tqdm
+pyyaml
 sqlalchemy
+tqdm

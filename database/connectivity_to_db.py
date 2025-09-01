@@ -4,10 +4,12 @@ from tqdm import tqdm
 from sqlalchemy import create_engine, text
 from sqlalchemy.dialects.postgresql import DOUBLE_PRECISION, INTEGER, TEXT
 
-import os
+import yaml
 
-POSTGRES_USER = os.environ["POSTGRES_USER"]
-POSTGRES_PASSWORD = os.environ["POSTGRES_PASSWORD"]
+with open("../.env", mode="r") as f:
+    _env = yaml.safe_load(f)
+POSTGRES_USER = _env["POSTGRES_USER"]
+POSTGRES_PASSWORD = _env["POSTGRES_PASSWORD"]
 
 # ---- config ----
 PARQUET_PATH = "data/connectivity.pq"
