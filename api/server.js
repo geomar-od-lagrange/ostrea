@@ -10,8 +10,8 @@ app.use(cors());
 const pool = new Pool({
   host: 'db',
   port: 5432,
-  user: 'user',
-  password: 'password',
+  user: rocess.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
   database: 'db',
 });
 

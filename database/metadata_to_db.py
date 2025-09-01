@@ -1,7 +1,12 @@
 import pandas as pd
 from sqlalchemy import create_engine
 
-ENGINE_URL = "postgresql://user:password@localhost:5432/db"  
+import os
+
+POSTGRES_USER = os.environ["POSTGRES_USER"]
+POSTGRES_PASSWORD = os.environ["POSTGRES_PASSWORD"]
+
+ENGINE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:5432/db"  
 TABLE = "metadata_table"                                                  
 FILE = "./data/meta.json"                                      
 

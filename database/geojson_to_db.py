@@ -1,7 +1,12 @@
 import geopandas as gpd
 from sqlalchemy import create_engine
 
-engine = create_engine("postgresql://user:password@localhost:5432/db")
+import os
+
+POSTGRES_USER = os.environ["POSTGRES_USER"]
+POSTGRES_PASSWORD = os.environ["POSTGRES_PASSWORD"]
+
+engine = create_engine(f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:5432/db")
 
 gdf = gpd.read_file("data/hexes.geojson")
 
