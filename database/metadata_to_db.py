@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 
 ENGINE_URL = "postgresql://user:password@localhost:5432/db"  
 TABLE = "metadata_table"                                                  
-FILE = "./new_data/meta.json"                                      
+FILE = "./data/meta.json"                                      
 
 engine = create_engine(ENGINE_URL)
 df = pd.read_json(FILE)

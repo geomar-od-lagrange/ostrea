@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.dialects.postgresql import DOUBLE_PRECISION, INTEGER, TEXT
 
 # ---- config ----
-PARQUET_PATH = "new_data/connectivity.pq"
+PARQUET_PATH = "data/connectivity.pq"
 TABLE_NAME   = "connectivity_table"
 PG_URL       = "postgresql://user:password@localhost:5432/db"
 CHUNKSIZE    = 100_000
