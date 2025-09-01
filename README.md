@@ -68,7 +68,7 @@ docker compose up
 
 ## License
 
-Distributed under the MIT License. See [LICENCE](LICENCE) for more information.
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ## Credits / Acknowledgements
 
