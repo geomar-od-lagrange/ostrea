@@ -2,12 +2,6 @@
 
 Visualization of simulated Oyster pathogen dispersal in the North Sea.
 
-## Table of Contents
-- [Installation](#installation)
-- [Usage](#usage)
-- [Configuration](#configuration)
-- [License](#license)
-
 ## Installation
 
 ### Prerequisites
@@ -47,7 +41,7 @@ python geojson_to_db.py
 python connectivity_to_db.py  # (might take a few minutes)
 ```
 
-### Using the app
+## Using the app
 
 Connect to http://localhost:5173/ in the browser of your choice.
 
@@ -73,4 +67,4 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 ## Credits / Acknowledgements
 
 - See [database/requirements.txt](database/requirements.txt) for used python libraries. Deckgl and maplibre for the frondend.
-- Contributors: Ingmar Eissfeldt (@IngmarEissfeldt), Willi Rath (@willirath), Felix Kirch (@felixkirch)
+- Contributors: Ingmar Eissfeldt ([@IngmarEissfeldt](https://github.com/ingmareissfeldt)), Willi Rath ([@willirath](https://github.com/willirath)), Felix Kirch ([@felixkirch](https://github.com/felixkirch))
