@@ -39,7 +39,7 @@ docker compose up
 ```bash
 # change to database dir
 cd database
-pip install requirements.txt
+pip install -r requirements.txt
 
 # insert the data
 python metadata_to_db.py
