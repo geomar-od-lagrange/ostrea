@@ -171,7 +171,7 @@ function App() {
                   lat: ${encodeURIComponent(metadata[info.object.properties.id].lat)}
                   Depth: ${encodeURIComponent(metadata[info.object.properties.id].depth)}
                   Disease: ${encodeURIComponent(metadata[info.object.properties.id].disease)}
-                  rest: ${encodeURIComponent(metadata[info.object.properties.id].est)}
+                  rest: ${encodeURIComponent(metadata[info.object.properties.id].rest)}
                   aqc: ${encodeURIComponent(metadata[info.object.properties.id].aqc)}
                   pop: ${encodeURIComponent(metadata[info.object.properties.id].pop)}`,
               });
