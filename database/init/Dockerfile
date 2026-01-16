@@ -15,10 +15,14 @@ RUN pip install --no-cache-dir \
     tqdm
 
 # Copy data files (baked into image for portability)
+# Context is ./database, so paths are relative to that
 COPY data/ ./data/
 
-# Copy Python scripts
-COPY geojson_to_db.py metadata_to_db.py connectivity_to_db.py init_db.py ./
+# Copy Python data loading scripts
+COPY geojson_to_db.py metadata_to_db.py connectivity_to_db.py ./
+
+# Copy init script
+COPY init/init_db.py ./
 
 # Make init script executable
 RUN chmod +x init_db.py
