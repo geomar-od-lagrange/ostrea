@@ -12,11 +12,40 @@ type Connection = {
   weight: number;
 };
 
+interface Metadata {
+  id: number;
+  lon: number;
+  lat: number;
+  depth: string;
+  disease: number;
+  rest: number;
+  aqc: number;
+  pop: number;
+}
+
+interface FeatureProperties {
+  id: number;
+}
+
+interface Feature {
+  type: 'Feature';
+  properties: FeatureProperties;
+  geometry: any; // GeoJSON geometry
+}
+
+interface FeatureCollection {
+  type: 'FeatureCollection';
+  features: Feature[];
+}
+
 function App() {
   const [selectedDepths, setSelectedDepths] = useState<string[]>(['05m']);
   const [selectedTimes, setSelectedTimes] = useState<string[]>(['00d-07d']);
-  const [feature, setFeature] = useState<any>(null);
-  const [metadata, setMetadata] = useState<any>(null);
+  const [feature, setFeature] = useState<FeatureCollection | null>(null);
+  const [metadata, setMetadata] = useState<Record<number, Metadata> | null>(null);
+
+  // TODO: Consolidate state management into single reducer or state object
+  // Current fragmented state should be refactored for better maintainability
   
   const [isAQCHighlighted, setAQC] = useState<boolean>(false);
   const [isRestHighlighted, setRest] = useState<boolean>(false);
