@@ -1,0 +1,27 @@
+FROM condaforge/miniforge3:latest
+
+WORKDIR /app
+
+# Install Python dependencies
+# Use psycopg2-binary for easier installation (no compilation needed)
+RUN pip install --no-cache-dir \
+    psycopg2-binary \
+    geoalchemy2 \
+    geopandas \
+    pandas \
+    pyarrow \
+    pyyaml \
+    sqlalchemy \
+    tqdm
+
+# Copy data files (baked into image for portability)
+COPY data/ ./data/
+
+# Copy Python scripts
+COPY geojson_to_db.py metadata_to_db.py connectivity_to_db.py init_db.py ./
+
+# Make init script executable
+RUN chmod +x init_db.py
+
+# Run initialization
+CMD ["python", "init_db.py"]

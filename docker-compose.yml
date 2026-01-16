@@ -13,6 +13,23 @@ services:
       timeout: 5s
       retries: 5
 
+  db-init:
+    build:
+      context: ./database
+      dockerfile: Dockerfile.init
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: "no"
+    labels:
+      kompose.service.type: "job"
+
   api:
     build: ./api
     env_file:

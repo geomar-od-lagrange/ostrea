@@ -3,18 +3,24 @@ import pyarrow.parquet as pq
 from tqdm import tqdm
 from sqlalchemy import create_engine, text
 from sqlalchemy.dialects.postgresql import DOUBLE_PRECISION, INTEGER, TEXT
-
+import os
 import yaml
 
-with open("../.env", mode="r") as f:
-    _env = yaml.safe_load(f)
-POSTGRES_USER = _env["POSTGRES_USER"]
-POSTGRES_PASSWORD = _env["POSTGRES_PASSWORD"]
+# Try environment variables first (Docker), fall back to .env file (local dev)
+POSTGRES_USER = os.getenv('POSTGRES_USER')
+POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
+DB_HOST = os.getenv('DB_HOST', 'localhost')
+
+if not POSTGRES_USER or not POSTGRES_PASSWORD:
+    with open("../.env", mode="r") as f:
+        _env = yaml.safe_load(f)
+    POSTGRES_USER = _env["POSTGRES_USER"]
+    POSTGRES_PASSWORD = _env["POSTGRES_PASSWORD"]
 
 # ---- config ----
 PARQUET_PATH = "data/connectivity.pq"
 TABLE_NAME   = "connectivity_table"
-PG_URL       = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:5432/db"
+PG_URL       = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_HOST}:5432/db"
 CHUNKSIZE    = 100_000
 SCHEMA       = "public"
 # ---------------
