@@ -160,20 +160,29 @@ function App() {
           
           onHover: (info: any) => {
             setHoveredId(info.object ? info.object.properties.id : null);
-            
+
             if (info.object) {
+              // Helper function to escape HTML
+              const escapeHtml = (str: string | number) =>
+                String(str)
+                  .replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;');
+
+              const data = metadata[info.object.properties.id];
               setHoveredId(info.object.properties.id);
               setTooltip({
                 x: info.x,
                 y: info.y,
-                content: `Id: ${encodeURIComponent(metadata[info.object.properties.id].id)}
-                  lon: ${encodeURIComponent(metadata[info.object.properties.id].lon)}
-                  lat: ${encodeURIComponent(metadata[info.object.properties.id].lat)}
-                  Depth: ${encodeURIComponent(metadata[info.object.properties.id].depth)}
-                  Disease: ${encodeURIComponent(metadata[info.object.properties.id].disease)}
-                  rest: ${encodeURIComponent(metadata[info.object.properties.id].rest)}
-                  aqc: ${encodeURIComponent(metadata[info.object.properties.id].aqc)}
-                  pop: ${encodeURIComponent(metadata[info.object.properties.id].pop)}`,
+                content: `Id: ${escapeHtml(data.id)}
+                  lon: ${escapeHtml(data.lon)}
+                  lat: ${escapeHtml(data.lat)}
+                  Depth: ${escapeHtml(data.depth)}
+                  Disease: ${escapeHtml(data.disease)}
+                  rest: ${escapeHtml(data.rest)}
+                  aqc: ${escapeHtml(data.aqc)}
+                  pop: ${escapeHtml(data.pop)}`,
               });
             } else {
               setHoveredId(null);
@@ -183,7 +192,7 @@ function App() {
 
           onClick: (info: any) => {
             if (!info.object) return;
-            if (clickIds.indexOf(info.object.properties.id) == -1) {
+            if (clickIds.indexOf(info.object.properties.id) === -1) {
               setClickIds([...clickIds, info.object.properties.id]);
             }
             else {
