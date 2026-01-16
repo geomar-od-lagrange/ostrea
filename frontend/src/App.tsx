@@ -101,6 +101,7 @@ function App() {
   useEffect(() => {
     if (clickIds?.length) {
 
+      // TODO: Add request timeout (10s) for better UX
       const ctrl = new AbortController();
       const fetchURL = `api/connectivity?depth=${encodeURIComponent(selectedDepths)}&time_range=${encodeURIComponent(selectedTimes)}&start_id=${encodeURIComponent(clickIds)}&op=mean`;
       console.log("Trying to fetch: ", fetchURL);

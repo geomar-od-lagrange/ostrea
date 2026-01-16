@@ -104,7 +104,11 @@ export default function ControlPanel({
       ))}
       
       <div style={{ marginTop: 12 }}>
-        <button type="button" onClick={clearHex} style={{ padding: "6px 10px", borderRadius: 6 }}>
+        <button
+          type="button"
+          onClick={() => clearHex?.({ depths: selectedDepths, times: selectedTimes })}
+          style={{ padding: "6px 10px", borderRadius: 6 }}
+        >
           Clear hex input
         </button>
       </div>
