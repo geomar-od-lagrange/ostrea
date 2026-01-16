@@ -103,7 +103,7 @@ function App() {
 
       // TODO: Add request timeout (10s) for better UX
       const ctrl = new AbortController();
-      const fetchURL = `api/connectivity?depth=${encodeURIComponent(selectedDepths)}&time_range=${encodeURIComponent(selectedTimes)}&start_id=${encodeURIComponent(clickIds)}&op=mean`;
+      const fetchURL = `api/connectivity?depth=${selectedDepths.join(',')}&time_range=${selectedTimes.join(',')}&start_id=${clickIds.join(',')}&op=mean`;
       console.log("Trying to fetch: ", fetchURL);
     
       (async () => {
@@ -163,7 +163,9 @@ function App() {
 
           getLineColor: (d: any) => {
             const id = d.properties.id;
+            if (!metadata) return [128, 128, 128, 100];
             const data = metadata[id];
+            if (!data) return [128, 128, 128, 100];
 
             const colors: number[][] = [];
 
@@ -192,6 +194,8 @@ function App() {
             setHoveredId(info.object ? info.object.properties.id : null);
 
             if (info.object) {
+              if (!metadata) return;
+
               // Helper function to escape HTML
               const escapeHtml = (str: string | number) =>
                 String(str)
@@ -201,6 +205,7 @@ function App() {
                   .replace(/"/g, '&quot;');
 
               const data = metadata[info.object.properties.id];
+              if (!data) return;
               setHoveredId(info.object.properties.id);
               setTooltip({
                 x: info.x,
@@ -265,7 +270,9 @@ function App() {
           clearHex={clearHex}
           isAQCHighlighted={isAQCHighlighted}
           onAQCChange={setAQC}
+          isRestHighlighted={isRestHighlighted}
           onRestChange={setRest}
+          isDiseaseHighlighted={isDiseaseHighlighted}
           onDiseaseChange={setDisease}
         />
       </div>
