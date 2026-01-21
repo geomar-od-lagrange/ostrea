@@ -76,3 +76,11 @@ def load_connectivity(engine, data_path=None, chunksize=100_000):
             INCLUDE (end_id, weight);
         '''))
         conn.execute(text(f'ANALYZE "{SCHEMA}"."{CONNECTIVITY_TABLE_NAME}";'))
+
+
+def main():
+    """Entrypoint for loading connectivity data."""
+    from .config import get_db_engine
+    engine = get_db_engine()
+    load_connectivity(engine)
+    print(f"Wrote data to {SCHEMA}.{CONNECTIVITY_TABLE_NAME} and ensured index + ANALYZE.")

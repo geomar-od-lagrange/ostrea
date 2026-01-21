@@ -45,16 +45,16 @@ try:
     # Load geo data
     if GEO_TABLE_NAME not in existing_tables:
         logger.info("Loading hexagon geometries...")
-        load_geojson(engine)
-        logger.info("Hexagon geometries loaded")
+        gdf = load_geojson(engine)
+        logger.info(f"Hexagon geometries loaded: {len(gdf)} features")
     else:
         logger.info(f"{GEO_TABLE_NAME} already exists, skipping")
 
     # Load metadata
     if METADATA_TABLE_NAME not in existing_tables:
         logger.info("Loading metadata...")
-        load_metadata(engine)
-        logger.info("Metadata loaded")
+        df = load_metadata(engine)
+        logger.info(f"Metadata loaded: {len(df)} records")
     else:
         logger.info(f"{METADATA_TABLE_NAME} already exists, skipping")
 
@@ -62,7 +62,7 @@ try:
     if CONNECTIVITY_TABLE_NAME not in existing_tables:
         logger.info("Loading connectivity data (this takes ~3 minutes)...")
         load_connectivity(engine)
-        logger.info("Connectivity data loaded")
+        logger.info("Connectivity data loaded with index and ANALYZE")
     else:
         logger.info(f"{CONNECTIVITY_TABLE_NAME} already exists, skipping")
 

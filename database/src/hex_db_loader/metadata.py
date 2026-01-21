@@ -26,3 +26,11 @@ def load_metadata(engine, data_path=None):
     df.to_sql(METADATA_TABLE_NAME, engine, if_exists="append", index=False, method="multi")
 
     return df
+
+
+def main():
+    """Entrypoint for loading metadata."""
+    from .config import get_db_engine
+    engine = get_db_engine()
+    df = load_metadata(engine)
+    print(f"Loaded {len(df)} metadata records")

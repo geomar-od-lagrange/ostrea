@@ -32,3 +32,11 @@ def load_geojson(engine, data_path=None):
     gdf_verify = gpd.read_postgis(GEO_TABLE_NAME, engine, "geometry")
 
     return gdf_verify
+
+
+def main():
+    """Entrypoint for loading GeoJSON data."""
+    from .config import get_db_engine
+    engine = get_db_engine()
+    gdf = load_geojson(engine)
+    print(gdf)
