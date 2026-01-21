@@ -1,4 +1,4 @@
-FROM condaforge/miniforge3:latest
+FROM condaforge/miniforge3:24.9.2-0
 
 WORKDIR /app
 
@@ -18,8 +18,12 @@ RUN pip install --no-cache-dir \
 # Context is ./database, so paths are relative to that
 COPY data/ ./data/
 
-# Copy Python data loading scripts
-COPY geojson_to_db.py metadata_to_db.py connectivity_to_db.py ./
+# Copy package source
+COPY src/ ./src/
+COPY pyproject.toml ./
+
+# Install package in editable mode
+RUN pip install --no-cache-dir -e .
 
 # Copy init script
 COPY init/init_db.py ./
