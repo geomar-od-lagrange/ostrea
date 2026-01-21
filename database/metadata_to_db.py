@@ -1,24 +1,9 @@
-import pandas as pd
-from sqlalchemy import create_engine
-import os
-import yaml
+#!/usr/bin/env python3
+"""Load metadata from JSON into database."""
+from hex_db_loader import get_db_engine, load_metadata
 
-# Try environment variables first (Docker), fall back to .env file (local dev)
-POSTGRES_USER = os.getenv('POSTGRES_USER')
-POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
-DB_HOST = os.getenv('DB_HOST', 'localhost')
-
-if not POSTGRES_USER or not POSTGRES_PASSWORD:
-    with open("../.env", mode="r") as f:
-        _env = yaml.safe_load(f)
-    POSTGRES_USER = _env["POSTGRES_USER"]
-    POSTGRES_PASSWORD = _env["POSTGRES_PASSWORD"]
-
-ENGINE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_HOST}:5432/db"  
-TABLE = "metadata_table"                                                  
-FILE = "./data/meta.json"                                      
-
-engine = create_engine(ENGINE_URL)
-df = pd.read_json(FILE)
-df.to_sql(TABLE, engine, if_exists="append", index=False, method="multi")
+if __name__ == "__main__":
+    engine = get_db_engine()
+    df = load_metadata(engine)
+    print(f"Loaded {len(df)} metadata records")
 

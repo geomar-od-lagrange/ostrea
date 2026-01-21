@@ -3,72 +3,73 @@
 Smart database initialization script.
 Checks if tables already exist and only loads data if needed.
 """
-import os
 import sys
-from sqlalchemy import create_engine, inspect
+import logging
+from sqlalchemy import inspect
+from hex_db_loader import (
+    get_db_engine,
+    load_geojson,
+    load_metadata,
+    load_connectivity,
+    GEO_TABLE_NAME,
+    METADATA_TABLE_NAME,
+    CONNECTIVITY_TABLE_NAME,
+)
 
-# Get connection parameters from environment
-POSTGRES_USER = os.getenv('POSTGRES_USER')
-POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
-DB_HOST = os.getenv('DB_HOST', 'db')
-
-if not POSTGRES_USER or not POSTGRES_PASSWORD:
-    print("❌ ERROR: POSTGRES_USER and POSTGRES_PASSWORD must be set")
-    sys.exit(1)
-
-# Connect to database
-ENGINE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_HOST}:5432/db"
-print(f"🔗 Connecting to database at {DB_HOST}...")
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 try:
-    engine = create_engine(ENGINE_URL)
+    # Connect to database
+    logger.info("Connecting to database...")
+    engine = get_db_engine()
     inspector = inspect(engine)
     existing_tables = inspector.get_table_names()
 
     # Check if data already exists
-    if 'geo_table' in existing_tables and 'metadata_table' in existing_tables and 'connectivity_table' in existing_tables:
-        print("✅ Database already initialized. Tables found:")
-        print(f"   - geo_table")
-        print(f"   - metadata_table")
-        print(f"   - connectivity_table")
-        print("⏭️  Skipping initialization.")
+    required_tables = [GEO_TABLE_NAME, METADATA_TABLE_NAME, CONNECTIVITY_TABLE_NAME]
+    if all(table in existing_tables for table in required_tables):
+        logger.info("Database already initialized. Tables found:")
+        for table in required_tables:
+            logger.info(f"  - {table}")
+        logger.info("Skipping initialization.")
         sys.exit(0)
 
     # Data doesn't exist, initialize it
-    print("🔄 Database is empty. Starting initialization...")
-    print()
+    logger.info("Database is empty. Starting initialization...")
 
     # Load geo data
-    if 'geo_table' not in existing_tables:
-        print("📍 Loading hexagon geometries...")
-        exec(open('geojson_to_db.py').read())
-        print("✅ Hexagon geometries loaded")
-        print()
+    if GEO_TABLE_NAME not in existing_tables:
+        logger.info("Loading hexagon geometries...")
+        load_geojson(engine)
+        logger.info("Hexagon geometries loaded")
     else:
-        print("⏭️  geo_table already exists, skipping")
+        logger.info(f"{GEO_TABLE_NAME} already exists, skipping")
 
     # Load metadata
-    if 'metadata_table' not in existing_tables:
-        print("📊 Loading metadata...")
-        exec(open('metadata_to_db.py').read())
-        print("✅ Metadata loaded")
-        print()
+    if METADATA_TABLE_NAME not in existing_tables:
+        logger.info("Loading metadata...")
+        load_metadata(engine)
+        logger.info("Metadata loaded")
     else:
-        print("⏭️  metadata_table already exists, skipping")
+        logger.info(f"{METADATA_TABLE_NAME} already exists, skipping")
 
     # Load connectivity data
-    if 'connectivity_table' not in existing_tables:
-        print("🔗 Loading connectivity data (this takes ~3 minutes)...")
-        exec(open('connectivity_to_db.py').read())
-        print("✅ Connectivity data loaded")
-        print()
+    if CONNECTIVITY_TABLE_NAME not in existing_tables:
+        logger.info("Loading connectivity data (this takes ~3 minutes)...")
+        load_connectivity(engine)
+        logger.info("Connectivity data loaded")
     else:
-        print("⏭️  connectivity_table already exists, skipping")
+        logger.info(f"{CONNECTIVITY_TABLE_NAME} already exists, skipping")
 
-    print("🎉 Database initialization complete!")
+    logger.info("Database initialization complete!")
 
 except Exception as e:
-    print(f"❌ ERROR during initialization: {e}")
+    logger.error(f"ERROR during initialization: {e}")
     import traceback
     traceback.print_exc()
     sys.exit(1)
