@@ -23,15 +23,10 @@ const META_TABLE_NAME = 'metadata_table';
 function validateArray(arr, maxLength, itemValidator) {
   if (!Array.isArray(arr)) return false;
   if (arr.length === 0 || arr.length > maxLength) return false;
-  return arr.every(itemValidator);
-}
-
-function isValidDepth(d) {
-  return ['05m', '10m', '15m'].includes(d);
-}
-
-function isValidTimeRange(t) {
-  return ['00d-07d', '07d-14d', '14d-28d'].includes(t);
+  if (itemValidator) {
+    return arr.every(itemValidator);
+  }
+  return true;
 }
 
 function isValidId(id) {
@@ -66,21 +61,21 @@ app.get('/connectivity', async (req, res) => {
   const start_ids = (req.query.start_id || '').split(',').filter(Boolean);
 
   // Validate inputs
-  if (!validateArray(depths, 10, isValidDepth)) {
+  if (!validateArray(depths, 10)) {
     return res.status(400).json({
-      error: 'Invalid depth parameter. Must be array of valid depths (05m, 10m, 15m), max 10 items'
+      error: 'Invalid depth parameter. Must be array with max 10 items'
     });
   }
 
-  if (!validateArray(time_ranges, 10, isValidTimeRange)) {
+  if (!validateArray(time_ranges, 10)) {
     return res.status(400).json({
-      error: 'Invalid time_range parameter. Must be array of valid ranges, max 10 items'
+      error: 'Invalid time_range parameter. Must be array with max 10 items'
     });
   }
 
-  if (!validateArray(start_ids, 100, isValidId)) {
+  if (!validateArray(start_ids, 10000, isValidId)) {
     return res.status(400).json({
-      error: 'Invalid start_id parameter. Must be array of positive integers, max 100 items'
+      error: 'Invalid start_id parameter. Must be array of positive integers, max 10000 items'
     });
   }
 
