@@ -24,4 +24,11 @@ spec:
         - image: 2024_hex_dashboard-frontend:latest
           imagePullPolicy: IfNotPresent
           name: frontend
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
       restartPolicy: Always

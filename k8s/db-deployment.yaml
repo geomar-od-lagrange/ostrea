@@ -40,6 +40,13 @@ spec:
                   key: POSTGRES_USER
                   name: env
           image: postgis/postgis:16-3.4
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
           livenessProbe:
             exec:
               command:

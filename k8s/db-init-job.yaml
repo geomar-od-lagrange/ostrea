@@ -13,6 +13,23 @@ spec:
       labels:
         io.kompose.service: db-init
     spec:
+      initContainers:
+        - name: wait-for-db
+          image: postgis/postgis:16-3.4
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h db -p 5432 -U "$POSTGRES_USER"; do
+                echo "Waiting for database..."
+                sleep 2
+              done
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  key: POSTGRES_USER
+                  name: env
       containers:
         - env:
             - name: DB_HOST
@@ -35,4 +52,11 @@ spec:
           image: 2024_hex_dashboard-db-init:latest
           imagePullPolicy: IfNotPresent
           name: db-init
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
       restartPolicy: Never
