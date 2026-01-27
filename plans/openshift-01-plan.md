@@ -47,17 +47,47 @@ Already addressed in kompose-02 (manual secret creation). Should work the same w
 
 ## Testing Approach
 
-1. Set up local OpenShift (CRC or similar)
-2. Try deploying current manifests, note what fails
+### Option 1: MicroShift in Docker (preferred)
+
+```bash
+docker run --rm -it --privileged \
+  -v microshift-data:/var/lib \
+  -p 6443:6443 -p 80:80 -p 443:443 \
+  quay.io/microshift/microshift-aio:latest
+```
+
+- Simplest, no VM needed
+- Clean teardown: `docker rm` + `docker volume rm`
+- Need to verify ARM64 image availability
+
+### Option 2: Vagrant + QEMU + MicroShift (fallback)
+
+If Docker image doesn't work on ARM64:
+
+```bash
+vagrant plugin install vagrant-qemu
+vagrant up    # Fedora VM + MicroShift
+vagrant destroy  # Clean teardown
+```
+
+### Option 3: Hand off to infra
+
+If local testing insufficient, hand over to infra team for real OpenShift cluster testing.
+
+---
+
+## Testing Steps
+
+1. Try Option 1 (Docker MicroShift)
+2. Deploy manifests, note what fails
 3. Fix issues iteratively
-4. Document actual required changes
+4. If blocked, try Option 2 or hand off
 
 ---
 
 ## Open Questions
 
-- Which OpenShift version are we targeting?
-- Do we have access to a test cluster?
+- ARM64 MicroShift image available?
 - Any organization-specific requirements (image registry, network policies, etc.)?
 
 ---
@@ -65,5 +95,5 @@ Already addressed in kompose-02 (manual secret creation). Should work the same w
 ## Reference
 
 - `k8s/openshift-route.yaml` - Route manifest (untested)
-- kompose-01-review.md - General K8s security review
-- kompose-02-implementation.md - Hardening implementation plan
+- plans/done/kompose-01-review.md - General K8s security review
+- plans/done/kompose-02-implementation.md - Hardening implementation plan
