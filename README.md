@@ -1,70 +1,95 @@
 # OYSTERS
 
-Visualization of simulated Oyster pathogen dispersal in the North Sea.
+Visualization of simulated oyster larval dispersal connectivity in the North Sea.
 
-## Installation
+![Screenshot](images/oysters.png)
+
+## Quick Start
+
+Clone and enter the repository:
+
+```bash
+$ git clone https://github.com/geomar-od-lagrange/2024_hex_dashboard.git
+$ cd 2024_hex_dashboard
+```
+
+Create environment file from example:
+
+```bash
+$ cp .env.example .env
+```
+
+Build and run (database auto-initializes):
+
+```bash
+$ docker compose build
+$ docker compose up
+```
+
+Open http://localhost:5173/ in your browser.
+
+## Project Structure
+
+```
+.
+├── api/                    # Node.js/Express API server
+├── database/
+│   ├── data/               # Processed data (parquet, geojson, json)
+│   │   └── source/         # Original data + processing notebook
+│   ├── init/               # Database init container
+│   └── src/hex_db_loader/  # Python data loading package
+├── frontend/               # React + deck.gl + MapLibre frontend
+├── images/                 # Screenshots
+├── nginx/                  # Reverse proxy config
+├── security/               # CVE scan results
+├── volumes/                # Docker volumes (gitignored)
+├── .env                    # Environment variables (gitignored)
+├── .env.example            # Environment template
+└── docker-compose.yml
+```
+
+## Development
 
 ### Prerequisites
 
-1. Ensure that Docker is installed, e.g., by installing [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/).
+- Docker (via [Docker Desktop](https://docs.docker.com/desktop/) or CLI)
+- [pixi](https://pixi.sh/) (for Python development in `database/`)
 
-2. Ensure you have a Python installation (e.g. via Micromamba or via the OS). In Ubuntu Linux, you can run
+### Running Locally
+
+Foreground mode with live logs (Ctrl+C to stop):
+
 ```bash
-sudo apt update
-sudo apt install -y python3 python3-pip
+$ docker compose up
 ```
 
-### Getting the app code and starting the app
-
-Make sure the docker engine is running, e.g., through your app browser (the desktop UI can be closed).
+Background mode:
 
 ```bash
-# Clone the repo and change to dir
-git clone https://github.com/geomar-od-lagrange/2024_hex_dashboard.git
-cd 2024_hex_dashboard
-
-# Start the containers
-docker compose build
-docker compose up
+$ docker compose up -d
+$ docker compose logs -f
+$ docker compose down
+$ docker compose down -v  # also removes volumes
 ```
 
-### Fill up the database
+### Database Loaders
+
+The database initializes automatically. For manual data loading:
 
 ```bash
-# change to database dir
-cd database
-pip install -r requirements.txt
-
-# insert the data
-python metadata_to_db.py
-python geojson_to_db.py
-python connectivity_to_db.py  # (might take a few minutes)
-```
-
-## Using the app
-
-Connect to http://localhost:5173/ in the browser of your choice.
-
-### Shutting down and restarting
-
-Stop the app with:
-```bash
-# from within the main project directory
-docker compose down
-```
-
-Apply code changes and restart:
-```bash
-# from within the main project directory
-docker compose build
-docker compose up
+$ cd database
+$ pixi run python -m hex_db_loader.connectivity
+$ pixi run python -m hex_db_loader.geojson
+$ pixi run python -m hex_db_loader.metadata
 ```
 
 ## License
 
-Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
+MIT License. See [LICENSE](LICENSE).
 
-## Credits / Acknowledgements
+## Contributors
 
-- See [database/requirements.txt](database/requirements.txt) for used python libraries. Deckgl and maplibre for the frondend.
-- Contributors: Ingmar Eissfeldt ([@IngmarEissfeldt](https://github.com/ingmareissfeldt)), Willi Rath ([@willirath](https://github.com/willirath)), Felix Kirch ([@felixkirch](https://github.com/felixkirch))
+- Willi Rath ([@willirath](https://github.com/willirath))
+- Ingmar Eissfeldt ([@IngmarEissfeldt](https://github.com/ingmareissfeldt))
+- Felix Kirch ([@felixkirch](https://github.com/felixkirch))
+- Lara Schmittmann ([@laraschmittmann](https://github.com/laraschmittmann))

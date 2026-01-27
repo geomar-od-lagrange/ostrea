@@ -1,51 +1,64 @@
-version: '3'
-
 services:
   db:
-    image: 'postgis/postgis:latest'
-    ports:
-      - '5432:5432'
+    image: 'postgis/postgis:16-3.4'
     env_file:
-      - .env 
+      - .env
     volumes:
-      - ./db-data/:/var/lib/postgresql/data/
+      - ./volumes/db-data/:/var/lib/postgresql/data/
     networks:
-      - postgres-network
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  adminer:
-    image: adminer:latest
-    ports:
-      - '8080:8080'
+  db-init:
+    build:
+      context: ./database
+      dockerfile: init/Dockerfile
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
-      - postgres-network
+      - app-network
+    restart: "no"
+    labels:
+      kompose.service.type: "job"
 
   api:
     build: ./api
-    ports:
-      - '3000:3000'
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
-      - postgres-network
+      - app-network
 
   frontend:
     build:
       context: ./frontend
-    # volumes:
-    #   - ./frontend:/app
-    #   - /app/node_modules
-    ports:
-      - '5173:5173'
-    environment:
-      - HOST=0.0.0.0
     networks:
-      - postgres-network
+      - app-network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "127.0.0.1:5173:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+      - frontend
+    networks:
+      - app-network
 
 networks:
-  postgres-network:
+  app-network:
     driver: bridge
 

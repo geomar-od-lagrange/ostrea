@@ -12,11 +12,40 @@ type Connection = {
   weight: number;
 };
 
+interface Metadata {
+  id: number;
+  lon: number;
+  lat: number;
+  depth: string;
+  disease: number;
+  rest: number;
+  aqc: number;
+  pop: number;
+}
+
+interface FeatureProperties {
+  id: number;
+}
+
+interface Feature {
+  type: 'Feature';
+  properties: FeatureProperties;
+  geometry: any; // GeoJSON geometry
+}
+
+interface FeatureCollection {
+  type: 'FeatureCollection';
+  features: Feature[];
+}
+
 function App() {
   const [selectedDepths, setSelectedDepths] = useState<string[]>(['05m']);
   const [selectedTimes, setSelectedTimes] = useState<string[]>(['00d-07d']);
-  const [feature, setFeature] = useState<any>(null);
-  const [metadata, setMetadata] = useState<any>(null);
+  const [feature, setFeature] = useState<FeatureCollection | null>(null);
+  const [metadata, setMetadata] = useState<Record<number, Metadata> | null>(null);
+
+  // TODO: Consolidate state management into single reducer or state object
+  // Current fragmented state should be refactored for better maintainability
   
   const [isAQCHighlighted, setAQC] = useState<boolean>(false);
   const [isRestHighlighted, setRest] = useState<boolean>(false);
@@ -72,8 +101,9 @@ function App() {
   useEffect(() => {
     if (clickIds?.length) {
 
+      // TODO: Add request timeout (10s) for better UX
       const ctrl = new AbortController();
-      const fetchURL = `api/connectivity?depth=${encodeURIComponent(selectedDepths)}&time_range=${encodeURIComponent(selectedTimes)}&start_id=${encodeURIComponent(clickIds)}&op=mean`;
+      const fetchURL = `api/connectivity?depth=${selectedDepths.join(',')}&time_range=${selectedTimes.join(',')}&start_id=${clickIds.join(',')}&op=mean`;
       console.log("Trying to fetch: ", fetchURL);
     
       (async () => {
@@ -133,7 +163,9 @@ function App() {
 
           getLineColor: (d: any) => {
             const id = d.properties.id;
+            if (!metadata) return [128, 128, 128, 100];
             const data = metadata[id];
+            if (!data) return [128, 128, 128, 100];
 
             const colors: number[][] = [];
 
@@ -160,20 +192,32 @@ function App() {
           
           onHover: (info: any) => {
             setHoveredId(info.object ? info.object.properties.id : null);
-            
+
             if (info.object) {
+              if (!metadata) return;
+
+              // Helper function to escape HTML
+              const escapeHtml = (str: string | number) =>
+                String(str)
+                  .replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;');
+
+              const data = metadata[info.object.properties.id];
+              if (!data) return;
               setHoveredId(info.object.properties.id);
               setTooltip({
                 x: info.x,
                 y: info.y,
-                content: `Id: ${encodeURIComponent(metadata[info.object.properties.id].id)}
-                  lon: ${encodeURIComponent(metadata[info.object.properties.id].lon)}
-                  lat: ${encodeURIComponent(metadata[info.object.properties.id].lat)}
-                  Depth: ${encodeURIComponent(metadata[info.object.properties.id].depth)}
-                  Disease: ${encodeURIComponent(metadata[info.object.properties.id].disease)}
-                  rest: ${encodeURIComponent(metadata[info.object.properties.id].rest)}
-                  aqc: ${encodeURIComponent(metadata[info.object.properties.id].aqc)}
-                  pop: ${encodeURIComponent(metadata[info.object.properties.id].pop)}`,
+                content: `Id: ${escapeHtml(data.id)}
+                  lon: ${escapeHtml(data.lon)}
+                  lat: ${escapeHtml(data.lat)}
+                  Depth: ${escapeHtml(data.depth)}
+                  Disease: ${escapeHtml(data.disease)}
+                  rest: ${escapeHtml(data.rest)}
+                  aqc: ${escapeHtml(data.aqc)}
+                  pop: ${escapeHtml(data.pop)}`,
               });
             } else {
               setHoveredId(null);
@@ -183,7 +227,7 @@ function App() {
 
           onClick: (info: any) => {
             if (!info.object) return;
-            if (clickIds.indexOf(info.object.properties.id) == -1) {
+            if (clickIds.indexOf(info.object.properties.id) === -1) {
               setClickIds([...clickIds, info.object.properties.id]);
             }
             else {
@@ -226,7 +270,9 @@ function App() {
           clearHex={clearHex}
           isAQCHighlighted={isAQCHighlighted}
           onAQCChange={setAQC}
+          isRestHighlighted={isRestHighlighted}
           onRestChange={setRest}
+          isDiseaseHighlighted={isDiseaseHighlighted}
           onDiseaseChange={setDisease}
         />
       </div>
