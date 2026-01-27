@@ -30,8 +30,14 @@ spec:
                 configMapKeyRef:
                   key: POSTGRES_USER
                   name: env
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
       containers:
-        - env:
+        - securityContext:
+            allowPrivilegeEscalation: false
+          env:
             - name: DB_HOST
               value: db
             - name: POSTGRES_DB

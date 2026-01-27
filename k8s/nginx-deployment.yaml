@@ -22,12 +22,18 @@ spec:
       labels:
         io.kompose.service: nginx
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
       containers:
         - image: nginx:1.27-alpine
           name: nginx
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
           resources:
             requests:
               cpu: 100m
@@ -40,6 +46,10 @@ spec:
               name: nginx-cm0
               readOnly: true
               subPath: nginx.conf
+            - mountPath: /var/cache/nginx
+              name: nginx-cache
+            - mountPath: /var/run
+              name: nginx-run
       restartPolicy: Always
       volumes:
         - configMap:
@@ -48,3 +58,7 @@ spec:
                 path: nginx.conf
             name: nginx-cm0
           name: nginx-cm0
+        - emptyDir: {}
+          name: nginx-cache
+        - emptyDir: {}
+          name: nginx-run

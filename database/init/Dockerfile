@@ -28,8 +28,11 @@ RUN pip install --no-cache-dir -e .
 # Copy init script
 COPY init/init_db.py ./
 
-# Make init script executable
-RUN chmod +x init_db.py
+# Create non-root user and set ownership
+RUN useradd -m -u 1000 appuser && \
+    chown -R appuser:appuser /app
+
+USER appuser
 
 # Run initialization
 CMD ["python", "init_db.py"]

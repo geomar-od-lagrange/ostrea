@@ -11,11 +11,11 @@ data:
         }
 
         upstream frontend {
-            server frontend:80;
+            server frontend:8080;
         }
 
         server {
-            listen 80;
+            listen 8080;
 
             # API proxy
             location /api/ {

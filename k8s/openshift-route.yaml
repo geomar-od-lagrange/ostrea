@@ -20,7 +20,7 @@ spec:
     name: nginx
     weight: 100
   port:
-    targetPort: 80
+    targetPort: 8080
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect

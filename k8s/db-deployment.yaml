@@ -22,8 +22,12 @@ spec:
       labels:
         io.kompose.service: db
     spec:
+      securityContext:
+        fsGroup: 999
       containers:
-        - env:
+        - securityContext:
+            allowPrivilegeEscalation: false
+          env:
             - name: POSTGRES_DB
               valueFrom:
                 configMapKeyRef:
