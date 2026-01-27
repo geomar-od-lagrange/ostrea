@@ -71,19 +71,13 @@ $ kubectl logs -f deployment/nginx -n 2024-hex-dashboard
 $ kubectl get pods -n 2024-hex-dashboard
 ```
 
-Set up external access using an Ingress resource.
+For local testing (kind, minikube):
 
-### OpenShift
+```bash
+$ kubectl port-forward svc/nginx 5173:5173 -n 2024-hex-dashboard
+```
 
-Follow the Kubernetes deployment steps above (use `oc` instead of `kubectl`) with these additional considerations:
-
-- **Image registry**: Update manifests to reference OpenShift internal registry or your organization's registry
-- **Security Context Constraints (SCC)**: Containers may need SCC adjustments or security contexts to run as non-root
-- **External access**: Deploy the Route resource instead of an Ingress:
-  ```bash
-  $ oc apply -f k8s/openshift-route.yaml
-  ```
-- **Storage class**: Add explicit `storageClassName` to `k8s/db-pvc.yaml` (check available: `oc get storageclass`)
+For production, set up external access using an Ingress resource.
 
 ## Project Structure
 
