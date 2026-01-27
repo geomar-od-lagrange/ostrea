@@ -60,6 +60,16 @@ Monitor database initialization (takes ~3 minutes):
 $ kubectl logs -f job/db-init
 ```
 
+Other useful log commands:
+
+```bash
+$ kubectl logs -f deployment/api       # API server logs
+$ kubectl logs -f deployment/db        # PostgreSQL logs
+$ kubectl logs -f deployment/frontend  # Frontend logs
+$ kubectl logs -f deployment/nginx     # Reverse proxy logs
+$ kubectl get pods                     # Check pod status
+```
+
 Set up external access using an Ingress resource.
 
 ### OpenShift
