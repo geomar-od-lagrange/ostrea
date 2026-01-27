@@ -1,0 +1,27 @@
+# OpenShift Route for external access
+# Only needed for OpenShift (use Ingress for standard K8s)
+#
+# UNTESTED: This manifest has not been tested on an OpenShift cluster
+#
+# Usage:
+#   oc apply -f k8s/openshift-route.yaml
+#
+# Access at: https://oysters-<namespace>.<cluster-domain>/
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: oysters
+  labels:
+    app: oysters
+spec:
+  to:
+    kind: Service
+    name: nginx
+    weight: 100
+  port:
+    targetPort: 80
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None

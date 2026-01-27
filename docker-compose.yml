@@ -27,8 +27,6 @@ services:
     networks:
       - app-network
     restart: "no"
-    labels:
-      kompose.service.type: "job"
 
   api:
     build: ./api

@@ -27,44 +27,60 @@ try:
     # Connect to database
     logger.info("Connecting to database...")
     engine = get_db_engine()
+
+    # Check for completion marker (fast, atomic check)
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        result = conn.execute(text("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables
+                WHERE table_name = '_db_init_complete'
+            )
+        """)).scalar()
+
+        if result:
+            logger.info("Found completion marker. Database already initialized.")
+            logger.info("To force re-initialization: DROP TABLE _db_init_complete;")
+            sys.exit(0)
+
+    logger.info("No completion marker found. Starting database initialization...")
+
+    # Clean up any partial data from previous failed attempts
     inspector = inspect(engine)
     existing_tables = inspector.get_table_names()
+    tables_to_clean = [GEO_TABLE_NAME, METADATA_TABLE_NAME, CONNECTIVITY_TABLE_NAME]
 
-    # Check if data already exists
-    required_tables = [GEO_TABLE_NAME, METADATA_TABLE_NAME, CONNECTIVITY_TABLE_NAME]
-    if all(table in existing_tables for table in required_tables):
-        logger.info("Database already initialized. Tables found:")
-        for table in required_tables:
-            logger.info(f"  - {table}")
-        logger.info("Skipping initialization.")
-        sys.exit(0)
+    if any(table in existing_tables for table in tables_to_clean):
+        logger.info("Found existing data tables. Cleaning up partial data...")
+        with engine.begin() as conn:
+            for table in tables_to_clean:
+                if table in existing_tables:
+                    conn.execute(text(f'DROP TABLE IF EXISTS "{table}" CASCADE'))
+        logger.info("Cleanup complete. Starting fresh load...")
 
-    # Data doesn't exist, initialize it
-    logger.info("Database is empty. Starting initialization...")
+    # Load all data (tables either don't exist or were truncated)
+    logger.info("Loading hexagon geometries...")
+    gdf = load_geojson(engine)
+    logger.info(f"Hexagon geometries loaded: {len(gdf)} features")
 
-    # Load geo data
-    if GEO_TABLE_NAME not in existing_tables:
-        logger.info("Loading hexagon geometries...")
-        gdf = load_geojson(engine)
-        logger.info(f"Hexagon geometries loaded: {len(gdf)} features")
-    else:
-        logger.info(f"{GEO_TABLE_NAME} already exists, skipping")
+    logger.info("Loading metadata...")
+    df = load_metadata(engine)
+    logger.info(f"Metadata loaded: {len(df)} records")
 
-    # Load metadata
-    if METADATA_TABLE_NAME not in existing_tables:
-        logger.info("Loading metadata...")
-        df = load_metadata(engine)
-        logger.info(f"Metadata loaded: {len(df)} records")
-    else:
-        logger.info(f"{METADATA_TABLE_NAME} already exists, skipping")
+    logger.info("Loading connectivity data (this takes ~3 minutes)...")
+    load_connectivity(engine)
+    logger.info("Connectivity data loaded with index and ANALYZE")
 
-    # Load connectivity data
-    if CONNECTIVITY_TABLE_NAME not in existing_tables:
-        logger.info("Loading connectivity data (this takes ~3 minutes)...")
-        load_connectivity(engine)
-        logger.info("Connectivity data loaded with index and ANALYZE")
-    else:
-        logger.info(f"{CONNECTIVITY_TABLE_NAME} already exists, skipping")
+    # Mark initialization as complete
+    logger.info("Creating completion marker...")
+    with engine.begin() as conn:
+        conn.execute(text("""
+            CREATE TABLE _db_init_complete (
+                completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                status TEXT DEFAULT 'complete'
+            )
+        """))
+        conn.execute(text("INSERT INTO _db_init_complete DEFAULT VALUES"))
 
     logger.info("Database initialization complete!")
 
