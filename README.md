@@ -92,3 +92,4 @@ MIT License. See [LICENSE](LICENSE).
 - Willi Rath ([@willirath](https://github.com/willirath))
 - Ingmar Eissfeldt ([@IngmarEissfeldt](https://github.com/ingmareissfeldt))
 - Felix Kirch ([@felixkirch](https://github.com/felixkirch))
+- Lara Schmittmann ([@laraschmittmann](https://github.com/laraschmittmann))
