@@ -2,6 +2,8 @@
 
 Visualization of simulated oyster larval dispersal connectivity in the North Sea.
 
+![Screenshot](images/oysters.png)
+
 ## Quick Start
 
 Clone and enter the repository:
@@ -37,6 +39,7 @@ Open http://localhost:5173/ in your browser.
 │   ├── init/               # Database init container
 │   └── src/hex_db_loader/  # Python data loading package
 ├── frontend/               # React + deck.gl + MapLibre frontend
+├── images/                 # Screenshots
 ├── nginx/                  # Reverse proxy config
 ├── security/               # CVE scan results
 ├── volumes/                # Docker volumes (gitignored)
