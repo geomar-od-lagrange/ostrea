@@ -1,5 +1,8 @@
 [project]
-authors = [{name = "Willi Rath", email = "wrath@geomar.de"}]
+authors = [
+    {name = "Willi Rath", email = "wrath@geomar.de"},
+    {name = "Ingmar Eissfeldt"},
+]
 dependencies = []
 name = "hex_db_loader"
 requires-python = ">= 3.11"

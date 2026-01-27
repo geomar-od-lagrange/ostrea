@@ -6,7 +6,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "contributors": [
+    "Willi Rath <wrath@geomar.de>",
+    "Ingmar Eissfeldt"
+  ],
   "license": "ISC",
   "description": "",
   "dependencies": {

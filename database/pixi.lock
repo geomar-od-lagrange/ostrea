@@ -808,7 +808,7 @@ packages:
 - pypi: ./
   name: hex-db-loader
   version: 0.1.0
-  sha256: 55b6f1384b8c784fcca95a5d6afbe91e081e758e84bfe49acdd05663d023a8be
+  sha256: 836ecae8c5b07257dfee980db8fa7de09e9044cbc7d67c5e6847432c989db117
   requires_python: '>=3.11'
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/noarch/hpack-4.1.0-pyhd8ed1ab_0.conda

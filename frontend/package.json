@@ -3,6 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "contributors": [
+    "Willi Rath <wrath@geomar.de>",
+    "Ingmar Eissfeldt",
+    "Felix Kirch"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
