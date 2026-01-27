@@ -48,10 +48,18 @@ Update image references in `k8s/*-deployment.yaml` and `k8s/db-init-job.yaml`:
 - Change: `image: 2024_hex_dashboard-api:latest`
 - To: `image: <registry>/2024_hex_dashboard-api:latest`
 
-Deploy to cluster:
+Create namespace and database secret:
 
 ```bash
 $ kubectl apply -f k8s/namespace.yaml
+$ kubectl create secret generic db-secret \
+    --from-literal=POSTGRES_PASSWORD=$(openssl rand -base64 16) \
+    -n 2024-hex-dashboard
+```
+
+Deploy to cluster:
+
+```bash
 $ kubectl apply -f k8s/ -n 2024-hex-dashboard
 ```
 

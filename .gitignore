@@ -11,3 +11,6 @@ __pycache__/
 .env
 .env.local
 .env.*.local
+
+# Kubernetes secrets (keep db-secret.example.yaml)
+k8s/db-secret.yaml
