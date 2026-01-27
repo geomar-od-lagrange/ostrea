@@ -51,30 +51,31 @@ Update image references in `k8s/*-deployment.yaml` and `k8s/db-init-job.yaml`:
 Deploy to cluster:
 
 ```bash
-$ kubectl apply -f k8s/
+$ kubectl apply -f k8s/namespace.yaml
+$ kubectl apply -f k8s/ -n 2024-hex-dashboard
 ```
 
 Monitor database initialization (takes ~3 minutes):
 
 ```bash
-$ kubectl logs -f job/db-init
+$ kubectl logs -f job/db-init -n 2024-hex-dashboard
 ```
 
 Other useful log commands:
 
 ```bash
-$ kubectl logs -f deployment/api       # API server logs
-$ kubectl logs -f deployment/db        # PostgreSQL logs
-$ kubectl logs -f deployment/frontend  # Frontend logs
-$ kubectl logs -f deployment/nginx     # Reverse proxy logs
-$ kubectl get pods                     # Check pod status
+$ kubectl logs -f deployment/api -n 2024-hex-dashboard
+$ kubectl logs -f deployment/db -n 2024-hex-dashboard
+$ kubectl logs -f deployment/frontend -n 2024-hex-dashboard
+$ kubectl logs -f deployment/nginx -n 2024-hex-dashboard
+$ kubectl get pods -n 2024-hex-dashboard
 ```
 
 Set up external access using an Ingress resource.
 
 ### OpenShift
 
-Follow the Kubernetes deployment steps above with these additional considerations:
+Follow the Kubernetes deployment steps above (use `oc` instead of `kubectl`) with these additional considerations:
 
 - **Image registry**: Update manifests to reference OpenShift internal registry or your organization's registry
 - **Security Context Constraints (SCC)**: Containers may need SCC adjustments or security contexts to run as non-root
