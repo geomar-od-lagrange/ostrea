@@ -4,3 +4,7 @@
 #   registry: "registry:5000/"      # MicroShift with registry container
 #   registry: "myregistry.io/org/"  # Remote registry
 registry: ""
+
+# Hostname for OpenShift Routes
+# Use "localhost" for local MicroShift testing
+host: ""

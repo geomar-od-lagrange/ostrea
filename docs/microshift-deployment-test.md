@@ -65,7 +65,9 @@ kubectl create secret generic db-secret \
 ### Deploy with Helm
 
 ```bash
-helm template oysters ./helm/ostrea --set registry=registry:5000/ \
+helm template oysters ./helm/ostrea \
+  --set registry=registry:5000/ \
+  --set host=localhost \
   | kubectl apply --namespace 2024-hex-dashboard -f -
 ```
 

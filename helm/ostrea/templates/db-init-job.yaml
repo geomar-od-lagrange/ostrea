@@ -1,14 +1,12 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  labels:
-    io.kompose.service: db-init
   name: db-init
 spec:
   template:
     metadata:
       labels:
-        io.kompose.service: db-init
+        app: db-init
     spec:
       initContainers:
         - name: wait-for-db
@@ -26,13 +24,16 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: POSTGRES_USER
-                  name: env
+                  name: ostrea-config
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
       containers:
-        - securityContext:
+        - name: db-init
+          image: {{ .Values.registry }}2024-hex-dashboard-db-init:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
             allowPrivilegeEscalation: false
           env:
             - name: DB_HOST
@@ -41,7 +42,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: POSTGRES_DB
-                  name: env
+                  name: ostrea-config
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -51,10 +52,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: POSTGRES_USER
-                  name: env
-          image: {{ .Values.registry }}2024-hex-dashboard-db-init:latest
-          imagePullPolicy: IfNotPresent
-          name: db-init
+                  name: ostrea-config
           resources:
             requests:
               cpu: 250m

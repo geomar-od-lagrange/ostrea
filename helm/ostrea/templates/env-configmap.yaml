@@ -1,9 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: env
-  labels:
-    io.kompose.service: api-env
+  name: ostrea-config
 data:
   POSTGRES_DB: db
   POSTGRES_USER: user

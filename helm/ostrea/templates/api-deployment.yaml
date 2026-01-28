@@ -1,32 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    io.kompose.service: api
   name: api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: api
+      app: api
   template:
     metadata:
       labels:
-        io.kompose.service: api
+        app: api
     spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
       containers:
-        - securityContext:
+        - name: api
+          image: {{ .Values.registry }}2024-hex-dashboard-api:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
             allowPrivilegeEscalation: false
           env:
             - name: POSTGRES_DB
               valueFrom:
                 configMapKeyRef:
                   key: POSTGRES_DB
-                  name: env
+                  name: ostrea-config
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -36,10 +37,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: POSTGRES_USER
-                  name: env
-          image: {{ .Values.registry }}2024-hex-dashboard-api:latest
-          imagePullPolicy: IfNotPresent
-          name: api
+                  name: ostrea-config
           resources:
             requests:
               cpu: 250m
