@@ -5,6 +5,7 @@ import StaticMap from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import ControlPanel from './ControlPanel';
 import InfoBox from './InfoBox';
+import { theme } from './theme';
 
 const MAP_STYLE = 'https://demotiles.maplibre.org/style.json';
 
@@ -152,39 +153,38 @@ function App() {
           getFillColor: (d: any) => {
             const id: number = d.properties.id;
 
-            if (id === hoveredId) return [255, 255, 0, 255];
+            if (id === hoveredId) return theme.hex.hovered;
 
             const w = weightMap.get(id);
             if (w !== undefined) {
-              const green = Math.min(255, Math.round(w * 255));
-              return [0, green, 0, 255];
+              return theme.hex.getWeightColor(w);
             }
-            return [0, 0, 255, 100];
+            return theme.hex.default;
           },
 
           getLineColor: (d: any) => {
             const id = d.properties.id;
-            if (!metadata) return [128, 128, 128, 100];
+            if (!metadata) return theme.stroke.noMetadata;
             const data = metadata[id];
-            if (!data) return [128, 128, 128, 100];
+            if (!data) return theme.stroke.noMetadata;
 
             const colors: number[][] = [];
 
             if (isAQCHighlighted && data.aqc > 0) {
-              colors.push([255, 255, 0, 255]);   // yellow
+              colors.push([...theme.stroke.aquaculture]);
             }
             if (isRestHighlighted && data.rest > 0) {
-              colors.push([64, 224, 208, 255]);  // turquoise
+              colors.push([...theme.stroke.restoration]);
             }
             if (isDiseaseHighlighted && data.disease > 0) {
-              colors.push([255, 0, 0, 255]);     // red
+              colors.push([...theme.stroke.disease]);
             }
             if (clickIds.includes(id)) {
-              colors.push([255, 128, 0, 255]);   // orange
-            } 
+              colors.push([...theme.stroke.selected]);
+            }
 
-            if (colors.length === 0) return [0, 0, 128, 30]; // default
-              // Blend
+            if (colors.length === 0) return theme.stroke.default;
+            // Blend
             return colors[0].map((_, i) =>
               Math.round(colors.reduce((sum, c) => sum + c[i], 0) / colors.length)
             );
@@ -256,11 +256,11 @@ function App() {
           top: 10,
           left: 10,
           zIndex: 1,
-          background: 'rgba(0,0,0,0.9)',
+          background: theme.ui.controlPanel.background,
           padding: '8px',
           borderRadius: '4px',
           boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-          color: '#fff'
+          color: theme.ui.controlPanel.text
         }}
       >
         <ControlPanel
@@ -284,11 +284,11 @@ function App() {
           bottom: 10,
           left: 10,
           zIndex: 1,
-          background: 'rgba(220,220,220,0.95)',
+          background: theme.ui.infoBox.background,
           padding: '8px',
           borderRadius: '4px',
           boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-          color: '#333'
+          color: theme.ui.infoBox.text
         }}
       >
         <InfoBox />
@@ -302,8 +302,8 @@ function App() {
           top: tooltip.y + 10,
           zIndex: 2,
           pointerEvents: "none",
-          background: "rgba(0,0,0,0.75)",
-          color: "#fff",
+          background: theme.ui.tooltip.background,
+          color: theme.ui.tooltip.text,
           padding: "6px 8px",
           borderRadius: "4px",
           fontSize: 12,
