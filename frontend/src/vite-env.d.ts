@@ -1,9 +1,6 @@
 /// <reference types="vite/client" />
 
-export default defineConfig({
-  plugins: [react()],
-  optimizeDeps: {
-    include: ["@deck.gl/react", "@deck.gl/layers", "react-map-gl"]
-  }
-});
-
+declare module '*.md?raw' {
+  const content: string;
+  export default content;
+}

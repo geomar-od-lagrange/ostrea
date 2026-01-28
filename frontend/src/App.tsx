@@ -4,6 +4,7 @@ import { GeoJsonLayer } from '@deck.gl/layers';
 import StaticMap from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import ControlPanel from './ControlPanel';
+import InfoBox from './InfoBox';
 
 const MAP_STYLE = 'https://demotiles.maplibre.org/style.json';
 
@@ -276,7 +277,23 @@ function App() {
           onDiseaseChange={setDisease}
         />
       </div>
-      
+
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 10,
+          left: 10,
+          zIndex: 1,
+          background: 'rgba(220,220,220,0.95)',
+          padding: '8px',
+          borderRadius: '4px',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+          color: '#333'
+        }}
+      >
+        <InfoBox />
+      </div>
+
     {tooltip && (
       <div
         style={{
