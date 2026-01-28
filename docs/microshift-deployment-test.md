@@ -66,6 +66,8 @@ kubectl create secret generic db-secret \
 
 ```bash
 helm template ostrea ./helm/ostrea \
+  --namespace ostrea \
+  --set openshift=true \
   --set registry=registry:5000/ \
   --set host=localhost \
   | kubectl apply --namespace ostrea -f -
@@ -112,7 +114,7 @@ curl -s http://localhost:5173/api/metadata | head -c 100
 Remove Helm-deployed resources (keeps namespace and secret for redeployment):
 
 ```bash
-helm template ostrea ./helm/ostrea | kubectl delete --namespace ostrea -f -
+helm template ostrea ./helm/ostrea --namespace ostrea --set openshift=true | kubectl delete --namespace ostrea -f -
 ```
 
 Delete the namespace (removes all resources including secret):

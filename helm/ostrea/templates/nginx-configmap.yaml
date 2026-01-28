@@ -1,0 +1,38 @@
+{{- if not .Values.openshift }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  nginx.conf: |
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        # Kubernetes CoreDNS (standard cluster IP)
+        resolver 10.96.0.10 valid=5s;
+
+        server {
+            listen 8080;
+
+            # API proxy - strip /api prefix
+            location ~ ^/api/(.*)$ {
+                set $api_backend http://api.{{ .Release.Namespace }}.svc.cluster.local:3000;
+                proxy_pass $api_backend/$1$is_args$args;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+
+            # Frontend
+            location / {
+                set $frontend_backend http://frontend.{{ .Release.Namespace }}.svc.cluster.local:8080;
+                proxy_pass $frontend_backend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+            }
+        }
+    }
+{{- end }}
