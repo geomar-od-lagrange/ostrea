@@ -1,4 +1,5 @@
 import * as React from "react";
+import { theme } from "./theme";
 
 interface ControlPanelProps {
   selectedDepths: string[];
@@ -56,17 +57,25 @@ export default function ControlPanel({
       }}
     >
     <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
-      <legend style={{ fontWeight: 600, marginBottom: 8 }}>ControlPanel</legend>
+      <div style={{ marginBottom: 12 }}>
+        <button
+          type="button"
+          onClick={() => clearHex?.({ depths: selectedDepths, times: selectedTimes })}
+          style={{ padding: "6px 10px", borderRadius: 6 }}
+        >
+          Clear
+        </button>
+      </div>
 
+      <div style={{ fontWeight: 600, marginBottom: 8 }}>Depth</div>
       {depths.map(d => (
         <label
           key={d}
           style={{
-            display: "inline-flex",
+            display: "flex",
             alignItems: "center",
-            marginRight: 12,
             cursor: "pointer",
-            overscrollBehavior: 'none',
+            marginBottom: 4,
           }}
         >
           <input
@@ -81,14 +90,15 @@ export default function ControlPanel({
         </label>
       ))}
 
+      <div style={{ fontWeight: 600, marginTop: 12, marginBottom: 8 }}>Time range</div>
       {times.map(t => (
         <label
           key={t}
           style={{
-            display: "inline-flex",
+            display: "flex",
             alignItems: "center",
-            marginRight: 12,
             cursor: "pointer",
+            marginBottom: 4,
           }}
         >
           <input
@@ -102,48 +112,42 @@ export default function ControlPanel({
           {t}
         </label>
       ))}
-      
-      <div style={{ marginTop: 12 }}>
-        <button
-          type="button"
-          onClick={() => clearHex?.({ depths: selectedDepths, times: selectedTimes })}
-          style={{ padding: "6px 10px", borderRadius: 6 }}
-        >
-          Clear hex input
-        </button>
-      </div>
-      
-      <label style={{ display: "inline-flex", alignItems: "center", marginRight: 12, cursor: "pointer" }}>
+
+      <div style={{ fontWeight: 600, marginTop: 12, marginBottom: 8 }}>Highlights</div>
+      <label style={{ display: "flex", alignItems: "center", cursor: "pointer", marginBottom: 4 }}>
         <input
           type="checkbox"
           name="aqc"
           checked={isAQCHighlighted}
           onChange={(e) => onAQCChange(e.target.checked)}
-          style={{ marginRight: 6, accentColor: "#16a34a" }}
+          style={{ marginRight: 6, accentColor: theme.colors.aquaculture }}
         />
-        Highlight aquacultures
+        <span style={{ display: "inline-block", width: 12, height: 12, backgroundColor: theme.colors.aquaculture, marginRight: 6, borderRadius: 2 }} />
+        Aquacultures
       </label>
-      
-      <label style={{ display: "inline-flex", alignItems: "center", marginRight: 12, cursor: "pointer" }}>
+
+      <label style={{ display: "flex", alignItems: "center", cursor: "pointer", marginBottom: 4 }}>
         <input
           type="checkbox"
           name="rest"
           checked={isRestHighlighted}
           onChange={(e) => onRestChange(e.target.checked)}
-          style={{ marginRight: 6, accentColor: "#16a34a" }}
+          style={{ marginRight: 6, accentColor: theme.colors.restoration }}
         />
-        Highlight restoration sites
+        <span style={{ display: "inline-block", width: 12, height: 12, backgroundColor: theme.colors.restoration, marginRight: 6, borderRadius: 2 }} />
+        Restoration
       </label>
-      
-      <label style={{ display: "inline-flex", alignItems: "center", marginRight: 12, cursor: "pointer" }}>
+
+      <label style={{ display: "flex", alignItems: "center", cursor: "pointer", marginBottom: 4 }}>
         <input
           type="checkbox"
           name="disease"
           checked={isDiseaseHighlighted}
           onChange={(e) => onDiseaseChange(e.target.checked)}
-          style={{ marginRight: 6, accentColor: "#16a34a" }}
+          style={{ marginRight: 6, accentColor: theme.colors.disease }}
         />
-        Highlight confirmed outbreaks
+        <span style={{ display: "inline-block", width: 12, height: 12, backgroundColor: theme.colors.disease, marginRight: 6, borderRadius: 2 }} />
+        Outbreaks
       </label>
       
     </fieldset>
