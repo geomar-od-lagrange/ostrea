@@ -18,7 +18,7 @@ spec:
         fsGroup: 999
       containers:
         - name: db
-          image: postgis/postgis:16-3.4
+          image: postgis/postgis:16-3.5
           securityContext:
             allowPrivilegeEscalation: false
           envFrom:

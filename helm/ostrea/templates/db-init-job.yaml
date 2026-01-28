@@ -10,7 +10,7 @@ spec:
     spec:
       initContainers:
         - name: wait-for-db
-          image: postgis/postgis:16-3.4
+          image: postgis/postgis:16-3.5
           command:
             - sh
             - -c

@@ -1,6 +1,6 @@
 services:
   db:
-    image: 'postgis/postgis:16-3.4'
+    image: 'postgis/postgis:16-3.5'
     env_file:
       - .env
     volumes:
@@ -48,7 +48,7 @@ services:
       - app-network
 
   nginx:
-    image: nginx:1.27-alpine
+    image: nginx:1.28-alpine
     ports:
       - "127.0.0.1:5173:8080"
     volumes:
