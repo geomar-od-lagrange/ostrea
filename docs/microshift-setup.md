@@ -11,10 +11,19 @@ Run a local OpenShift-compatible cluster using MicroShift in Docker. Useful for 
 
 kubectl reads connection details from a kubeconfig file. By setting the `KUBECONFIG` environment variable to point to MicroShift's kubeconfig, the same kubectl binary connects to MicroShift instead of Docker Desktop's Kubernetes cluster.
 
+## Create Docker Network
+
+Create a shared network so MicroShift and the image registry can communicate:
+
+```bash
+docker network create microshift-net
+```
+
 ## Start MicroShift
 
 ```bash
 docker run -d --name microshift --privileged \
+  --network microshift-net \
   -v microshift-data:/var/lib \
   -p 6443:6443 -p 80:80 -p 443:443 \
   quay.io/microshift/microshift-aio:latest
@@ -22,31 +31,14 @@ docker run -d --name microshift --privileged \
 
 Wait for the container to initialize (~1-2 minutes).
 
-## Set Up Image Registry
+## Start Image Registry
 
-MicroShift uses CRI-O which requires a registry to pull images from (no direct image loading like kind). Run a registry container on a shared Docker network.
+MicroShift uses CRI-O which requires a registry to pull images from (no direct image loading like kind).
 
-Create the network and connect MicroShift to it:
-
-```bash
-docker network create microshift-net
-docker network connect microshift-net microshift
-```
-
-Start the registry container (using port 5001 since macOS uses 5000 for AirPlay):
+Start the registry on the same network (using port 5001 since macOS uses 5000 for AirPlay):
 
 ```bash
 docker run -d --name registry --network microshift-net -p 5001:5000 registry:2
-```
-
-Verify both sides can access it:
-
-```bash
-# From host
-curl -s http://localhost:5001/v2/_catalog
-
-# From MicroShift (uses container name as hostname)
-docker exec microshift curl -s http://registry:5000/v2/_catalog
 ```
 
 Configure CRI-O to trust the insecure registry:
@@ -62,9 +54,21 @@ EOF'
 docker exec microshift systemctl restart crio
 ```
 
-### Push Images to Registry
+Verify both sides can access the registry:
 
-Tag and push images from your host. Use `localhost:5001` for pushing:
+```bash
+# From host
+curl -s http://localhost:5001/v2/_catalog
+
+# From MicroShift (uses container name as hostname)
+docker exec microshift curl -s http://registry:5000/v2/_catalog
+```
+
+Both should return `{"repositories":[]}`.
+
+## Push Images to Registry
+
+Tag and push images from your host using `localhost:5001`:
 
 ```bash
 docker tag myimage:latest localhost:5001/myimage:latest
