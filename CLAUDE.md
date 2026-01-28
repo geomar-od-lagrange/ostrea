@@ -23,6 +23,7 @@
 - **pixi global**: CLI tools (gh, jq, codex)
 - **pixi local** (database/): Python deps only
 - Don't add system tools to project pixi
+- **Temporary tools**: Use `mktemp -d` for one-off binaries (kind, kompose, etc.), not plain /tmp
 
 ## GitHub Integration
 ```bash
@@ -35,3 +36,14 @@ gh api repos/OWNER/REPO/pulls/N/reviews   # Reviews
 docker compose up -d    # Start
 docker compose down     # Stop
 ```
+
+## Kubernetes Testing (MicroShift)
+
+The Helm chart (`helm/ostrea`) uses OpenShift Routes for path-based routing.
+For local testing, use MicroShift (OpenShift-compatible).
+
+See docs:
+- [docs/microshift-setup.md](docs/microshift-setup.md) - Cluster setup
+- [docs/microshift-deployment-test.md](docs/microshift-deployment-test.md) - Deployment workflow
+
+Quick access after deployment: **http://localhost:5173/**

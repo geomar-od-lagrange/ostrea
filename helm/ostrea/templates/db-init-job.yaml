@@ -1,0 +1,50 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init
+spec:
+  template:
+    metadata:
+      labels:
+        app: db-init
+    spec:
+      initContainers:
+        - name: wait-for-db
+          image: postgis/postgis:16-3.4
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h db -p 5432 -U "$POSTGRES_USER"; do
+                echo "Waiting for database..."
+                sleep 2
+              done
+          envFrom:
+            - configMapRef:
+                name: ostrea-config
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: db-init
+          image: {{ .Values.registry }}ostrea-db-init:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+          env:
+            - name: DB_HOST
+              value: db
+          envFrom:
+            - configMapRef:
+                name: ostrea-config
+            - secretRef:
+                name: db-secret
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+      restartPolicy: Never

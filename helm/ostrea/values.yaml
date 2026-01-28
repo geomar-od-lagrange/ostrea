@@ -1,0 +1,14 @@
+# Image registry prefix (include trailing slash if set)
+# Examples:
+#   registry: ""                    # Local images (kind, Docker Desktop)
+#   registry: "registry:5000/"      # MicroShift with registry container
+#   registry: "myregistry.io/org/"  # Remote registry
+registry: ""
+
+# OpenShift mode: use Routes for path-based routing
+# Set to true for MicroShift/OpenShift, false for vanilla Kubernetes (kind)
+openshift: false
+
+# Hostname for OpenShift Routes (only used when openshift=true)
+# Use "localhost" for local MicroShift testing
+host: ""

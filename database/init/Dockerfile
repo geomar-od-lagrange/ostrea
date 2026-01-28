@@ -1,4 +1,4 @@
-FROM condaforge/miniforge3:24.9.2-0
+FROM condaforge/miniforge3:25.3.0-3
 
 WORKDIR /app
 
@@ -28,8 +28,10 @@ RUN pip install --no-cache-dir -e .
 # Copy init script
 COPY init/init_db.py ./
 
-# Make init script executable
-RUN chmod +x init_db.py
+# Use existing user (miniforge3 has UID 1000 already)
+RUN chown -R 1000:1000 /app
+
+USER 1000
 
 # Run initialization
 CMD ["python", "init_db.py"]
