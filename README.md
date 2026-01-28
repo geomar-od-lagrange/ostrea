@@ -30,23 +30,31 @@ docker compose up
 
 Open http://localhost:5173/ in your browser.
 
-### Kubernetes (OpenShift)
+### Kubernetes (kind)
 
-The Helm chart in `helm/ostrea/` deploys to OpenShift clusters using Routes for ingress.
-
-Build and push images:
+The Helm chart supports vanilla Kubernetes using [kind](https://kind.sigs.k8s.io/). An nginx proxy handles `/api` routing.
 
 ```bash
+kind create cluster --name ostrea
 docker compose build
-docker tag ostrea-api:latest <registry>/ostrea-api:latest
-docker tag ostrea-frontend:latest <registry>/ostrea-frontend:latest
-docker tag ostrea-db-init:latest <registry>/ostrea-db-init:latest
-docker push <registry>/ostrea-api:latest
-docker push <registry>/ostrea-frontend:latest
-docker push <registry>/ostrea-db-init:latest
+kind load docker-image ostrea-api:latest ostrea-frontend:latest ostrea-db-init:latest --name ostrea
+kubectl create namespace ostrea
+kubectl create secret generic db-secret \
+  --from-literal=POSTGRES_USER=user \
+  --from-literal=POSTGRES_PASSWORD=$(openssl rand -base64 24) \
+  --from-literal=POSTGRES_DB=db \
+  -n ostrea
+helm template ostrea ./helm/ostrea --namespace ostrea | kubectl apply --namespace ostrea -f -
+kubectl port-forward -n ostrea svc/nginx 5173:8080
 ```
 
-Create namespace and secret:
+Open http://localhost:5173/
+
+For detailed instructions, see [docs/kind-deployment-test.md](docs/kind-deployment-test.md).
+
+### Kubernetes (OpenShift)
+
+The Helm chart also supports OpenShift clusters using Routes for ingress (`--set openshift=true`).
 
 ```bash
 kubectl create namespace ostrea
@@ -55,21 +63,10 @@ kubectl create secret generic db-secret \
   --from-literal=POSTGRES_PASSWORD=$(openssl rand -base64 24) \
   --from-literal=POSTGRES_DB=db \
   -n ostrea
-```
-
-Deploy with Helm:
-
-```bash
-helm template ostrea ./helm/ostrea \
+helm template ostrea ./helm/ostrea --namespace ostrea \
+  --set openshift=true \
   --set registry=<registry>/ \
   | kubectl apply --namespace ostrea -f -
-```
-
-Monitor deployment:
-
-```bash
-kubectl get pods -n ostrea
-kubectl logs -f job/db-init -n ostrea
 ```
 
 For local OpenShift testing with MicroShift, see [docs/microshift-deployment-test.md](docs/microshift-deployment-test.md).
@@ -85,7 +82,7 @@ For local OpenShift testing with MicroShift, see [docs/microshift-deployment-tes
 │   ├── init/               # Database init container
 │   └── src/hex_db_loader/  # Python data loading package
 ├── frontend/               # React + deck.gl + MapLibre frontend
-├── helm/ostrea/            # Helm chart for OpenShift deployment
+├── helm/ostrea/            # Helm chart for Kubernetes/OpenShift
 ├── images/                 # Screenshots
 ├── security/               # CVE scan results
 ├── volumes/                # Docker volumes (gitignored)
