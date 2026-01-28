@@ -2,6 +2,8 @@
 
 Run a local OpenShift-compatible cluster using MicroShift in Docker. Useful for validating Kubernetes manifests against OpenShift APIs (Routes, SCCs, etc.) without a full OpenShift installation.
 
+**Goal:** After setup and deployment, access the app at **http://localhost:5173/** with no `/etc/hosts` modifications needed.
+
 ## Prerequisites
 
 - Docker Desktop or Docker CLI
@@ -25,9 +27,11 @@ docker network create microshift-net
 docker run -d --name microshift --privileged \
   --network microshift-net \
   -v microshift-data:/var/lib \
-  -p 6443:6443 -p 80:80 -p 443:443 \
+  -p 6443:6443 -p 5173:80 \
   quay.io/microshift/microshift-aio:latest
 ```
+
+Port 5173 on the host maps to the OpenShift router (port 80) inside the container.
 
 Wait for the container to initialize (~1-2 minutes).
 
@@ -44,8 +48,7 @@ docker run -d --name registry --network microshift-net -p 5001:5000 registry:2
 Configure CRI-O to trust the insecure registry:
 
 ```bash
-docker exec microshift bash -c 'cat >> /etc/containers/registries.conf <<EOF
-
+docker exec microshift bash -c 'mkdir -p /etc/containers/registries.conf.d && cat > /etc/containers/registries.conf.d/registry.conf << EOF
 [[registry]]
 location = "registry:5000"
 insecure = true

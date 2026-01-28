@@ -1,12 +1,12 @@
-# Testing OYSTERS Deployment on MicroShift
+# Testing OSTREA Deployment on MicroShift
 
-Test the full OYSTERS application deployment on a local MicroShift cluster.
+Test the full OSTREA application deployment on a local MicroShift cluster.
 
 ## Prerequisites
 
 Complete the MicroShift setup from [microshift-setup.md](microshift-setup.md):
 - Docker network `microshift-net` created
-- MicroShift container running
+- MicroShift container running (port 5173 mapped to router)
 - Registry container running at `localhost:5001`
 - CRI-O configured to trust the registry
 - `KUBECONFIG` exported
@@ -69,15 +69,11 @@ helm template oysters ./helm/ostrea --set registry=registry:5000/ \
   | kubectl apply --namespace 2024-hex-dashboard -f -
 ```
 
-### Set Up Port Forwarding
+### Access the Application
 
-```bash
-kubectl port-forward -n 2024-hex-dashboard svc/nginx 5173:5173 &
-```
+Open in browser: **http://localhost:5173/**
 
-**Frontend available at: http://localhost:5173/**
-
-The UI will load immediately. Data populates as db-init runs.
+The Routes are configured with `host: localhost`, so no `/etc/hosts` modification needed.
 
 ## Verify Deployment
 
@@ -90,35 +86,26 @@ kubectl get pods -n 2024-hex-dashboard
 Expected:
 
 ```
-NAME                        READY   STATUS      RESTARTS   AGE
-api-...                     1/1     Running     0          1m
-db-...                      1/1     Running     0          1m
-db-init-...                 1/1     Running     0          1m
-frontend-...                1/1     Running     0          1m
-nginx-...                   1/1     Running     0          1m
+NAME                        READY   STATUS    RESTARTS   AGE
+api-...                     1/1     Running   0          1m
+db-...                      1/1     Running   0          1m
+db-init-...                 1/1     Running   0          1m
+frontend-...                1/1     Running   0          1m
 ```
 
-Test the API:
+Check routes:
+
+```bash
+kubectl get routes -n 2024-hex-dashboard
+```
+
+Test API:
 
 ```bash
 curl -s http://localhost:5173/api/metadata | head -c 100
 ```
 
-## Local Deployment (kind / Docker Desktop)
-
-For local testing where images are loaded directly (no registry):
-
-```bash
-helm template oysters ./helm/ostrea | kubectl apply --namespace 2024-hex-dashboard -f -
-```
-
 ## Cleanup
-
-Stop port forwarding:
-
-```bash
-pkill -f "kubectl port-forward.*2024-hex-dashboard"
-```
 
 Remove Helm-deployed resources (keeps namespace and secret for redeployment):
 

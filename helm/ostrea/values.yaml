@@ -4,8 +4,3 @@
 #   registry: "registry:5000/"      # MicroShift with registry container
 #   registry: "myregistry.io/org/"  # Remote registry
 registry: ""
-
-# OpenShift Route (only works on OpenShift/MicroShift)
-openshift:
-  route:
-    enabled: false
