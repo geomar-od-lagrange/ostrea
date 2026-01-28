@@ -1,9 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: /tmp/kompose convert -f ../docker-compose.yml
-    kompose.version: 1.35.0 (9532ceef3)
   labels:
     io.kompose.service: db
   name: db
@@ -16,9 +13,6 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        kompose.cmd: /tmp/kompose convert -f ../docker-compose.yml
-        kompose.version: 1.35.0 (9532ceef3)
       labels:
         io.kompose.service: db
     spec:

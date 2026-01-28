@@ -11,10 +11,11 @@ Complete the MicroShift setup from [microshift-setup.md](microshift-setup.md):
 - CRI-O configured to trust the registry
 - `KUBECONFIG` exported
 
-Also ensure `envsubst` is available:
+Install Helm (if not available):
 ```bash
-pixi global install gettext
-pixi global expose add --environment gettext envsubst
+HELM_DIR=$(mktemp -d)
+curl -fsSL https://get.helm.sh/helm-v3.17.0-darwin-arm64.tar.gz | tar -xz -C "$HELM_DIR"
+export PATH="$HELM_DIR/darwin-arm64:$PATH"
 ```
 
 ## Build and Push Images
@@ -48,10 +49,10 @@ Expected: `{"repositories":["2024-hex-dashboard-api","2024-hex-dashboard-db-init
 ### Create Namespace and Secret
 
 ```bash
-kubectl apply -f k8s/namespace.yaml
+kubectl create namespace 2024-hex-dashboard
 ```
 
-Create the database secret. Values must match `k8s/env-configmap.yaml`:
+Create the database secret (values must match `helm/ostrea/templates/env-configmap.yaml`):
 
 ```bash
 kubectl create secret generic db-secret \
@@ -61,22 +62,12 @@ kubectl create secret generic db-secret \
   -n 2024-hex-dashboard
 ```
 
-### Apply Manifests with Registry Prefix
-
-The k8s manifests use `${REGISTRY}` templating for image names. Set the registry prefix and apply:
+### Deploy with Helm
 
 ```bash
-export REGISTRY=registry:5000/
-for f in k8s/*.yaml; do
-  envsubst '$REGISTRY' < "$f"
-  echo "---"
-done | kubectl apply -n 2024-hex-dashboard -f -
+helm template oysters ./helm/ostrea --set registry=registry:5000/ \
+  | kubectl apply --namespace 2024-hex-dashboard -f -
 ```
-
-Notes:
-- `envsubst '$REGISTRY'` only substitutes `$REGISTRY`, leaving other variables like `$POSTGRES_USER` untouched
-- `echo "---"` adds YAML document separators between files
-- `-n 2024-hex-dashboard` ensures all resources go to the correct namespace
 
 ### Set Up Port Forwarding
 
@@ -86,7 +77,7 @@ kubectl port-forward -n 2024-hex-dashboard svc/nginx 5173:5173 &
 
 **Frontend available at: http://localhost:5173/**
 
-The UI will load immediately. Data populates as db-init runs (~3 minutes).
+The UI will load immediately. Data populates as db-init runs.
 
 ## Verify Deployment
 
@@ -107,31 +98,19 @@ frontend-...                1/1     Running     0          1m
 nginx-...                   1/1     Running     0          1m
 ```
 
-Check the OpenShift Route was created:
-
-```bash
-kubectl get routes -n 2024-hex-dashboard
-```
-
 Test the API:
 
 ```bash
 curl -s http://localhost:5173/api/metadata | head -c 100
 ```
 
-## Local Deployment (without registry)
+## Local Deployment (kind / Docker Desktop)
 
-For local testing with kind or Docker Desktop Kubernetes where images are loaded directly:
+For local testing where images are loaded directly (no registry):
 
 ```bash
-export REGISTRY=
-for f in k8s/*.yaml; do
-  envsubst '$REGISTRY' < "$f"
-  echo "---"
-done | kubectl apply -n 2024-hex-dashboard -f -
+helm template oysters ./helm/ostrea | kubectl apply --namespace 2024-hex-dashboard -f -
 ```
-
-This uses local image names directly (e.g., `2024-hex-dashboard-api:latest`).
 
 ## Cleanup
 
@@ -141,7 +120,13 @@ Stop port forwarding:
 pkill -f "kubectl port-forward.*2024-hex-dashboard"
 ```
 
-Delete the namespace (removes all resources):
+Remove Helm-deployed resources (keeps namespace and secret for redeployment):
+
+```bash
+helm template oysters ./helm/ostrea | kubectl delete --namespace 2024-hex-dashboard -f -
+```
+
+Delete the namespace (removes all resources including secret):
 
 ```bash
 kubectl delete namespace 2024-hex-dashboard

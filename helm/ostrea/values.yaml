@@ -1,0 +1,11 @@
+# Image registry prefix (include trailing slash if set)
+# Examples:
+#   registry: ""                    # Local images (kind, Docker Desktop)
+#   registry: "registry:5000/"      # MicroShift with registry container
+#   registry: "myregistry.io/org/"  # Remote registry
+registry: ""
+
+# OpenShift Route (only works on OpenShift/MicroShift)
+openshift:
+  route:
+    enabled: false
