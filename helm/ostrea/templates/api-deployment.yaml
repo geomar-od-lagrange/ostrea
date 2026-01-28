@@ -18,7 +18,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: api
-          image: {{ .Values.registry }}2024-hex-dashboard-api:latest
+          image: {{ .Values.registry }}ostrea-api:latest
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false

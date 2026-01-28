@@ -1,6 +1,6 @@
-# OYSTERS
+# OSTREA
 
-Visualization of simulated oyster larval dispersal connectivity in the North Sea.
+Oyster Spatio-Temporal Dispersal Atlas - Visualization of simulated oyster larval dispersal connectivity in the North Sea.
 
 ![Screenshot](images/oysters.png)
 
@@ -11,81 +11,68 @@ Visualization of simulated oyster larval dispersal connectivity in the North Sea
 Clone and enter the repository:
 
 ```bash
-$ git clone https://github.com/geomar-od-lagrange/2024_hex_dashboard.git
-$ cd 2024_hex_dashboard
+git clone https://github.com/geomar-od-lagrange/2024_hex_dashboard.git
+cd 2024_hex_dashboard
 ```
 
 Create environment file from example:
 
 ```bash
-$ cp .env.example .env
+cp .env.example .env
 ```
 
 Build and run (database auto-initializes):
 
 ```bash
-$ docker compose build
-$ docker compose up
+docker compose build
+docker compose up
 ```
 
 Open http://localhost:5173/ in your browser.
 
-### Kubernetes
+### Kubernetes (OpenShift)
 
-Build and push images to your container registry:
+The Helm chart in `helm/ostrea/` deploys to OpenShift clusters using Routes for ingress.
 
-```bash
-$ docker compose build
-$ docker tag 2024_hex_dashboard-api:latest <registry>/2024_hex_dashboard-api:latest
-$ docker tag 2024_hex_dashboard-frontend:latest <registry>/2024_hex_dashboard-frontend:latest
-$ docker tag 2024_hex_dashboard-db-init:latest <registry>/2024_hex_dashboard-db-init:latest
-$ docker push <registry>/2024_hex_dashboard-api:latest
-$ docker push <registry>/2024_hex_dashboard-frontend:latest
-$ docker push <registry>/2024_hex_dashboard-db-init:latest
-```
-
-Update image references in `k8s/*-deployment.yaml` and `k8s/db-init-job.yaml`:
-- Change: `image: 2024_hex_dashboard-api:latest`
-- To: `image: <registry>/2024_hex_dashboard-api:latest`
-
-Create namespace and database secret:
+Build and push images:
 
 ```bash
-$ kubectl apply -f k8s/namespace.yaml
-$ kubectl create secret generic db-secret \
-    --from-literal=POSTGRES_PASSWORD=$(openssl rand -base64 16) \
-    -n 2024-hex-dashboard
+docker compose build
+docker tag ostrea-api:latest <registry>/ostrea-api:latest
+docker tag ostrea-frontend:latest <registry>/ostrea-frontend:latest
+docker tag ostrea-db-init:latest <registry>/ostrea-db-init:latest
+docker push <registry>/ostrea-api:latest
+docker push <registry>/ostrea-frontend:latest
+docker push <registry>/ostrea-db-init:latest
 ```
 
-Deploy to cluster:
+Create namespace and secret:
 
 ```bash
-$ kubectl apply -f k8s/ -n 2024-hex-dashboard
+kubectl create namespace ostrea
+kubectl create secret generic db-secret \
+  --from-literal=POSTGRES_USER=user \
+  --from-literal=POSTGRES_PASSWORD=$(openssl rand -base64 24) \
+  --from-literal=POSTGRES_DB=db \
+  -n ostrea
 ```
 
-Monitor database initialization (takes ~3 minutes):
+Deploy with Helm:
 
 ```bash
-$ kubectl logs -f job/db-init -n 2024-hex-dashboard
+helm template ostrea ./helm/ostrea \
+  --set registry=<registry>/ \
+  | kubectl apply --namespace ostrea -f -
 ```
 
-Other useful log commands:
+Monitor deployment:
 
 ```bash
-$ kubectl logs -f deployment/api -n 2024-hex-dashboard
-$ kubectl logs -f deployment/db -n 2024-hex-dashboard
-$ kubectl logs -f deployment/frontend -n 2024-hex-dashboard
-$ kubectl logs -f deployment/nginx -n 2024-hex-dashboard
-$ kubectl get pods -n 2024-hex-dashboard
+kubectl get pods -n ostrea
+kubectl logs -f job/db-init -n ostrea
 ```
 
-For local testing (kind, minikube):
-
-```bash
-$ kubectl port-forward svc/nginx 5173:5173 -n 2024-hex-dashboard
-```
-
-For production, set up external access using an Ingress resource.
+For local OpenShift testing with MicroShift, see [docs/microshift-deployment-test.md](docs/microshift-deployment-test.md).
 
 ## Project Structure
 
@@ -98,9 +85,8 @@ For production, set up external access using an Ingress resource.
 │   ├── init/               # Database init container
 │   └── src/hex_db_loader/  # Python data loading package
 ├── frontend/               # React + deck.gl + MapLibre frontend
+├── helm/ostrea/            # Helm chart for OpenShift deployment
 ├── images/                 # Screenshots
-├── k8s/                    # Kubernetes/OpenShift manifests
-├── nginx/                  # Reverse proxy config
 ├── security/               # CVE scan results
 ├── volumes/                # Docker volumes (gitignored)
 ├── .env                    # Environment variables (gitignored)
@@ -120,16 +106,16 @@ For production, set up external access using an Ingress resource.
 Foreground mode with live logs (Ctrl+C to stop):
 
 ```bash
-$ docker compose up
+docker compose up
 ```
 
 Background mode:
 
 ```bash
-$ docker compose up -d
-$ docker compose logs -f
-$ docker compose down
-$ docker compose down -v  # also removes volumes
+docker compose up -d
+docker compose logs -f
+docker compose down
+docker compose down -v  # also removes volumes
 ```
 
 ### Database Loaders
@@ -137,10 +123,10 @@ $ docker compose down -v  # also removes volumes
 The database initializes automatically. For manual data loading:
 
 ```bash
-$ cd database
-$ pixi run python -m hex_db_loader.connectivity
-$ pixi run python -m hex_db_loader.geojson
-$ pixi run python -m hex_db_loader.metadata
+cd database
+pixi run python -m hex_db_loader.connectivity
+pixi run python -m hex_db_loader.geojson
+pixi run python -m hex_db_loader.metadata
 ```
 
 ## License

@@ -18,7 +18,7 @@ spec:
         runAsGroup: 101
       containers:
         - name: frontend
-          image: {{ .Values.registry }}2024-hex-dashboard-frontend:latest
+          image: {{ .Values.registry }}ostrea-frontend:latest
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false

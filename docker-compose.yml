@@ -14,6 +14,7 @@ services:
       retries: 5
 
   db-init:
+    image: ostrea-db-init:latest
     build:
       context: ./database
       dockerfile: init/Dockerfile
@@ -29,6 +30,7 @@ services:
     restart: "no"
 
   api:
+    image: ostrea-api:latest
     build: ./api
     env_file:
       - .env
@@ -39,6 +41,7 @@ services:
       - app-network
 
   frontend:
+    image: ostrea-frontend:latest
     build:
       context: ./frontend
     networks:
@@ -59,4 +62,3 @@ services:
 networks:
   app-network:
     driver: bridge
-

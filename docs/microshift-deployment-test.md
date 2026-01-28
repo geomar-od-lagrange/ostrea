@@ -23,17 +23,17 @@ export PATH="$HELM_DIR/darwin-arm64:$PATH"
 Build the project images:
 
 ```bash
-docker build -t localhost:5001/2024-hex-dashboard-api:latest ./api
-docker build -t localhost:5001/2024-hex-dashboard-frontend:latest ./frontend
-docker build -t localhost:5001/2024-hex-dashboard-db-init:latest -f database/init/Dockerfile ./database
+docker build -t localhost:5001/ostrea-api:latest ./api
+docker build -t localhost:5001/ostrea-frontend:latest ./frontend
+docker build -t localhost:5001/ostrea-db-init:latest -f database/init/Dockerfile ./database
 ```
 
 Push to registry:
 
 ```bash
-docker push localhost:5001/2024-hex-dashboard-api:latest
-docker push localhost:5001/2024-hex-dashboard-frontend:latest
-docker push localhost:5001/2024-hex-dashboard-db-init:latest
+docker push localhost:5001/ostrea-api:latest
+docker push localhost:5001/ostrea-frontend:latest
+docker push localhost:5001/ostrea-db-init:latest
 ```
 
 Verify images are in the registry:
@@ -42,14 +42,14 @@ Verify images are in the registry:
 curl -s http://localhost:5001/v2/_catalog
 ```
 
-Expected: `{"repositories":["2024-hex-dashboard-api","2024-hex-dashboard-db-init","2024-hex-dashboard-frontend"]}`
+Expected: `{"repositories":["ostrea-api","ostrea-db-init","ostrea-frontend"]}`
 
 ## Deploy to MicroShift
 
 ### Create Namespace and Secret
 
 ```bash
-kubectl create namespace 2024-hex-dashboard
+kubectl create namespace ostrea
 ```
 
 Create the database secret (values must match `helm/ostrea/templates/env-configmap.yaml`):
@@ -59,16 +59,16 @@ kubectl create secret generic db-secret \
   --from-literal=POSTGRES_USER=user \
   --from-literal=POSTGRES_PASSWORD=$(openssl rand -base64 24) \
   --from-literal=POSTGRES_DB=db \
-  -n 2024-hex-dashboard
+  -n ostrea
 ```
 
 ### Deploy with Helm
 
 ```bash
-helm template oysters ./helm/ostrea \
+helm template ostrea ./helm/ostrea \
   --set registry=registry:5000/ \
   --set host=localhost \
-  | kubectl apply --namespace 2024-hex-dashboard -f -
+  | kubectl apply --namespace ostrea -f -
 ```
 
 ### Access the Application
@@ -82,7 +82,7 @@ The Routes are configured with `host: localhost`, so no `/etc/hosts` modificatio
 Check pod status:
 
 ```bash
-kubectl get pods -n 2024-hex-dashboard
+kubectl get pods -n ostrea
 ```
 
 Expected:
@@ -98,7 +98,7 @@ frontend-...                1/1     Running   0          1m
 Check routes:
 
 ```bash
-kubectl get routes -n 2024-hex-dashboard
+kubectl get routes -n ostrea
 ```
 
 Test API:
@@ -112,13 +112,13 @@ curl -s http://localhost:5173/api/metadata | head -c 100
 Remove Helm-deployed resources (keeps namespace and secret for redeployment):
 
 ```bash
-helm template oysters ./helm/ostrea | kubectl delete --namespace 2024-hex-dashboard -f -
+helm template ostrea ./helm/ostrea | kubectl delete --namespace ostrea -f -
 ```
 
 Delete the namespace (removes all resources including secret):
 
 ```bash
-kubectl delete namespace 2024-hex-dashboard
+kubectl delete namespace ostrea
 ```
 
 To fully tear down MicroShift, see [microshift-setup.md](microshift-setup.md#cleanup).

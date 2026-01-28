@@ -31,7 +31,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: db-init
-          image: {{ .Values.registry }}2024-hex-dashboard-db-init:latest
+          image: {{ .Values.registry }}ostrea-db-init:latest
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
