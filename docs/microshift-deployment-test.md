@@ -24,7 +24,7 @@ Build the project images:
 ```bash
 docker build -t localhost:5001/2024-hex-dashboard-api:latest ./api
 docker build -t localhost:5001/2024-hex-dashboard-frontend:latest ./frontend
-docker build -t localhost:5001/2024-hex-dashboard-db-init:latest ./database/init
+docker build -t localhost:5001/2024-hex-dashboard-db-init:latest -f database/init/Dockerfile ./database
 ```
 
 Push to registry:
