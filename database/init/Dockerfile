@@ -1,4 +1,4 @@
-FROM condaforge/miniforge3:25.11.0-1
+FROM condaforge/miniforge3:25.3.0-3
 
 WORKDIR /app
 
@@ -28,11 +28,10 @@ RUN pip install --no-cache-dir -e .
 # Copy init script
 COPY init/init_db.py ./
 
-# Create non-root user and set ownership
-RUN useradd -m -u 1000 appuser && \
-    chown -R appuser:appuser /app
+# Use existing user (miniforge3 has UID 1000 already)
+RUN chown -R 1000:1000 /app
 
-USER appuser
+USER 1000
 
 # Run initialization
 CMD ["python", "init_db.py"]
