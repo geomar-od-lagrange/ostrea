@@ -22,6 +22,57 @@ docker run -d --name microshift --privileged \
 
 Wait for the container to initialize (~1-2 minutes).
 
+## Set Up Image Registry
+
+MicroShift uses CRI-O which requires a registry to pull images from (no direct image loading like kind). Run a registry container on a shared Docker network.
+
+Create the network and connect MicroShift to it:
+
+```bash
+docker network create microshift-net
+docker network connect microshift-net microshift
+```
+
+Start the registry container (using port 5001 since macOS uses 5000 for AirPlay):
+
+```bash
+docker run -d --name registry --network microshift-net -p 5001:5000 registry:2
+```
+
+Verify both sides can access it:
+
+```bash
+# From host
+curl -s http://localhost:5001/v2/_catalog
+
+# From MicroShift (uses container name as hostname)
+docker exec microshift curl -s http://registry:5000/v2/_catalog
+```
+
+Configure CRI-O to trust the insecure registry:
+
+```bash
+docker exec microshift bash -c 'cat >> /etc/containers/registries.conf <<EOF
+
+[[registry]]
+location = "registry:5000"
+insecure = true
+EOF'
+
+docker exec microshift systemctl restart crio
+```
+
+### Push Images to Registry
+
+Tag and push images from your host. Use `localhost:5001` for pushing:
+
+```bash
+docker tag myimage:latest localhost:5001/myimage:latest
+docker push localhost:5001/myimage:latest
+```
+
+In Kubernetes manifests, reference images as `registry:5000/myimage:latest` (how MicroShift sees the registry on the Docker network).
+
 ## Configure kubectl
 
 Create a temporary directory for the kubeconfig and note its path:
@@ -87,10 +138,16 @@ Core pods should be Running:
 
 ## Cleanup
 
-Stop and remove the container:
+Stop and remove the containers:
 
 ```bash
-docker stop microshift && docker rm microshift
+docker stop microshift registry && docker rm microshift registry
+```
+
+Remove the Docker network:
+
+```bash
+docker network rm microshift-net
 ```
 
 Remove the persistent volume:
