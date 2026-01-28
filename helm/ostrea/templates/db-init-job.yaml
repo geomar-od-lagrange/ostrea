@@ -19,12 +19,9 @@ spec:
                 echo "Waiting for database..."
                 sleep 2
               done
-          env:
-            - name: POSTGRES_USER
-              valueFrom:
-                configMapKeyRef:
-                  key: POSTGRES_USER
-                  name: ostrea-config
+          envFrom:
+            - configMapRef:
+                name: ostrea-config
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -38,21 +35,11 @@ spec:
           env:
             - name: DB_HOST
               value: db
-            - name: POSTGRES_DB
-              valueFrom:
-                configMapKeyRef:
-                  key: POSTGRES_DB
-                  name: ostrea-config
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: POSTGRES_PASSWORD
-                  name: db-secret
-            - name: POSTGRES_USER
-              valueFrom:
-                configMapKeyRef:
-                  key: POSTGRES_USER
-                  name: ostrea-config
+          envFrom:
+            - configMapRef:
+                name: ostrea-config
+            - secretRef:
+                name: db-secret
           resources:
             requests:
               cpu: 250m

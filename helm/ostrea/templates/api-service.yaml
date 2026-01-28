@@ -5,7 +5,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - name: "3000"
+    - name: http
       port: 3000
       targetPort: 3000
   selector:

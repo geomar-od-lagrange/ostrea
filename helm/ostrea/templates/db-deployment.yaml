@@ -21,22 +21,11 @@ spec:
           image: postgis/postgis:16-3.4
           securityContext:
             allowPrivilegeEscalation: false
-          env:
-            - name: POSTGRES_DB
-              valueFrom:
-                configMapKeyRef:
-                  key: POSTGRES_DB
-                  name: ostrea-config
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: POSTGRES_PASSWORD
-                  name: db-secret
-            - name: POSTGRES_USER
-              valueFrom:
-                configMapKeyRef:
-                  key: POSTGRES_USER
-                  name: ostrea-config
+          envFrom:
+            - configMapRef:
+                name: ostrea-config
+            - secretRef:
+                name: db-secret
           resources:
             requests:
               cpu: 500m
@@ -46,10 +35,7 @@ spec:
               memory: 2Gi
           livenessProbe:
             exec:
-              command:
-                - sh
-                - -c
-                - pg_isready -U "$POSTGRES_USER"
+              command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\""]
             failureThreshold: 5
             periodSeconds: 10
             timeoutSeconds: 5

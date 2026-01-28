@@ -29,6 +29,8 @@ spec:
             limits:
               cpu: 500m
               memory: 512Mi
+          # Writable dirs for nginx running as non-root (UID 101).
+          # Ensures compatibility with OpenShift arbitrary UID assignment.
           volumeMounts:
             - mountPath: /var/cache/nginx
               name: nginx-cache
