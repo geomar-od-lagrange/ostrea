@@ -25,7 +25,7 @@ spec:
         runAsUser: 101
         runAsGroup: 101
       containers:
-        - image: 2024_hex_dashboard-frontend:latest
+        - image: ${REGISTRY}2024-hex-dashboard-frontend:latest
           imagePullPolicy: IfNotPresent
           name: frontend
           securityContext:

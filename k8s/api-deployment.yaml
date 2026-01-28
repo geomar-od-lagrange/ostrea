@@ -43,7 +43,7 @@ spec:
                 configMapKeyRef:
                   key: POSTGRES_USER
                   name: env
-          image: 2024_hex_dashboard-api:latest
+          image: ${REGISTRY}2024-hex-dashboard-api:latest
           imagePullPolicy: IfNotPresent
           name: api
           resources:
