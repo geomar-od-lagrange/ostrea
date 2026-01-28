@@ -2,7 +2,7 @@
 
 Oyster Spatio-Temporal Dispersal Atlas - Visualization of simulated oyster larval dispersal connectivity in the North Sea.
 
-![Screenshot](images/oysters.png)
+![Screenshot](images/ostrea.png)
 
 ## Quick Start
 
