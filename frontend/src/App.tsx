@@ -5,6 +5,7 @@ import StaticMap from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import ControlPanel from './ControlPanel';
 import InfoBox from './InfoBox';
+import { theme } from './theme';
 
 const MAP_STYLE = 'https://demotiles.maplibre.org/style.json';
 
@@ -48,9 +49,9 @@ function App() {
   // TODO: Consolidate state management into single reducer or state object
   // Current fragmented state should be refactored for better maintainability
   
-  const [isAQCHighlighted, setAQC] = useState<boolean>(false);
-  const [isRestHighlighted, setRest] = useState<boolean>(false);
-  const [isDiseaseHighlighted, setDisease] = useState<boolean>(false);
+  const [isAQCHighlighted, setAQC] = useState<boolean>(true);
+  const [isRestHighlighted, setRest] = useState<boolean>(true);
+  const [isDiseaseHighlighted, setDisease] = useState<boolean>(true);
   
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [clickIds, setClickIds] = useState<number[]>([]);
@@ -92,7 +93,7 @@ function App() {
     longitude: 1,
     latitude: 55.0,
     zoom: 5,
-    pitch: 0,
+    pitch: 45,
     bearing: 0
   };
 
@@ -142,55 +143,72 @@ function App() {
           filled: true,
           stroked: true,
           pickable: true,
-          lineWidthMinPixels: 2,
+          lineWidthMinPixels: 3,
+          extruded: true,
+          wireframe: true,
 
           updateTriggers: {
-            getFillColor: [hoveredId, weightMap],
-            getLineColor: [clickIds, isAQCHighlighted, isRestHighlighted, isDiseaseHighlighted]
+            getFillColor: [hoveredId, weightMap, clickIds, isAQCHighlighted, isRestHighlighted, isDiseaseHighlighted],
+            getElevation: [weightMap, clickIds, isAQCHighlighted, isRestHighlighted, isDiseaseHighlighted]
+          },
+
+          getElevation: (d: any) => {
+            const id = d.properties.id;
+            const data = metadata?.[id];
+
+            // Highlighted hexes get base elevation
+            const isHighlighted = data && (
+              (isAQCHighlighted && data.aqc > 0) ||
+              (isRestHighlighted && data.rest > 0) ||
+              (isDiseaseHighlighted && data.disease > 0)
+            ) || clickIds.includes(id);
+
+            const baseElevation = isHighlighted ? theme.elevation.highlighted : theme.elevation.default;
+
+            const w = weightMap.get(id);
+            return w !== undefined ? theme.elevation.getElevation(w) + baseElevation : baseElevation;
           },
 
           getFillColor: (d: any) => {
             const id: number = d.properties.id;
 
-            if (id === hoveredId) return [255, 255, 0, 255];
+            if (id === hoveredId) return theme.hex.hovered;
+
+            // Check for highlights - highlight colors take priority over selected
+            const data = metadata?.[id];
+            if (data) {
+              const highlightColors: number[][] = [];
+              if (isAQCHighlighted && data.aqc > 0) {
+                highlightColors.push([...theme.highlight.aquaculture]);
+              }
+              if (isRestHighlighted && data.rest > 0) {
+                highlightColors.push([...theme.highlight.restoration]);
+              }
+              if (isDiseaseHighlighted && data.disease > 0) {
+                highlightColors.push([...theme.highlight.disease]);
+              }
+              // Use highlight colors if any, otherwise use selected color
+              if (highlightColors.length > 0) {
+                return highlightColors[0].map((_, i) =>
+                  Math.round(highlightColors.reduce((sum, c) => sum + c[i], 0) / highlightColors.length)
+                ) as [number, number, number, number];
+              }
+            }
+            // Selected color only if no highlight colors apply
+            if (clickIds.includes(id)) {
+              return [...theme.highlight.selected] as [number, number, number, number];
+            }
 
             const w = weightMap.get(id);
             if (w !== undefined) {
-              const green = Math.min(255, Math.round(w * 255));
-              return [0, green, 0, 255];
+              return theme.hex.getWeightColor(w);
             }
-            return [0, 0, 255, 100];
+            return theme.hex.default;
           },
 
-          getLineColor: (d: any) => {
-            const id = d.properties.id;
-            if (!metadata) return [128, 128, 128, 100];
-            const data = metadata[id];
-            if (!data) return [128, 128, 128, 100];
+          getLineColor: theme.stroke.default,
+          getLineWidth: 1,
 
-            const colors: number[][] = [];
-
-            if (isAQCHighlighted && data.aqc > 0) {
-              colors.push([255, 255, 0, 255]);   // yellow
-            }
-            if (isRestHighlighted && data.rest > 0) {
-              colors.push([64, 224, 208, 255]);  // turquoise
-            }
-            if (isDiseaseHighlighted && data.disease > 0) {
-              colors.push([255, 0, 0, 255]);     // red
-            }
-            if (clickIds.includes(id)) {
-              colors.push([255, 128, 0, 255]);   // orange
-            } 
-
-            if (colors.length === 0) return [0, 0, 128, 30]; // default
-              // Blend
-            return colors[0].map((_, i) =>
-              Math.round(colors.reduce((sum, c) => sum + c[i], 0) / colors.length)
-            );
-          },
-
-          
           onHover: (info: any) => {
             setHoveredId(info.object ? info.object.properties.id : null);
 
@@ -256,11 +274,11 @@ function App() {
           top: 10,
           left: 10,
           zIndex: 1,
-          background: 'rgba(0,0,0,0.9)',
+          background: theme.ui.controlPanel.background,
           padding: '8px',
           borderRadius: '4px',
           boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-          color: '#fff'
+          color: theme.ui.controlPanel.text
         }}
       >
         <ControlPanel
@@ -284,11 +302,11 @@ function App() {
           bottom: 10,
           left: 10,
           zIndex: 1,
-          background: 'rgba(220,220,220,0.95)',
+          background: theme.ui.infoBox.background,
           padding: '8px',
           borderRadius: '4px',
           boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-          color: '#333'
+          color: theme.ui.infoBox.text
         }}
       >
         <InfoBox />
@@ -302,8 +320,8 @@ function App() {
           top: tooltip.y + 10,
           zIndex: 2,
           pointerEvents: "none",
-          background: "rgba(0,0,0,0.75)",
-          color: "#fff",
+          background: theme.ui.tooltip.background,
+          color: theme.ui.tooltip.text,
           padding: "6px 8px",
           borderRadius: "4px",
           fontSize: 12,
