@@ -145,11 +145,10 @@ function App() {
           pickable: true,
           lineWidthMinPixels: 3,
           extruded: true,
+          wireframe: true,
 
           updateTriggers: {
             getFillColor: [hoveredId, weightMap, clickIds, isAQCHighlighted, isRestHighlighted, isDiseaseHighlighted],
-            getLineColor: [clickIds, isAQCHighlighted, isRestHighlighted, isDiseaseHighlighted],
-            getLineWidth: [clickIds, isAQCHighlighted, isRestHighlighted, isDiseaseHighlighted],
             getElevation: [weightMap, clickIds, isAQCHighlighted, isRestHighlighted, isDiseaseHighlighted]
           },
 
@@ -207,50 +206,8 @@ function App() {
             return theme.hex.default;
           },
 
-          getLineColor: (d: any) => {
-            const id = d.properties.id;
-            // Selected hexes always get orange outline (top indicator)
-            if (clickIds.includes(id)) {
-              return [...theme.highlight.selected];
-            }
-            if (!metadata) return theme.stroke.noMetadata;
-            const data = metadata[id];
-            if (!data) return theme.stroke.noMetadata;
-
-            const highlightColors: number[][] = [];
-
-            if (isAQCHighlighted && data.aqc > 0) {
-              highlightColors.push([...theme.highlight.aquaculture]);
-            }
-            if (isRestHighlighted && data.rest > 0) {
-              highlightColors.push([...theme.highlight.restoration]);
-            }
-            if (isDiseaseHighlighted && data.disease > 0) {
-              highlightColors.push([...theme.highlight.disease]);
-            }
-
-            if (highlightColors.length > 0) {
-              return highlightColors[0].map((_, i) =>
-                Math.round(highlightColors.reduce((sum, c) => sum + c[i], 0) / highlightColors.length)
-              );
-            }
-            return theme.stroke.default;
-          },
-
-          getLineWidth: (d: any) => {
-            const id = d.properties.id;
-            if (!metadata) return 1;
-            const data = metadata[id];
-            if (!data) return 1;
-
-            const isHighlighted =
-              (isAQCHighlighted && data.aqc > 0) ||
-              (isRestHighlighted && data.rest > 0) ||
-              (isDiseaseHighlighted && data.disease > 0) ||
-              clickIds.includes(id);
-
-            return isHighlighted ? 5 : 1;
-          },
+          getLineColor: theme.stroke.default,
+          getLineWidth: 1,
 
           onHover: (info: any) => {
             setHoveredId(info.object ? info.object.properties.id : null);
