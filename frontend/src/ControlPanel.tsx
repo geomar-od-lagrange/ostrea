@@ -95,8 +95,8 @@ export default function ControlPanel({
         ✕
       </button>
     </div>
-    <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
-      <div style={{ marginBottom: 12 }}>
+    <fieldset className="control-panel-fieldset">
+      <div className="control-panel-clear">
         <button
           type="button"
           onClick={() => clearHex?.({ depths: selectedDepths, times: selectedTimes })}
@@ -106,89 +106,82 @@ export default function ControlPanel({
         </button>
       </div>
 
-      <div style={{ fontWeight: 600, marginBottom: 8 }}>Depth</div>
-      {depths.map(d => (
-        <label
-          key={d}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            cursor: "pointer",
-            marginBottom: 4,
-          }}
-        >
-          <input
-            type="checkbox"
-            name="depth"
-            value={d}
-            checked={selectedDepths.includes(d)}
-            onChange={handleDepthChange}
-            style={{ marginRight: 6 }}
-          />
-          {d}
-        </label>
-      ))}
+      <div className="control-panel-section">
+        <div className="control-panel-section-label">Depth</div>
+        <div className="control-panel-section-options">
+          {depths.map(d => (
+            <label key={d} className="control-panel-option">
+              <input
+                type="checkbox"
+                name="depth"
+                value={d}
+                checked={selectedDepths.includes(d)}
+                onChange={handleDepthChange}
+              />
+              {d}
+            </label>
+          ))}
+        </div>
+      </div>
 
-      <div style={{ fontWeight: 600, marginTop: 12, marginBottom: 8 }}>Time range</div>
-      {times.map(t => (
-        <label
-          key={t}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            cursor: "pointer",
-            marginBottom: 4,
-          }}
-        >
-          <input
-            type="checkbox"
-            name="time"
-            value={t}
-            checked={selectedTimes.includes(t)}
-            onChange={handleTimeChange}
-            style={{ marginRight: 6 }}
-          />
-          {t}
-        </label>
-      ))}
+      <div className="control-panel-section">
+        <div className="control-panel-section-label">Time range</div>
+        <div className="control-panel-section-options">
+          {times.map(t => (
+            <label key={t} className="control-panel-option">
+              <input
+                type="checkbox"
+                name="time"
+                value={t}
+                checked={selectedTimes.includes(t)}
+                onChange={handleTimeChange}
+              />
+              {t}
+            </label>
+          ))}
+        </div>
+      </div>
 
-      <div style={{ fontWeight: 600, marginTop: 12, marginBottom: 8 }}>Highlights</div>
-      <label style={{ display: "flex", alignItems: "center", cursor: "pointer", marginBottom: 4 }}>
-        <input
-          type="checkbox"
-          name="aqc"
-          checked={isAQCHighlighted}
-          onChange={(e) => onAQCChange(e.target.checked)}
-          style={{ marginRight: 6, accentColor: theme.colors.aquaculture }}
-        />
-        <span style={{ display: "inline-block", width: 12, height: 12, backgroundColor: theme.colors.aquaculture, marginRight: 6, borderRadius: 2 }} />
-        Aquacultures
-      </label>
+      <div className="control-panel-section">
+        <div className="control-panel-section-label">Highlights</div>
+        <div className="control-panel-section-options">
+          <label className="control-panel-option">
+            <input
+              type="checkbox"
+              name="aqc"
+              checked={isAQCHighlighted}
+              onChange={(e) => onAQCChange(e.target.checked)}
+              style={{ accentColor: theme.colors.aquaculture }}
+            />
+            <span className="control-panel-color-swatch" style={{ backgroundColor: theme.colors.aquaculture }} />
+            Aquacultures
+          </label>
 
-      <label style={{ display: "flex", alignItems: "center", cursor: "pointer", marginBottom: 4 }}>
-        <input
-          type="checkbox"
-          name="rest"
-          checked={isRestHighlighted}
-          onChange={(e) => onRestChange(e.target.checked)}
-          style={{ marginRight: 6, accentColor: theme.colors.restoration }}
-        />
-        <span style={{ display: "inline-block", width: 12, height: 12, backgroundColor: theme.colors.restoration, marginRight: 6, borderRadius: 2 }} />
-        Restoration
-      </label>
+          <label className="control-panel-option">
+            <input
+              type="checkbox"
+              name="rest"
+              checked={isRestHighlighted}
+              onChange={(e) => onRestChange(e.target.checked)}
+              style={{ accentColor: theme.colors.restoration }}
+            />
+            <span className="control-panel-color-swatch" style={{ backgroundColor: theme.colors.restoration }} />
+            Restoration
+          </label>
 
-      <label style={{ display: "flex", alignItems: "center", cursor: "pointer", marginBottom: 4 }}>
-        <input
-          type="checkbox"
-          name="disease"
-          checked={isDiseaseHighlighted}
-          onChange={(e) => onDiseaseChange(e.target.checked)}
-          style={{ marginRight: 6, accentColor: theme.colors.disease }}
-        />
-        <span style={{ display: "inline-block", width: 12, height: 12, backgroundColor: theme.colors.disease, marginRight: 6, borderRadius: 2 }} />
-        Outbreaks
-      </label>
-      
+          <label className="control-panel-option">
+            <input
+              type="checkbox"
+              name="disease"
+              checked={isDiseaseHighlighted}
+              onChange={(e) => onDiseaseChange(e.target.checked)}
+              style={{ accentColor: theme.colors.disease }}
+            />
+            <span className="control-panel-color-swatch" style={{ backgroundColor: theme.colors.disease }} />
+            Outbreaks
+          </label>
+        </div>
+      </div>
     </fieldset>
     </div>
   );

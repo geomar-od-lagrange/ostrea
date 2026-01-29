@@ -157,3 +157,89 @@ button:focus-visible {
     padding: 8px 12px;
   }
 }
+
+/* Control panel structure */
+.control-panel-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.control-panel-clear {
+  margin-bottom: 12px;
+}
+
+.control-panel-section {
+  margin-bottom: 12px;
+}
+
+.control-panel-section-label {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.control-panel-section-options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.control-panel-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.control-panel-option input {
+  margin-right: 6px;
+}
+
+.control-panel-color-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  border-radius: 2px;
+}
+
+/* Vertical responsive: short viewport */
+@media (max-height: 820px) {
+  .control-panel-container {
+    max-width: none;
+  }
+
+  .control-panel-clear {
+    margin-bottom: 8px;
+  }
+
+  .control-panel-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .control-panel-section-label {
+    margin-bottom: 0;
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+
+  .control-panel-section-options {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 16px;
+  }
+}
+
+/* Short + narrow: hide section labels, keep options inline */
+@media (max-height: 820px) and (max-width: 700px) {
+  .control-panel-section-label {
+    display: none;
+  }
+
+  .control-panel-section-options {
+    flex-wrap: nowrap;
+  }
+}
+
