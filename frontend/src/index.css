@@ -66,3 +66,85 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Panel containers */
+.control-panel-container {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.info-box-container {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 1;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.info-box-content {
+  width: 500px;
+  max-width: calc(100vw - 40px);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Responsive: tablets and smaller */
+@media (max-width: 768px) {
+  .control-panel-container {
+    max-width: calc(100vw - 20px);
+    font-size: 14px;
+  }
+
+  .info-box-container {
+    max-width: calc(100vw - 20px);
+  }
+
+  .info-box-content {
+    width: auto;
+    max-width: calc(100vw - 40px);
+    max-height: 200px;
+  }
+}
+
+/* Responsive: phones */
+@media (max-width: 480px) {
+  .control-panel-container {
+    top: 5px;
+    left: 5px;
+    padding: 6px;
+    font-size: 13px;
+  }
+
+  .info-box-container {
+    bottom: 5px;
+    left: 5px;
+    padding: 6px;
+  }
+
+  .info-box-content {
+    max-width: calc(100vw - 24px);
+    max-height: 150px;
+    font-size: 11px;
+  }
+
+  /* Larger touch targets for checkboxes */
+  .control-panel-container input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+
+  .control-panel-container label {
+    padding: 4px 0;
+  }
+
+  .control-panel-container button {
+    padding: 8px 12px;
+  }
+}

@@ -35,7 +35,7 @@ export default function ControlPanel({
   isDiseaseHighlighted,
   onDiseaseChange
 }: ControlPanelProps) {
-  const [collapsed, setCollapsed] = React.useState(false);
+  const [collapsed, setCollapsed] = React.useState(() => window.innerWidth <= 480);
 
   const handleDepthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onDepthChange(toggle(selectedDepths, e.target.value));

@@ -6,7 +6,7 @@ import "katex/dist/katex.min.css";
 import infoText from "./info.md?raw";
 
 export default function InfoBox() {
-  const [collapsed, setCollapsed] = React.useState(false);
+  const [collapsed, setCollapsed] = React.useState(() => window.innerWidth <= 480);
 
   if (collapsed) {
     return (
@@ -28,7 +28,7 @@ export default function InfoBox() {
   }
 
   return (
-    <div style={{ width: 500, maxHeight: 300, overflowY: "auto" }}>
+    <div className="info-box-content">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1em" }}>
         <div style={{ fontSize: 12, lineHeight: 1.5, color: "#333" }}>
           <Markdown
