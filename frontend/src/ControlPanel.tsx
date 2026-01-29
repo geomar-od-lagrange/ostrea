@@ -35,6 +35,8 @@ export default function ControlPanel({
   isDiseaseHighlighted,
   onDiseaseChange
 }: ControlPanelProps) {
+  const [collapsed, setCollapsed] = React.useState(false);
+
   const handleDepthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onDepthChange(toggle(selectedDepths, e.target.value));
   };
@@ -42,10 +44,29 @@ export default function ControlPanel({
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onTimeChange(toggle(selectedTimes, e.target.value));
   };
-  
+
   const stopScroll = (e: React.WheelEvent | React.TouchEvent) => {
     e.preventDefault();
   };
+
+  if (collapsed) {
+    return (
+      <button
+        onClick={() => setCollapsed(false)}
+        style={{
+          background: "transparent",
+          border: "none",
+          color: theme.ui.controlPanel.text,
+          fontSize: 12,
+          cursor: "pointer",
+          padding: "2px 0",
+        }}
+        title="Show controls"
+      >
+        Controls
+      </button>
+    );
+  }
 
   return (
     <div
@@ -56,6 +77,24 @@ export default function ControlPanel({
         maxHeight: "100%",
       }}
     >
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+      <span style={{ fontWeight: 600 }}>Controls</span>
+      <button
+        onClick={() => setCollapsed(true)}
+        style={{
+          background: "transparent",
+          border: "none",
+          color: theme.ui.controlPanel.text,
+          fontSize: 16,
+          cursor: "pointer",
+          padding: 0,
+          flexShrink: 0,
+        }}
+        title="Collapse"
+      >
+        ✕
+      </button>
+    </div>
     <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
       <div style={{ marginBottom: 12 }}>
         <button
