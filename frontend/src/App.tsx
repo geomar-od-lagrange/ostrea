@@ -134,130 +134,174 @@ function App() {
     [connections]
   );
 
+  // Helper: add z-coordinate to all positions in a geometry
+  const addZToGeometry = (geometry: any, z: number): any => {
+    const addZ = (coords: any): any => {
+      if (typeof coords[0] === 'number') {
+        // It's a position [lon, lat] or [lon, lat, z]
+        return [coords[0], coords[1], z];
+      }
+      return coords.map(addZ);
+    };
+    return { ...geometry, coordinates: addZ(geometry.coordinates) };
+  };
 
+  // Helper: create feature with z-coordinate
+  const featureWithZ = (f: Feature, z: number): Feature => ({
+    ...f,
+    geometry: addZToGeometry(f.geometry, z),
+  });
+
+  // Calculate connectivity height for a hex
+  const getConnHeight = (id: number) => {
+    const w = weightMap.get(id);
+    return w !== undefined ? theme.elevation.getElevation(w) : 0;
+  };
+
+  // Common layer properties
+  const commonLayerProps = {
+    filled: true,
+    stroked: true,
+    extruded: true,
+    wireframe: true,
+    getLineColor: theme.stroke.default,
+    getLineWidth: 1,
+    lineWidthMinPixels: 3,
+  };
+
+  // Interaction handlers for base layer
+  const interactionHandlers = {
+    pickable: true,
+    onHover: (info: any) => {
+      setHoveredId(info.object ? info.object.properties.id : null);
+      if (info.object) {
+        if (!metadata) return;
+        const escapeHtml = (str: string | number) =>
+          String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const data = metadata[info.object.properties.id];
+        if (!data) return;
+        const weight = weightMap.get(info.object.properties.id);
+        setTooltip({
+          x: info.x,
+          y: info.y,
+          content: [
+            `Id: ${escapeHtml(data.id)}`,
+            `lon: ${escapeHtml(data.lon.toFixed(2))}`,
+            `lat: ${escapeHtml(data.lat.toFixed(2))}`,
+            `depth: ${escapeHtml(data.depth)}`,
+            `disease: ${escapeHtml(data.disease)}`,
+            `rest: ${escapeHtml(data.rest)}`,
+            `aqc: ${escapeHtml(data.aqc)}`,
+            `pop: ${escapeHtml(data.pop)}`,
+            ...(weight !== undefined ? [`wgt: ${escapeHtml(weight.toExponential(2))}`] : []),
+          ].join('\n'),
+        });
+      } else {
+        setHoveredId(null);
+        setTooltip(null);
+      }
+    },
+    onClick: (info: any) => {
+      if (!info.object) return;
+      if (clickIds.indexOf(info.object.properties.id) === -1) {
+        setClickIds([...clickIds, info.object.properties.id]);
+      } else {
+        setClickIds(prev => prev.filter(x => x !== info.object.properties.id));
+      }
+    },
+  };
+
+  const catHeight = theme.elevation.categoryHeight;
+
+  // Build layers: Connectivity at base, then REST, AQC, OUTBREAK stacked on top
   const layers = feature
     ? [
+        // Layer 1: Base/Connectivity - z=0, height=weight-based or default
         new GeoJsonLayer({
-          id: 'geojson-layer',
+          id: 'connectivity-layer',
           data: feature,
-          filled: true,
-          stroked: true,
-          pickable: true,
-          lineWidthMinPixels: 3,
-          extruded: true,
-          wireframe: true,
-
+          ...commonLayerProps,
+          ...interactionHandlers,
           updateTriggers: {
-            getFillColor: [hoveredId, weightMap, clickIds, isAQCHighlighted, isRestHighlighted, isDiseaseHighlighted],
-            getElevation: [weightMap, clickIds, isAQCHighlighted, isRestHighlighted, isDiseaseHighlighted]
+            getFillColor: [hoveredId, weightMap, clickIds],
+            getElevation: [weightMap, clickIds],
           },
-
           getElevation: (d: any) => {
             const id = d.properties.id;
-            const data = metadata?.[id];
-
-            // Highlighted hexes get base elevation
-            const isHighlighted = data && (
-              (isAQCHighlighted && data.aqc > 0) ||
-              (isRestHighlighted && data.rest > 0) ||
-              (isDiseaseHighlighted && data.disease > 0)
-            ) || clickIds.includes(id);
-
-            const baseElevation = isHighlighted ? theme.elevation.highlighted : theme.elevation.default;
-
             const w = weightMap.get(id);
-            return w !== undefined ? theme.elevation.getElevation(w) + baseElevation : baseElevation;
+            const isSelected = clickIds.includes(id);
+            if (w !== undefined) return theme.elevation.getElevation(w);
+            if (isSelected) return catHeight; // Give selected hexes some height
+            return theme.elevation.default;
           },
-
           getFillColor: (d: any) => {
-            const id: number = d.properties.id;
-
+            const id = d.properties.id;
             if (id === hoveredId) return theme.hex.hovered;
-
-            // Check for highlights - highlight colors take priority over selected
-            const data = metadata?.[id];
-            if (data) {
-              const highlightColors: number[][] = [];
-              if (isAQCHighlighted && data.aqc > 0) {
-                highlightColors.push([...theme.highlight.aquaculture]);
-              }
-              if (isRestHighlighted && data.rest > 0) {
-                highlightColors.push([...theme.highlight.restoration]);
-              }
-              if (isDiseaseHighlighted && data.disease > 0) {
-                highlightColors.push([...theme.highlight.disease]);
-              }
-              // Use highlight colors if any, otherwise use selected color
-              if (highlightColors.length > 0) {
-                return highlightColors[0].map((_, i) =>
-                  Math.round(highlightColors.reduce((sum, c) => sum + c[i], 0) / highlightColors.length)
-                ) as [number, number, number, number];
-              }
-            }
-            // Selected color only if no highlight colors apply
-            if (clickIds.includes(id)) {
-              return [...theme.highlight.selected] as [number, number, number, number];
-            }
-
+            if (clickIds.includes(id)) return [...theme.highlight.selected] as [number, number, number, number];
             const w = weightMap.get(id);
-            if (w !== undefined) {
-              return theme.hex.getWeightColor(w);
-            }
+            if (w !== undefined) return theme.hex.getWeightColor(w);
             return theme.hex.default;
           },
+        }),
 
-          getLineColor: theme.stroke.default,
-          getLineWidth: 1,
-
-          onHover: (info: any) => {
-            setHoveredId(info.object ? info.object.properties.id : null);
-
-            if (info.object) {
-              if (!metadata) return;
-
-              // Helper function to escape HTML
-              const escapeHtml = (str: string | number) =>
-                String(str)
-                  .replace(/&/g, '&amp;')
-                  .replace(/</g, '&lt;')
-                  .replace(/>/g, '&gt;')
-                  .replace(/"/g, '&quot;');
-
-              const data = metadata[info.object.properties.id];
-              if (!data) return;
-              setHoveredId(info.object.properties.id);
-              const weight = weightMap.get(info.object.properties.id);
-              setTooltip({
-                x: info.x,
-                y: info.y,
-                content: [
-                  `Id: ${escapeHtml(data.id)}`,
-                  `lon: ${escapeHtml(data.lon.toFixed(2))}`,
-                  `lat: ${escapeHtml(data.lat.toFixed(2))}`,
-                  `depth: ${escapeHtml(data.depth)}`,
-                  `disease: ${escapeHtml(data.disease)}`,
-                  `rest: ${escapeHtml(data.rest)}`,
-                  `aqc: ${escapeHtml(data.aqc)}`,
-                  `pop: ${escapeHtml(data.pop)}`,
-                  ...(weight !== undefined ? [`wgt: ${escapeHtml(weight.toExponential(2))}`] : []),
-                ].join('\n'),
-              });
-            } else {
-              setHoveredId(null);
-              setTooltip(null);
-            }
+        // Layer 2: REST - stacked on top of connectivity
+        ...(isRestHighlighted && metadata ? [new GeoJsonLayer({
+          id: 'rest-layer',
+          data: {
+            type: 'FeatureCollection',
+            features: feature.features
+              .filter((f: Feature) => metadata[f.properties.id]?.rest > 0)
+              .map((f: Feature) => featureWithZ(f, getConnHeight(f.properties.id))),
           },
+          ...commonLayerProps,
+          pickable: false,
+          updateTriggers: { data: [weightMap], getFillColor: [hoveredId] },
+          getElevation: catHeight,
+          getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.restoration,
+        })] : []),
 
-          onClick: (info: any) => {
-            if (!info.object) return;
-            if (clickIds.indexOf(info.object.properties.id) === -1) {
-              setClickIds([...clickIds, info.object.properties.id]);
-            }
-            else {
-              setClickIds(prev => prev.filter(x => x !== info.object.properties.id));
-            }
-          }
-        })
+        // Layer 3: AQC - stacked on top of REST
+        ...(isAQCHighlighted && metadata ? [new GeoJsonLayer({
+          id: 'aqc-layer',
+          data: {
+            type: 'FeatureCollection',
+            features: feature.features
+              .filter((f: Feature) => metadata[f.properties.id]?.aqc > 0)
+              .map((f: Feature) => {
+                const id = f.properties.id;
+                const baseZ = getConnHeight(id) + (isRestHighlighted && metadata[id]?.rest > 0 ? catHeight : 0);
+                return featureWithZ(f, baseZ);
+              }),
+          },
+          ...commonLayerProps,
+          pickable: false,
+          updateTriggers: { data: [weightMap, isRestHighlighted], getFillColor: [hoveredId] },
+          getElevation: catHeight,
+          getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.aquaculture,
+        })] : []),
+
+        // Layer 4: OUTBREAK/Disease - stacked on top of AQC
+        ...(isDiseaseHighlighted && metadata ? [new GeoJsonLayer({
+          id: 'disease-layer',
+          data: {
+            type: 'FeatureCollection',
+            features: feature.features
+              .filter((f: Feature) => metadata[f.properties.id]?.disease > 0)
+              .map((f: Feature) => {
+                const id = f.properties.id;
+                const data = metadata[id];
+                const baseZ = getConnHeight(id)
+                  + (isRestHighlighted && data?.rest > 0 ? catHeight : 0)
+                  + (isAQCHighlighted && data?.aqc > 0 ? catHeight : 0);
+                return featureWithZ(f, baseZ);
+              }),
+          },
+          ...commonLayerProps,
+          pickable: false,
+          updateTriggers: { data: [weightMap, isRestHighlighted, isAQCHighlighted], getFillColor: [hoveredId] },
+          getElevation: catHeight,
+          getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.disease,
+        })] : []),
       ]
     : [];
 
