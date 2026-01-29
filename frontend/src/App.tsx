@@ -323,15 +323,9 @@ function App() {
       </DeckGL>
 
       <div
+        className="control-panel-container"
         style={{
-          position: 'absolute',
-          top: 10,
-          left: 10,
-          zIndex: 1,
           background: theme.ui.controlPanel.background,
-          padding: '8px',
-          borderRadius: '4px',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
           color: theme.ui.controlPanel.text
         }}
       >
@@ -351,15 +345,9 @@ function App() {
       </div>
 
       <div
+        className="info-box-container"
         style={{
-          position: 'absolute',
-          bottom: 10,
-          left: 10,
-          zIndex: 1,
           background: theme.ui.infoBox.background,
-          padding: '8px',
-          borderRadius: '4px',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
           color: theme.ui.infoBox.text
         }}
       >

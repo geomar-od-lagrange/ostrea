@@ -66,3 +66,180 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Panel containers */
+.control-panel-container {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.info-box-container {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 1;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.info-box-wrapper {
+  position: relative;
+  width: calc(100vw - 40px);
+  max-width: 500px;
+}
+
+.info-box-content {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 20px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #333;
+}
+
+/* Responsive: tablets and smaller */
+@media (max-width: 768px) {
+  .control-panel-container {
+    max-width: calc(100vw - 20px);
+    font-size: 14px;
+  }
+
+  .info-box-container {
+    max-width: calc(100vw - 20px);
+  }
+
+  .info-box-content {
+    max-height: 200px;
+  }
+}
+
+/* Responsive: phones */
+@media (max-width: 480px) {
+  .control-panel-container {
+    top: 5px;
+    left: 5px;
+    padding: 6px;
+    font-size: 13px;
+  }
+
+  .info-box-container {
+    bottom: 5px;
+    left: 5px;
+    padding: 6px;
+  }
+
+  .info-box-wrapper {
+    max-width: calc(100vw - 24px);
+  }
+
+  .info-box-content {
+    max-height: 150px;
+    font-size: 11px;
+  }
+
+  /* Larger touch targets for checkboxes */
+  .control-panel-container input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+
+  .control-panel-container label {
+    padding: 4px 0;
+  }
+
+  .control-panel-container button {
+    padding: 8px 12px;
+  }
+}
+
+/* Control panel structure */
+.control-panel-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.control-panel-clear {
+  margin-bottom: 12px;
+}
+
+.control-panel-section {
+  margin-bottom: 12px;
+}
+
+.control-panel-section-label {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.control-panel-section-options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.control-panel-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.control-panel-option input {
+  margin-right: 6px;
+}
+
+.control-panel-color-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  border-radius: 2px;
+}
+
+/* Vertical responsive: short viewport */
+@media (max-height: 820px) {
+  .control-panel-container {
+    max-width: none;
+  }
+
+  .control-panel-clear {
+    margin-bottom: 8px;
+  }
+
+  .control-panel-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .control-panel-section-label {
+    margin-bottom: 0;
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+
+  .control-panel-section-options {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 16px;
+  }
+}
+
+/* Short + narrow: hide section labels, keep options inline */
+@media (max-height: 820px) and (max-width: 700px) {
+  .control-panel-section-label {
+    display: none;
+  }
+
+  .control-panel-section-options {
+    flex-wrap: nowrap;
+  }
+}
+

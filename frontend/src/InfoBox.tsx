@@ -6,7 +6,7 @@ import "katex/dist/katex.min.css";
 import infoText from "./info.md?raw";
 
 export default function InfoBox() {
-  const [collapsed, setCollapsed] = React.useState(false);
+  const [collapsed, setCollapsed] = React.useState(() => window.innerWidth <= 480);
 
   if (collapsed) {
     return (
@@ -28,36 +28,38 @@ export default function InfoBox() {
   }
 
   return (
-    <div style={{ width: 500, maxHeight: 300, overflowY: "auto" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1em" }}>
-        <div style={{ fontSize: 12, lineHeight: 1.5, color: "#333" }}>
-          <Markdown
-            remarkPlugins={[remarkMath]}
-            rehypePlugins={[rehypeKatex]}
-            components={{
-              img: ({ ...props }) => (
-                <img {...props} style={{ maxWidth: "70%", height: "auto", display: "block" }} />
-              ),
-            }}
-          >
-            {infoText}
-          </Markdown>
-        </div>
-        <button
-          onClick={() => setCollapsed(true)}
-          style={{
-            background: "transparent",
-            border: "none",
-            color: "#333",
-            fontSize: 16,
-            cursor: "pointer",
-            padding: 0,
-            flexShrink: 0,
+    <div className="info-box-wrapper">
+      <button
+        onClick={() => setCollapsed(true)}
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 16,
+          background: "rgba(220, 220, 220, 0.9)",
+          border: "none",
+          color: "#333",
+          fontSize: 14,
+          cursor: "pointer",
+          padding: "7px 12px",
+          borderRadius: 4,
+          zIndex: 1,
+        }}
+        title="Collapse"
+      >
+        ✕
+      </button>
+      <div className="info-box-content">
+        <Markdown
+          remarkPlugins={[remarkMath]}
+          rehypePlugins={[rehypeKatex]}
+          components={{
+            img: ({ ...props }) => (
+              <img {...props} style={{ maxWidth: "70%", height: "auto", display: "block" }} />
+            ),
           }}
-          title="Collapse"
         >
-          ✕
-        </button>
+          {infoText}
+        </Markdown>
       </div>
     </div>
   );
