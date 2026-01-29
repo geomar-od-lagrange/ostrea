@@ -226,17 +226,21 @@ function App() {
               const data = metadata[info.object.properties.id];
               if (!data) return;
               setHoveredId(info.object.properties.id);
+              const weight = weightMap.get(info.object.properties.id);
               setTooltip({
                 x: info.x,
                 y: info.y,
-                content: `Id: ${escapeHtml(data.id)}
-                  lon: ${escapeHtml(data.lon)}
-                  lat: ${escapeHtml(data.lat)}
-                  Depth: ${escapeHtml(data.depth)}
-                  Disease: ${escapeHtml(data.disease)}
-                  rest: ${escapeHtml(data.rest)}
-                  aqc: ${escapeHtml(data.aqc)}
-                  pop: ${escapeHtml(data.pop)}`,
+                content: [
+                  `Id: ${escapeHtml(data.id)}`,
+                  `lon: ${escapeHtml(data.lon.toFixed(2))}`,
+                  `lat: ${escapeHtml(data.lat.toFixed(2))}`,
+                  `depth: ${escapeHtml(data.depth)}`,
+                  `disease: ${escapeHtml(data.disease)}`,
+                  `rest: ${escapeHtml(data.rest)}`,
+                  `aqc: ${escapeHtml(data.aqc)}`,
+                  `pop: ${escapeHtml(data.pop)}`,
+                  ...(weight !== undefined ? [`wgt: ${escapeHtml(weight.toExponential(2))}`] : []),
+                ].join('\n'),
               });
             } else {
               setHoveredId(null);
@@ -325,9 +329,9 @@ function App() {
           padding: "6px 8px",
           borderRadius: "4px",
           fontSize: 12,
-          maxWidth: 280,
+          maxWidth: 320,
           boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
-          whiteSpace: "pre-line",
+          whiteSpace: "pre",
           overscrollBehavior: 'none',
         }}
       >
