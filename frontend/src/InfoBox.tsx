@@ -28,36 +28,37 @@ export default function InfoBox() {
   }
 
   return (
-    <div className="info-box-content">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1em" }}>
-        <div style={{ fontSize: 12, lineHeight: 1.5, color: "#333" }}>
-          <Markdown
-            remarkPlugins={[remarkMath]}
-            rehypePlugins={[rehypeKatex]}
-            components={{
-              img: ({ ...props }) => (
-                <img {...props} style={{ maxWidth: "70%", height: "auto", display: "block" }} />
-              ),
-            }}
-          >
-            {infoText}
-          </Markdown>
-        </div>
-        <button
-          onClick={() => setCollapsed(true)}
-          style={{
-            background: "transparent",
-            border: "none",
-            color: "#333",
-            fontSize: 16,
-            cursor: "pointer",
-            padding: 0,
-            flexShrink: 0,
+    <div className="info-box-wrapper">
+      <button
+        onClick={() => setCollapsed(true)}
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          background: "transparent",
+          border: "none",
+          color: "#333",
+          fontSize: 16,
+          cursor: "pointer",
+          padding: 0,
+          zIndex: 1,
+        }}
+        title="Collapse"
+      >
+        ✕
+      </button>
+      <div className="info-box-content">
+        <Markdown
+          remarkPlugins={[remarkMath]}
+          rehypePlugins={[rehypeKatex]}
+          components={{
+            img: ({ ...props }) => (
+              <img {...props} style={{ maxWidth: "70%", height: "auto", display: "block" }} />
+            ),
           }}
-          title="Collapse"
         >
-          ✕
-        </button>
+          {infoText}
+        </Markdown>
       </div>
     </div>
   );

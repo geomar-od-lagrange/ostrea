@@ -88,11 +88,19 @@ button:focus-visible {
   box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
+.info-box-wrapper {
+  position: relative;
+  width: calc(100vw - 40px);
+  max-width: 500px;
+}
+
 .info-box-content {
-  width: 500px;
-  max-width: calc(100vw - 40px);
   max-height: 300px;
   overflow-y: auto;
+  padding-right: 20px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #333;
 }
 
 /* Responsive: tablets and smaller */
@@ -107,8 +115,6 @@ button:focus-visible {
   }
 
   .info-box-content {
-    width: auto;
-    max-width: calc(100vw - 40px);
     max-height: 200px;
   }
 }
@@ -128,8 +134,11 @@ button:focus-visible {
     padding: 6px;
   }
 
-  .info-box-content {
+  .info-box-wrapper {
     max-width: calc(100vw - 24px);
+  }
+
+  .info-box-content {
     max-height: 150px;
     font-size: 11px;
   }
