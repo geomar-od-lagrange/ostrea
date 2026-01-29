@@ -34,13 +34,14 @@ export default function InfoBox() {
         style={{
           position: "absolute",
           top: 0,
-          right: 0,
-          background: "transparent",
+          right: 16,
+          background: "rgba(220, 220, 220, 0.9)",
           border: "none",
           color: "#333",
-          fontSize: 16,
+          fontSize: 14,
           cursor: "pointer",
-          padding: 0,
+          padding: "7px 12px",
+          borderRadius: 4,
           zIndex: 1,
         }}
         title="Collapse"
