@@ -110,6 +110,7 @@ export const theme = {
     selected: hexToRgba(colors.selected) as RGBA,
   },
 
+
   // UI panel colors (CSS strings)
   ui: {
     controlPanel: {
