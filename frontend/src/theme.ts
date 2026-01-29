@@ -92,8 +92,8 @@ export const theme = {
   elevation: {
     maxHeight: 50000, // meters
     default: 0,
-    highlighted: 15000, // base elevation for highlighted hexes
-    getElevation: (weight: number) => weight * 50000,
+    categoryHeight: 10000,  // Height of each category segment
+    getElevation: (weight: number) => weight * 30000, // Connectivity height
   },
 
   // Hex stroke/line colors (as RGBA for deck.gl)
@@ -109,6 +109,7 @@ export const theme = {
     disease: hexToRgba(colors.disease) as RGBA,
     selected: hexToRgba(colors.selected) as RGBA,
   },
+
 
   // UI panel colors (CSS strings)
   ui: {

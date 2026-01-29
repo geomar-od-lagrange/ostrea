@@ -16,13 +16,13 @@ export default function InfoBox() {
           background: "transparent",
           border: "none",
           color: "#333",
-          fontSize: 20,
+          fontSize: 12,
           cursor: "pointer",
-          padding: 0,
+          padding: "2px 0",
         }}
         title="Show info"
       >
-        ℹ️
+        Info
       </button>
     );
   }
