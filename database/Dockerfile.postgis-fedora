@@ -2,7 +2,7 @@
 # Built from sclorg/postgresql-container scaffolding with PostGIS added.
 # Supports arbitrary UIDs (OpenShift restricted SCC).
 #
-# Based on: https://github.com/sclorg/postgresql-container/tree/master/16
+# Based on: https://github.com/sclorg/postgresql-container/commit/63cb3441de6f5b5bc6ce431bb5c7418ba2bdff33
 # Vendored scripts: database/vendor/postgresql-container/16/
 #
 # Changes from upstream sclorg:
