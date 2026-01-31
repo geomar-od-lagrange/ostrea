@@ -16,6 +16,11 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
+        {{- if .Values.restrictedSCC }}
+        runAsUser: 1000700000
+        runAsGroup: 1000700000
+        fsGroup: 1000700000
+        {{- end }}
       containers:
         - name: db
           image: {{ .Values.registry }}ostrea-db:latest

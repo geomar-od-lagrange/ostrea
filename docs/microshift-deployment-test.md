@@ -74,7 +74,23 @@ On production OpenShift, the `restricted` SCC enforces:
 | `allowPrivilegeEscalation: false` | No privilege escalation |
 | `MustRunAs` (fsGroup) | fsGroup from namespace range |
 
-MicroShift does not auto-inject these values into pods. The Helm chart must set them explicitly in pod security contexts for them to take effect. See [Restricted SCC Test Results](#restricted-scc-test-results) for image compatibility findings.
+MicroShift does not have the admission controller that injects UIDs from the namespace range into pods. To simulate this, the Helm chart has a `restrictedSCC` toggle that injects a fixed UID (1000700000) into all pod securityContexts:
+
+```bash
+helm template ostrea ./helm/ostrea \
+  --namespace ostrea \
+  --set openshift=true \
+  --set restrictedSCC=true \
+  --set registry=registry:5000/ \
+  --set host=localhost \
+  | kubectl apply --namespace ostrea -f -
+```
+
+This forces all containers to run as UID 1000700000, matching what production OpenShift would do. Without this flag, MicroShift pods run as whatever UID the image specifies (which doesn't test the arbitrary-UID path).
+
+The namespace annotations above are still useful for documentation purposes (they record the intended UID range), but they have no effect without the `restrictedSCC` flag.
+
+See [Restricted SCC Test Results](#restricted-scc-test-results) for image compatibility findings.
 
 To remove the annotations and return to default behavior:
 
@@ -246,6 +262,6 @@ command: ["bash", "-c", "run-postgresql || (cat /var/lib/pgsql/data/userdata/log
 | MicroShift (default SCC) | `postgis/postgis:16-3.4` | root (0) | Yes (17,833,840 rows) |
 | MicroShift (restricted SCC) | `postgis/postgis:16-3.4` | N/A | Pod fails to start |
 | kind (vanilla k8s) | `ostrea-db` | 26 (postgres) | Yes (17,833,840 rows) |
-| MicroShift (restricted SCC) | `ostrea-db` | — | Pending |
+| MicroShift (`restrictedSCC=true`) | `ostrea-db` | 1000700000 | Yes (17,833,840 rows) |
 
 > **Gotcha:** Dockerfile `VOLUME` directives cause anonymous volume overlays on Kubernetes, shadowing PVC mounts at parent paths. The `ostrea-db` Dockerfile deliberately omits `VOLUME` for this reason. If data is lost on pod restart, check for this first.
