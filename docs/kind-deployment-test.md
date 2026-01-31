@@ -45,9 +45,16 @@ kubectl cluster-info --context kind-ostrea
 
 ## Load Images
 
+Build the database image (see [microshift-deployment-test.md](microshift-deployment-test.md#database-image-ostrea-db) for background):
+
+```bash
+docker build -t ostrea-db:latest -f database/Dockerfile.postgis-fedora ./database
+```
+
 kind can load images directly from Docker (no registry needed):
 
 ```bash
+kind load docker-image ostrea-db:latest --name ostrea
 kind load docker-image ostrea-api:latest --name ostrea
 kind load docker-image ostrea-frontend:latest --name ostrea
 kind load docker-image ostrea-db-init:latest --name ostrea
@@ -139,7 +146,7 @@ Verify data survives pod restarts:
    ```
 5. Verify row counts match
 
-Result: Data preserved (17,833,840 connectivity rows, 8,357 geo rows). The `postgis/postgis:16-3.4` image runs as root (UID 0) on kind with no UID issues. See [microshift-deployment-test.md](microshift-deployment-test.md#restricted-scc-test-results) for OpenShift-specific constraints.
+Results: Data preserved for both `postgis/postgis:16-3.4` and `ostrea-db` (17,833,840 connectivity rows, 8,357 geo rows). See [microshift-deployment-test.md](microshift-deployment-test.md#pvc-restart-results) for the full results table across clusters and images.
 
 ## Cleanup
 

@@ -2,9 +2,16 @@
 # Built from sclorg/postgresql-container scaffolding with PostGIS added.
 # Supports arbitrary UIDs (OpenShift restricted SCC).
 #
-# TODO: give commit hash instead of just branch name
 # Based on: https://github.com/sclorg/postgresql-container/tree/master/16
-# Changes: added postgis to INSTALL_PKGS, set POSTGRESQL_EXTENSIONS
+# Vendored scripts: database/vendor/postgresql-container/16/
+#
+# Changes from upstream sclorg:
+#   - Added postgis to INSTALL_PKGS
+#   - Set POSTGRESQL_EXTENSIONS=postgis
+#   - Patched common.sh: extension creation targets $POSTGRESQL_DATABASE
+#     (upstream creates extensions in default 'postgres' db)
+#   - Removed VOLUME directive (causes anonymous volume shadowing when
+#     a PVC is mounted at a parent path on Kubernetes)
 
 FROM quay.io/fedora/s2i-core:41
 
