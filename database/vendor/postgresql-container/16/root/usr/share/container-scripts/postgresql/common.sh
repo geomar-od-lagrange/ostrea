@@ -1,3 +1,7 @@
+# Source: https://github.com/sclorg/postgresql-container (Apache-2.0)
+# Modified: added -d "$POSTGRESQL_DATABASE" to psql in create_extensions()
+#           so extensions are created in the user database, not 'postgres'.
+
 # Configuration settings.
 export POSTGRESQL_MAX_CONNECTIONS=${POSTGRESQL_MAX_CONNECTIONS:-100}
 export POSTGRESQL_MAX_PREPARED_TRANSACTIONS=${POSTGRESQL_MAX_PREPARED_TRANSACTIONS:-0}
