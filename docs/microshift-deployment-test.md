@@ -52,6 +52,37 @@ Expected: `{"repositories":["ostrea-api","ostrea-db-init","ostrea-frontend"]}`
 kubectl create namespace ostrea
 ```
 
+#### Simulate Production OpenShift Security (Optional)
+
+By default, MicroShift does not enforce the `restricted` SCC — containers can run as root. Production OpenShift assigns a random non-root UID from a namespace-specific range. To simulate this, annotate the namespace:
+
+```bash
+kubectl annotate namespace ostrea \
+  openshift.io/sa.scc.uid-range=1000700000/10000 \
+  openshift.io/sa.scc.supplemental-groups=1000700000/10000 \
+  openshift.io/sa.scc.mcs-labels=s0:c26,c15
+```
+
+On production OpenShift, the `restricted` SCC enforces:
+
+| Constraint | Effect |
+|------------|--------|
+| `runAsNonRoot: true` | Container must not run as root |
+| `MustRunAsRange` | UID assigned from namespace annotation range |
+| `allowPrivilegeEscalation: false` | No privilege escalation |
+| `MustRunAs` (fsGroup) | fsGroup from namespace range |
+
+MicroShift does not auto-inject these values into pods. The Helm chart must set them explicitly in pod security contexts for them to take effect. See [Restricted SCC Test Results](#restricted-scc-test-results) for image compatibility findings.
+
+To remove the annotations and return to default behavior:
+
+```bash
+kubectl annotate namespace ostrea \
+  openshift.io/sa.scc.uid-range- \
+  openshift.io/sa.scc.supplemental-groups- \
+  openshift.io/sa.scc.mcs-labels-
+```
+
 Create the database secret (values must match `helm/ostrea/templates/env-configmap.yaml`):
 
 ```bash
@@ -124,3 +155,78 @@ kubectl delete namespace ostrea
 ```
 
 To fully tear down MicroShift, see [microshift-setup.md](microshift-setup.md#cleanup).
+
+## PVC Restart Test
+
+Verify data survives pod restarts (relevant for issue #31):
+
+1. Deploy and wait for db-init to complete
+2. Record row counts:
+   ```bash
+   kubectl exec -n ostrea deploy/db -- psql -U user -d db -c "SELECT count(*) FROM connectivity_table;"
+   ```
+3. Delete the pod (not the PVC):
+   ```bash
+   kubectl delete pod -n ostrea -l app=db
+   ```
+4. Wait for the replacement pod:
+   ```bash
+   kubectl wait -n ostrea --for=condition=ready pod -l app=db --timeout=120s
+   ```
+5. Verify row counts match
+
+## Restricted SCC Test Results
+
+Results from testing database container images under restricted-SCC-like constraints (namespace annotated with UID range, pods configured with `runAsNonRoot: true`, `runAsUser: 1000700000`).
+
+### `postgis/postgis:16-3.4` (Current Image)
+
+**Not compatible with restricted SCC.**
+
+| Test | Result |
+|------|--------|
+| `runAsNonRoot` without explicit UID | `container has runAsNonRoot and image will run as root` — image runs as root |
+| Explicit `runAsUser: 1000700000` | `chmod: changing permissions of '/var/lib/postgresql/data': Operation not permitted` |
+| `initdb` | `could not change permissions of directory "/var/lib/postgresql/data": Operation not permitted` |
+
+The image's entrypoint runs `chmod` and `initdb` as root. It cannot function under a random non-root UID.
+
+### `quay.io/fedora/postgresql-16` (RH Image)
+
+**Compatible with restricted SCC, with volume adjustments.**
+
+| Test | Result |
+|------|--------|
+| `initdb` as UID 1000700000 | Succeeds — all data files owned by random UID |
+| PVC mount at `/var/lib/pgsql/data` | Fails — entrypoint creates `/var/lib/pgsql` first, permission denied |
+| PVC mount at `/var/lib/pgsql` | Succeeds |
+| Lock file at `/var/run/postgresql` | `FATAL: could not create lock file` — permission denied |
+| Additional `emptyDir` at `/var/run/postgresql` | Succeeds — PostgreSQL starts and serves queries |
+
+To debug startup failures, override the container command:
+
+```yaml
+command: ["bash", "-c", "run-postgresql || (cat /var/lib/pgsql/data/userdata/log/*.log 2>/dev/null; ls -la /var/lib/pgsql/ 2>/dev/null; id; exit 1)"]
+```
+
+### Image Comparison
+
+| Aspect | `postgis/postgis:16-3.4` | `quay.io/fedora/postgresql-16` |
+|--------|--------------------------|-------------------------------|
+| Runs as | root (UID 0) | postgres (UID 26), supports arbitrary UIDs |
+| Data directory | `/var/lib/postgresql/data` | `/var/lib/pgsql/data/userdata` |
+| PVC mount point | `/var/lib/postgresql/data` | `/var/lib/pgsql` |
+| Env vars | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | `POSTGRESQL_USER`, `POSTGRESQL_PASSWORD`, `POSTGRESQL_DATABASE` |
+| Needs `/var/run/postgresql` mount | No (root can write anywhere) | Yes (`emptyDir`) |
+| PostGIS | Built-in | Via `ostrea-db` custom build |
+| Architectures | amd64, arm64 | amd64 only (Fedora base supports arm64) |
+| OpenShift restricted SCC | Not compatible | Compatible |
+
+### PVC Restart Results
+
+| Cluster | Image | UID After Restart | Data Preserved |
+|---------|-------|-------------------|----------------|
+| kind (vanilla k8s) | `postgis/postgis:16-3.4` | root (0) | Yes (17,833,840 rows) |
+| MicroShift (default SCC) | `postgis/postgis:16-3.4` | root (0) | Yes (17,833,840 rows) |
+| MicroShift (restricted SCC) | `postgis/postgis:16-3.4` | N/A | Pod fails to start |
+| kind (vanilla k8s) | `ostrea-db` (sclorg + PostGIS) | 26 (postgres) | Yes (17,833,840 rows) |

@@ -120,6 +120,27 @@ Test API through nginx:
 curl http://localhost:5173/api/metadata | jq '. | length'
 ```
 
+## PVC Restart Test
+
+Verify data survives pod restarts:
+
+1. Deploy and wait for db-init to complete
+2. Record row counts:
+   ```bash
+   kubectl exec -n ostrea deploy/db -- psql -U user -d db -c "SELECT count(*) FROM connectivity_table;"
+   ```
+3. Delete the pod (not the PVC):
+   ```bash
+   kubectl delete pod -n ostrea -l app=db
+   ```
+4. Wait for the replacement pod:
+   ```bash
+   kubectl wait -n ostrea --for=condition=ready pod -l app=db --timeout=120s
+   ```
+5. Verify row counts match
+
+Result: Data preserved (17,833,840 connectivity rows, 8,357 geo rows). The `postgis/postgis:16-3.4` image runs as root (UID 0) on kind with no UID issues. See [microshift-deployment-test.md](microshift-deployment-test.md#restricted-scc-test-results) for OpenShift-specific constraints.
+
 ## Cleanup
 
 Delete the deployment:
