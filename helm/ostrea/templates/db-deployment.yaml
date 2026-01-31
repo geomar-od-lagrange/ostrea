@@ -15,10 +15,11 @@ spec:
         app: db
     spec:
       securityContext:
-        fsGroup: 999
+        runAsNonRoot: true
       containers:
         - name: db
-          image: postgis/postgis:16-3.4
+          image: {{ .Values.registry }}ostrea-db:latest
+          imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
           envFrom:
@@ -26,6 +27,13 @@ spec:
                 name: ostrea-config
             - secretRef:
                 name: db-secret
+          env:
+            # Map POSTGRES_PASSWORD from secret to POSTGRESQL_PASSWORD for RH image
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
           resources:
             requests:
               cpu: 500m
@@ -35,15 +43,19 @@ spec:
               memory: 2Gi
           livenessProbe:
             exec:
-              command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\""]
+              command: ["sh", "-c", "pg_isready -U \"$POSTGRESQL_USER\""]
             failureThreshold: 5
             periodSeconds: 10
             timeoutSeconds: 5
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
+            - mountPath: /var/lib/pgsql
               name: db-data
+            - mountPath: /var/run/postgresql
+              name: run-postgresql
       restartPolicy: Always
       volumes:
         - name: db-data
           persistentVolumeClaim:
             claimName: db-data
+        - name: run-postgresql
+          emptyDir: {}

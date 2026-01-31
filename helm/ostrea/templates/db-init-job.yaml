@@ -10,12 +10,13 @@ spec:
     spec:
       initContainers:
         - name: wait-for-db
-          image: postgis/postgis:16-3.4
+          image: {{ .Values.registry }}ostrea-db:latest
+          imagePullPolicy: IfNotPresent
           command:
             - sh
             - -c
             - |
-              until pg_isready -h db -p 5432 -U "$POSTGRES_USER"; do
+              until pg_isready -h db -p 5432 -U "$POSTGRESQL_USER"; do
                 echo "Waiting for database..."
                 sleep 2
               done
