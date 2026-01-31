@@ -25,8 +25,6 @@ spec:
                 name: ostrea-config
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
       containers:
         - name: db-init
           image: {{ .Values.registry }}ostrea-db-init:latest

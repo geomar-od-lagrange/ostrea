@@ -179,6 +179,33 @@ ls -ltd $TMPDIR/tmp.* 2>/dev/null || ls -ltd /tmp/tmp.* 2>/dev/null
 
 Then remove the directory containing the kubeconfig.
 
+## Troubleshooting
+
+### `ErrImagePull`: HTTPS error pulling from registry
+
+```
+Failed to pull image "registry:5000/...": Get "https://registry:5000/v2/": http: server gave HTTP response to HTTPS client
+```
+
+CRI-O defaults to HTTPS for all registries. The insecure registry config (see [Start Image Registry](#start-image-registry)) must be in place before pulling images. This config can be lost if:
+
+- The MicroShift container was restarted (`docker restart microshift`)
+- CRI-O was restarted without the config file present
+- A new MicroShift container was created without re-running the setup
+
+Fix: re-apply the insecure registry config and restart CRI-O:
+
+```bash
+docker exec microshift bash -c 'cat > /etc/containers/registries.conf.d/registry.conf << EOF
+[[registry]]
+location = "registry:5000"
+insecure = true
+EOF'
+docker exec microshift systemctl restart crio
+```
+
+Then delete the failing pods to trigger a re-pull.
+
 ## Notes
 
 - Tested on macOS ARM64 (Apple Silicon)

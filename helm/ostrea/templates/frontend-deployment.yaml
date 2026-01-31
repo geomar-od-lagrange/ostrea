@@ -14,8 +14,6 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 101
-        runAsGroup: 101
       containers:
         - name: frontend
           image: {{ .Values.registry }}ostrea-frontend:latest
