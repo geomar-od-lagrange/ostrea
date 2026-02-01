@@ -19,7 +19,7 @@ export default function InfoBox() {
         style={{
           background: "transparent",
           border: "none",
-          color: "#333",
+          color: "inherit",
           fontSize: 12,
           lineHeight: 1,
           cursor: "pointer",

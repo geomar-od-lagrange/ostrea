@@ -119,9 +119,9 @@ export default function ControlPanel({
               background: "transparent",
               border: "none",
               color: theme.ui.controlPanel.text,
-              fontSize: 16,
+              fontSize: 14,
               cursor: "pointer",
-              padding: 0,
+              padding: "2px 6px",
               lineHeight: 1,
             }}
             title="Collapse"

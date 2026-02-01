@@ -331,9 +331,13 @@ function App() {
       <div
         className="control-panel-container"
         style={{
+          '--panel-font-size': theme.panel.fontSize,
+          '--panel-border-radius': theme.panel.borderRadius,
+          '--panel-box-shadow': theme.panel.boxShadow,
+          '--panel-padding': theme.panel.padding,
           background: theme.ui.controlPanel.background,
-          color: theme.ui.controlPanel.text
-        }}
+          color: theme.ui.controlPanel.text,
+        } as React.CSSProperties}
       >
         <ControlPanel
           selectedDepths={selectedDepths}
@@ -353,9 +357,13 @@ function App() {
       <div
         className="info-box-container"
         style={{
+          '--panel-font-size': theme.panel.fontSize,
+          '--panel-border-radius': theme.panel.borderRadius,
+          '--panel-box-shadow': theme.panel.boxShadow,
+          '--panel-padding': theme.panel.padding,
           background: theme.ui.infoBox.background,
-          color: theme.ui.infoBox.text
-        }}
+          color: theme.ui.infoBox.text,
+        } as React.CSSProperties}
       >
         <InfoBox />
       </div>

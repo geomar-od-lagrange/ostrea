@@ -67,25 +67,27 @@ button:focus-visible {
   }
 }
 
-/* Panel containers */
-.control-panel-container {
+/* Panel containers — shared style
+   Visual tokens (font-size, border-radius, box-shadow, padding) come from
+   theme.ts via CSS custom properties set on each container in App.tsx.
+   Layout and responsive rules stay here. */
+.control-panel-container,
+.info-box-container {
   position: absolute;
-  top: 10px;
   left: 10px;
   z-index: 1;
-  padding: 8px;
-  border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  padding: var(--panel-padding);
+  border-radius: var(--panel-border-radius);
+  box-shadow: var(--panel-box-shadow);
+  font-size: var(--panel-font-size);
+}
+
+.control-panel-container {
+  top: 10px;
 }
 
 .info-box-container {
-  position: absolute;
   bottom: 10px;
-  left: 10px;
-  z-index: 1;
-  padding: 8px;
-  border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
 .info-box-wrapper {
@@ -110,7 +112,7 @@ button:focus-visible {
 .info-box-btn {
   background: transparent;
   border: none;
-  color: #333;
+  color: inherit;
   font-size: 14px;
   cursor: pointer;
   padding: 2px 6px;
@@ -126,9 +128,7 @@ button:focus-visible {
 .info-box-content {
   max-height: 300px;
   overflow-y: auto;
-  font-size: 12px;
   line-height: 1.5;
-  color: #333;
 }
 
 .info-box-content[data-state="maximized"] {
@@ -137,11 +137,7 @@ button:focus-visible {
 
 /* Responsive: tablets and smaller */
 @media (max-width: 768px) {
-  .control-panel-container {
-    max-width: calc(100vw - 20px);
-    font-size: 14px;
-  }
-
+  .control-panel-container,
   .info-box-container {
     max-width: calc(100vw - 20px);
   }
@@ -157,17 +153,19 @@ button:focus-visible {
 
 /* Responsive: phones */
 @media (max-width: 480px) {
-  .control-panel-container {
-    top: 5px;
+  .control-panel-container,
+  .info-box-container {
     left: 5px;
     padding: 6px;
-    font-size: 13px;
+    font-size: 12px;
+  }
+
+  .control-panel-container {
+    top: 5px;
   }
 
   .info-box-container {
     bottom: 5px;
-    left: 5px;
-    padding: 6px;
   }
 
   .info-box-wrapper {
@@ -180,7 +178,6 @@ button:focus-visible {
 
   .info-box-content {
     max-height: 150px;
-    font-size: 11px;
   }
 
   .info-box-content[data-state="maximized"] {

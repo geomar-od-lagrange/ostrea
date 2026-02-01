@@ -111,6 +111,14 @@ export const theme = {
   },
 
 
+  // UI panel shared tokens (applied as CSS custom properties)
+  panel: {
+    fontSize: '13px',
+    borderRadius: '4px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+    padding: '8px',
+  },
+
   // UI panel colors (CSS strings)
   ui: {
     controlPanel: {
