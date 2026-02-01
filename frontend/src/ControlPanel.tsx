@@ -58,8 +58,9 @@ export default function ControlPanel({
           border: "none",
           color: theme.ui.controlPanel.text,
           fontSize: 12,
+          lineHeight: 1,
           cursor: "pointer",
-          padding: "2px 0",
+          padding: 0,
         }}
         title="Show controls"
       >
@@ -77,37 +78,10 @@ export default function ControlPanel({
         maxHeight: "100%",
       }}
     >
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-      <span style={{ fontWeight: 600 }}>Controls</span>
-      <button
-        onClick={() => setCollapsed(true)}
-        style={{
-          background: "transparent",
-          border: "none",
-          color: theme.ui.controlPanel.text,
-          fontSize: 16,
-          cursor: "pointer",
-          padding: 0,
-          flexShrink: 0,
-        }}
-        title="Collapse"
-      >
-        ✕
-      </button>
-    </div>
     <fieldset className="control-panel-fieldset">
-      <div className="control-panel-clear">
-        <button
-          type="button"
-          onClick={() => clearHex?.({ depths: selectedDepths, times: selectedTimes })}
-          style={{ padding: "6px 10px", borderRadius: 6 }}
-        >
-          Clear
-        </button>
-      </div>
-
-      <div className="control-panel-section">
-        <div className="control-panel-section-label">Depth</div>
+      <div className="control-panel-section" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div className="control-panel-section-inner">
+          <div className="control-panel-section-label">Depth</div>
         <div className="control-panel-section-options">
           {depths.map(d => (
             <label key={d} className="control-panel-option">
@@ -121,6 +95,39 @@ export default function ControlPanel({
               {d}
             </label>
           ))}
+        </div>
+        </div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
+          <button
+            type="button"
+            onClick={() => clearHex?.({ depths: selectedDepths, times: selectedTimes })}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: theme.ui.controlPanel.text,
+              fontSize: 12,
+              cursor: "pointer",
+              padding: 0,
+              lineHeight: 1,
+            }}
+          >
+            clear
+          </button>
+          <button
+            onClick={() => setCollapsed(true)}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: theme.ui.controlPanel.text,
+              fontSize: 14,
+              cursor: "pointer",
+              padding: "2px 6px",
+              lineHeight: 1,
+            }}
+            title="Collapse"
+          >
+            ✕
+          </button>
         </div>
       </div>
 
@@ -151,10 +158,8 @@ export default function ControlPanel({
               name="aqc"
               checked={isAQCHighlighted}
               onChange={(e) => onAQCChange(e.target.checked)}
-              style={{ accentColor: theme.colors.aquaculture }}
             />
-            <span className="control-panel-color-swatch" style={{ backgroundColor: theme.colors.aquaculture }} />
-            Aquacultures
+            <span style={{ color: theme.colors.aquaculture, fontWeight: 600 }}>Aquacultures</span>
           </label>
 
           <label className="control-panel-option">
@@ -163,10 +168,8 @@ export default function ControlPanel({
               name="rest"
               checked={isRestHighlighted}
               onChange={(e) => onRestChange(e.target.checked)}
-              style={{ accentColor: theme.colors.restoration }}
             />
-            <span className="control-panel-color-swatch" style={{ backgroundColor: theme.colors.restoration }} />
-            Restoration
+            <span style={{ color: theme.colors.restoration, fontWeight: 600 }}>Restoration</span>
           </label>
 
           <label className="control-panel-option">
@@ -175,13 +178,12 @@ export default function ControlPanel({
               name="disease"
               checked={isDiseaseHighlighted}
               onChange={(e) => onDiseaseChange(e.target.checked)}
-              style={{ accentColor: theme.colors.disease }}
             />
-            <span className="control-panel-color-swatch" style={{ backgroundColor: theme.colors.disease }} />
-            Outbreaks
+            <span style={{ color: theme.colors.disease, fontWeight: 600 }}>Outbreaks</span>
           </label>
         </div>
       </div>
+
     </fieldset>
     </div>
   );
