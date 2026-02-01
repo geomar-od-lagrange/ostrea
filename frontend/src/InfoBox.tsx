@@ -21,8 +21,9 @@ export default function InfoBox() {
           border: "none",
           color: "#333",
           fontSize: 12,
+          lineHeight: 1,
           cursor: "pointer",
-          padding: "2px 0",
+          padding: 0,
         }}
         title="Show info"
       >

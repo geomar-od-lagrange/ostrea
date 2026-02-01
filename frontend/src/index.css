@@ -209,10 +209,6 @@ button:focus-visible {
   margin: 0;
 }
 
-.control-panel-clear {
-  margin-bottom: 12px;
-}
-
 .control-panel-section {
   margin-bottom: 12px;
 }
@@ -238,22 +234,11 @@ button:focus-visible {
   margin-right: 6px;
 }
 
-.control-panel-color-swatch {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  margin-right: 6px;
-  border-radius: 2px;
-}
 
 /* Vertical responsive: short viewport */
 @media (max-height: 820px) {
   .control-panel-container {
     max-width: none;
-  }
-
-  .control-panel-clear {
-    margin-bottom: 8px;
   }
 
   .control-panel-section {
@@ -276,7 +261,7 @@ button:focus-visible {
   }
 }
 
-/* Short + narrow: hide section labels, keep options inline */
+/* Short + narrow: hide section labels, keep options inline, reset enlarged touch targets */
 @media (max-height: 820px) and (max-width: 700px) {
   .control-panel-section-label {
     display: none;
@@ -284,6 +269,19 @@ button:focus-visible {
 
   .control-panel-section-options {
     flex-wrap: nowrap;
+  }
+
+  .control-panel-container input[type="checkbox"] {
+    width: auto;
+    height: auto;
+  }
+
+  .control-panel-container label {
+    padding: 0;
+  }
+
+  .control-panel-container button {
+    padding: 0.6em 1.2em;
   }
 }
 
