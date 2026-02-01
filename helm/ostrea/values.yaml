@@ -32,6 +32,7 @@ host: ""
 #   helm template ostrea ./helm/ostrea --set restrictedSCC=true ...
 #
 # This sets runAsUser/runAsGroup/fsGroup on all pods. The UID 1000700000 is
-# chosen to match the conventional test range (openshift.io/sa.scc.uid-range
-# annotation value used in docs/microshift-deployment-test.md).
+# chosen because it doesn't match any UID in our Dockerfiles (api: 1000,
+# frontend: 101, db: 26, db-init: 1000). The actual UID on production
+# OpenShift will differ — the point is to test under an arbitrary UID.
 restrictedSCC: false

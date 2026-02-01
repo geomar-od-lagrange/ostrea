@@ -86,7 +86,7 @@ helm template ostrea ./helm/ostrea \
   | kubectl apply --namespace ostrea -f -
 ```
 
-This forces all containers to run as UID 1000700000, matching what production OpenShift would do. Without this flag, MicroShift pods run as whatever UID the image specifies (which doesn't test the arbitrary-UID path).
+This forces all containers to run as UID 1000700000 — a value chosen because it doesn't match any UID in our Dockerfiles (api: 1000, frontend: 101, db: 26, db-init: 1000). The actual UID on production OpenShift will be different (assigned from the namespace range by the admission controller), but the point is to verify that images work under an arbitrary UID that doesn't correspond to any user in the image. Without this flag, MicroShift pods run as whatever UID the image specifies (which doesn't test the arbitrary-UID path).
 
 The namespace annotations above are still useful for documentation purposes (they record the intended UID range), but they have no effect without the `restrictedSCC` flag.
 
