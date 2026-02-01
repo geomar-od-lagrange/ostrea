@@ -132,6 +132,11 @@ export const theme = {
     tooltip: {
       background: `rgba(0,0,0,${colors.tooltipBgAlpha})`,
       text: colors.tooltipText,
+      padding: '6px 8px',
+      borderRadius: '4px',
+      fontSize: 12,
+      maxWidth: 320,
+      boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
     },
   },
 
