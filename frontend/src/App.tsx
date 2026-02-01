@@ -175,46 +175,52 @@ function App() {
     lineWidthMinPixels: 3,
   };
 
-  // Interaction handlers for base layer
+  // Shared hover handler for all layers (base + category)
+  const handleHover = (info: any) => {
+    setHoveredId(info.object ? info.object.properties.id : null);
+    if (info.object) {
+      if (!metadata) return;
+      const escapeHtml = (str: string | number) =>
+        String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      const data = metadata[info.object.properties.id];
+      if (!data) return;
+      const weight = weightMap.get(info.object.properties.id);
+      setTooltip({
+        x: info.x,
+        y: info.y,
+        content: [
+          `Id: ${escapeHtml(data.id)}`,
+          `lon: ${escapeHtml(data.lon.toFixed(2))}`,
+          `lat: ${escapeHtml(data.lat.toFixed(2))}`,
+          `depth: ${escapeHtml(data.depth)}`,
+          `disease: ${escapeHtml(data.disease)}`,
+          `rest: ${escapeHtml(data.rest)}`,
+          `aqc: ${escapeHtml(data.aqc)}`,
+          `pop: ${escapeHtml(data.pop)}`,
+          ...(weight !== undefined ? [`wgt: ${escapeHtml(weight.toExponential(2))}`] : []),
+        ].join('\n'),
+      });
+    } else {
+      setHoveredId(null);
+      setTooltip(null);
+    }
+  };
+
+  // Shared click handler for all layers
+  const handleClick = (info: any) => {
+    if (!info.object) return;
+    if (clickIds.indexOf(info.object.properties.id) === -1) {
+      setClickIds([...clickIds, info.object.properties.id]);
+    } else {
+      setClickIds(prev => prev.filter(x => x !== info.object.properties.id));
+    }
+  };
+
+  // Interaction handlers for all layers
   const interactionHandlers = {
     pickable: true,
-    onHover: (info: any) => {
-      setHoveredId(info.object ? info.object.properties.id : null);
-      if (info.object) {
-        if (!metadata) return;
-        const escapeHtml = (str: string | number) =>
-          String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        const data = metadata[info.object.properties.id];
-        if (!data) return;
-        const weight = weightMap.get(info.object.properties.id);
-        setTooltip({
-          x: info.x,
-          y: info.y,
-          content: [
-            `Id: ${escapeHtml(data.id)}`,
-            `lon: ${escapeHtml(data.lon.toFixed(2))}`,
-            `lat: ${escapeHtml(data.lat.toFixed(2))}`,
-            `depth: ${escapeHtml(data.depth)}`,
-            `disease: ${escapeHtml(data.disease)}`,
-            `rest: ${escapeHtml(data.rest)}`,
-            `aqc: ${escapeHtml(data.aqc)}`,
-            `pop: ${escapeHtml(data.pop)}`,
-            ...(weight !== undefined ? [`wgt: ${escapeHtml(weight.toExponential(2))}`] : []),
-          ].join('\n'),
-        });
-      } else {
-        setHoveredId(null);
-        setTooltip(null);
-      }
-    },
-    onClick: (info: any) => {
-      if (!info.object) return;
-      if (clickIds.indexOf(info.object.properties.id) === -1) {
-        setClickIds([...clickIds, info.object.properties.id]);
-      } else {
-        setClickIds(prev => prev.filter(x => x !== info.object.properties.id));
-      }
-    },
+    onHover: handleHover,
+    onClick: handleClick,
   };
 
   const catHeight = theme.elevation.categoryHeight;
@@ -260,9 +266,7 @@ function App() {
               .map((f: Feature) => featureWithZ(f, getConnHeight(f.properties.id))),
           },
           ...commonLayerProps,
-          pickable: true,
-          onHover: (info: any) => setHoveredId(info.object?.properties.id ?? null),
-          onClick: interactionHandlers.onClick,
+          ...interactionHandlers,
           updateTriggers: { data: [weightMap], getFillColor: [hoveredId] },
           getElevation: catHeight,
           getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.restoration,
@@ -282,9 +286,7 @@ function App() {
               }),
           },
           ...commonLayerProps,
-          pickable: true,
-          onHover: (info: any) => setHoveredId(info.object?.properties.id ?? null),
-          onClick: interactionHandlers.onClick,
+          ...interactionHandlers,
           updateTriggers: { data: [weightMap, isRestHighlighted], getFillColor: [hoveredId] },
           getElevation: catHeight,
           getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.aquaculture,
@@ -307,9 +309,7 @@ function App() {
               }),
           },
           ...commonLayerProps,
-          pickable: true,
-          onHover: (info: any) => setHoveredId(info.object?.properties.id ?? null),
-          onClick: interactionHandlers.onClick,
+          ...interactionHandlers,
           updateTriggers: { data: [weightMap, isRestHighlighted, isAQCHighlighted], getFillColor: [hoveredId] },
           getElevation: catHeight,
           getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.disease,
