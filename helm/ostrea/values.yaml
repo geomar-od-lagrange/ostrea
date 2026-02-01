@@ -12,3 +12,27 @@ openshift: false
 # Hostname for OpenShift Routes (only used when openshift=true)
 # Use "localhost" for local MicroShift testing
 host: ""
+
+# Simulate OpenShift restricted SCC UID assignment.
+#
+# On production OpenShift, the restricted SCC injects a random non-root UID
+# (from the namespace's openshift.io/sa.scc.uid-range annotation) into every
+# pod. This forces containers to run as an unpredictable UID, which breaks
+# images that assume a specific user.
+#
+# MicroShift does NOT have this admission controller, so pods run as whatever
+# UID the image specifies. Set restrictedSCC=true to inject a fixed UID
+# (1000700000) into all pod securityContexts, simulating the OpenShift
+# behavior on MicroShift or kind.
+#
+# Use this to verify that all images work under arbitrary UIDs before
+# deploying to production OpenShift.
+#
+# Usage:
+#   helm template ostrea ./helm/ostrea --set restrictedSCC=true ...
+#
+# This sets runAsUser/runAsGroup/fsGroup on all pods. The UID 1000700000 is
+# chosen because it doesn't match any UID in our Dockerfiles (api: 1000,
+# frontend: 101, db: 26, db-init: 1000). The actual UID on production
+# OpenShift will differ — the point is to test under an arbitrary UID.
+restrictedSCC: false

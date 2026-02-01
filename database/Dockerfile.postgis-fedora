@@ -1,0 +1,71 @@
+# PostgreSQL 16 + PostGIS for OpenShift
+# Built from sclorg/postgresql-container scaffolding with PostGIS added.
+# Supports arbitrary UIDs (OpenShift restricted SCC).
+#
+# Based on: https://github.com/sclorg/postgresql-container/commit/63cb3441de6f5b5bc6ce431bb5c7418ba2bdff33
+# Vendored scripts: database/vendor/postgresql-container/16/
+#
+# Changes from upstream sclorg:
+#   - Added postgis to INSTALL_PKGS
+#   - Set POSTGRESQL_EXTENSIONS=postgis
+#   - Patched common.sh: extension creation targets $POSTGRESQL_DATABASE
+#     (upstream creates extensions in default 'postgres' db)
+#   - Removed VOLUME directive (causes anonymous volume shadowing when
+#     a PVC is mounted at a parent path on Kubernetes)
+
+FROM quay.io/fedora/s2i-core:41
+
+ENV NAME=postgresql \
+    VERSION=0 \
+    \
+    POSTGRESQL_VERSION=16 \
+    POSTGRESQL_PREV_VERSION=15 \
+    HOME=/var/lib/pgsql \
+    PGUSER=postgres \
+    APP_DATA=/opt/app-root
+
+ENV SUMMARY="PostgreSQL 16 with PostGIS for OpenShift" \
+    DESCRIPTION="PostgreSQL 16 with PostGIS extension, compatible with OpenShift restricted SCC."
+
+LABEL summary="$SUMMARY" \
+      description="$DESCRIPTION" \
+      io.k8s.description="$DESCRIPTION" \
+      io.k8s.display-name="PostgreSQL 16 + PostGIS" \
+      io.openshift.expose-services="5432:postgresql" \
+      io.openshift.tags="database,postgresql,postgresql16,postgis"
+
+EXPOSE 5432
+
+COPY vendor/postgresql-container/16/root/usr/libexec/fix-permissions /usr/libexec/fix-permissions
+
+# UID 26 for postgres — must never change for volume safety.
+# PostGIS added to the standard sclorg package list.
+RUN INSTALL_PKGS="rsync tar gettext postgresql-server postgresql-contrib nss_wrapper" && \
+    INSTALL_PKGS+=" procps-ng util-linux postgresql-upgrade" && \
+    INSTALL_PKGS+=" findutils xz" && \
+    INSTALL_PKGS+=" pgaudit pgvector" && \
+    INSTALL_PKGS+=" postgis" && \
+    dnf -y --setopt=tsflags=nodocs install $INSTALL_PKGS && \
+    rpm -V $INSTALL_PKGS && \
+    postgres -V | grep -qe "$POSTGRESQL_VERSION\." && echo "Found VERSION $POSTGRESQL_VERSION" && \
+    dnf clean all && \
+    test "$(id postgres)" = "uid=26(postgres) gid=26(postgres) groups=26(postgres)" && \
+    mkdir -p /var/lib/pgsql/data && \
+    mkdir -p /run/postgresql && \
+    /usr/libexec/fix-permissions /var/lib/pgsql /run/postgresql
+
+ENV CONTAINER_SCRIPTS_PATH=/usr/share/container-scripts/postgresql \
+    POSTGRESQL_EXTENSIONS="postgis"
+
+COPY vendor/postgresql-container/16/root /
+COPY vendor/postgresql-container/16/s2i/bin/ $STI_SCRIPTS_PATH
+
+RUN ln -s /usr/bin/run-postgresql $STI_SCRIPTS_PATH/run
+
+RUN usermod -a -G root postgres && \
+    /usr/libexec/fix-permissions --read-only "$APP_DATA"
+
+USER 26
+
+ENTRYPOINT ["container-entrypoint"]
+CMD ["run-postgresql"]

@@ -3,5 +3,10 @@ kind: ConfigMap
 metadata:
   name: ostrea-config
 data:
+  # Used by api and db-init containers
   POSTGRES_DB: db
   POSTGRES_USER: user
+  # Used by the RH PostgreSQL container (sclorg env var convention)
+  POSTGRESQL_DATABASE: db
+  POSTGRESQL_USER: user
+  POSTGRESQL_EXTENSIONS: postgis

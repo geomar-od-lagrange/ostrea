@@ -45,9 +45,16 @@ kubectl cluster-info --context kind-ostrea
 
 ## Load Images
 
+Build the database image (see [microshift-deployment-test.md](microshift-deployment-test.md#database-image-ostrea-db) for background):
+
+```bash
+docker build -t ostrea-db:latest -f database/Dockerfile.postgis-fedora ./database
+```
+
 kind can load images directly from Docker (no registry needed):
 
 ```bash
+kind load docker-image ostrea-db:latest --name ostrea
 kind load docker-image ostrea-api:latest --name ostrea
 kind load docker-image ostrea-frontend:latest --name ostrea
 kind load docker-image ostrea-db-init:latest --name ostrea
@@ -119,6 +126,27 @@ Test API through nginx:
 ```bash
 curl http://localhost:5173/api/metadata | jq '. | length'
 ```
+
+## PVC Restart Test
+
+Verify data survives pod restarts:
+
+1. Deploy and wait for db-init to complete
+2. Record row counts:
+   ```bash
+   kubectl exec -n ostrea deploy/db -- psql -U user -d db -c "SELECT count(*) FROM connectivity_table;"
+   ```
+3. Delete the pod (not the PVC):
+   ```bash
+   kubectl delete pod -n ostrea -l app=db
+   ```
+4. Wait for the replacement pod:
+   ```bash
+   kubectl wait -n ostrea --for=condition=ready pod -l app=db --timeout=120s
+   ```
+5. Verify row counts match
+
+Results: Data preserved for both `postgis/postgis:16-3.4` and `ostrea-db` (17,833,840 connectivity rows, 8,357 geo rows). See [microshift-deployment-test.md](microshift-deployment-test.md#pvc-restart-results) for the full results table across clusters and images.
 
 ## Cleanup
 
