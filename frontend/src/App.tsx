@@ -7,7 +7,13 @@ import ControlPanel from './ControlPanel';
 import InfoBox from './InfoBox';
 import { theme } from './theme';
 
-const MAP_STYLE = 'https://demotiles.maplibre.org/style.json';
+// Free map styles (no API key required):
+// - https://tiles.openfreemap.org/styles/positron (minimal light gray)
+// - https://tiles.openfreemap.org/styles/liberty (balanced, clean)
+// - https://tiles.openfreemap.org/styles/bright (similar to liberty)
+// - https://tiles.openfreemap.org/styles/dark (dark theme)
+// - https://demotiles.maplibre.org/style.json (original colorful demo)
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 
 type Connection = {
   end_id: number;
