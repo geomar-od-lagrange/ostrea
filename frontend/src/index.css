@@ -251,6 +251,12 @@ button:focus-visible {
     flex-shrink: 0;
   }
 
+  .control-panel-section-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
   .control-panel-section-options {
     flex-direction: row;
     flex-wrap: nowrap;

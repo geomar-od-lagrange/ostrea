@@ -80,7 +80,7 @@ export default function ControlPanel({
     >
     <fieldset className="control-panel-fieldset">
       <div className="control-panel-section" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
+        <div className="control-panel-section-inner">
           <div className="control-panel-section-label">Depth</div>
         <div className="control-panel-section-options">
           {depths.map(d => (
