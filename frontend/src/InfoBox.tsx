@@ -5,13 +5,17 @@ import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import infoText from "./info.md?raw";
 
-export default function InfoBox() {
-  const [collapsed, setCollapsed] = React.useState(() => window.innerWidth <= 480);
+type InfoBoxState = "collapsed" | "normal" | "maximized";
 
-  if (collapsed) {
+export default function InfoBox() {
+  const [state, setState] = React.useState<InfoBoxState>(() =>
+    window.innerWidth <= 480 ? "collapsed" : "normal"
+  );
+
+  if (state === "collapsed") {
     return (
       <button
-        onClick={() => setCollapsed(false)}
+        onClick={() => setState("normal")}
         style={{
           background: "transparent",
           border: "none",
@@ -28,27 +32,16 @@ export default function InfoBox() {
   }
 
   return (
-    <div className="info-box-wrapper">
-      <button
-        onClick={() => setCollapsed(true)}
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 16,
-          background: "rgba(220, 220, 220, 0.9)",
-          border: "none",
-          color: "#333",
-          fontSize: 14,
-          cursor: "pointer",
-          padding: "7px 12px",
-          borderRadius: 4,
-          zIndex: 1,
-        }}
-        title="Collapse"
-      >
-        ✕
-      </button>
-      <div className="info-box-content">
+    <div className="info-box-wrapper" data-state={state}>
+      <div className="info-box-buttons">
+        <button
+          onClick={() => setState(state === "normal" ? "maximized" : "normal")}
+          className="info-box-btn"
+          title={state === "normal" ? "Maximize" : "Normal size"}
+        >□</button>
+        <button onClick={() => setState("collapsed")} className="info-box-btn" title="Close">✕</button>
+      </div>
+      <div className="info-box-content" data-state={state}>
         <Markdown
           remarkPlugins={[remarkMath]}
           rehypePlugins={[rehypeKatex]}

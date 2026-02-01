@@ -94,13 +94,45 @@ button:focus-visible {
   max-width: 500px;
 }
 
+.info-box-wrapper[data-state="maximized"] {
+  max-width: 700px;
+}
+
+.info-box-buttons {
+  position: absolute;
+  top: 0;
+  right: 14px;
+  z-index: 1;
+  display: flex;
+  gap: 0;
+}
+
+.info-box-btn {
+  background: transparent;
+  border: none;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 2px;
+  line-height: 1;
+}
+
+.info-box-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .info-box-content {
   max-height: 300px;
   overflow-y: auto;
-  padding-right: 20px;
   font-size: 12px;
   line-height: 1.5;
   color: #333;
+}
+
+.info-box-content[data-state="maximized"] {
+  max-height: 85vh;
 }
 
 /* Responsive: tablets and smaller */
@@ -116,6 +148,10 @@ button:focus-visible {
 
   .info-box-content {
     max-height: 200px;
+  }
+
+  .info-box-content[data-state="maximized"] {
+    max-height: 70vh;
   }
 }
 
@@ -138,9 +174,17 @@ button:focus-visible {
     max-width: calc(100vw - 24px);
   }
 
+  .info-box-wrapper[data-state="maximized"] {
+    max-width: calc(100vw - 24px);
+  }
+
   .info-box-content {
     max-height: 150px;
     font-size: 11px;
+  }
+
+  .info-box-content[data-state="maximized"] {
+    max-height: 60vh;
   }
 
   /* Larger touch targets for checkboxes */
