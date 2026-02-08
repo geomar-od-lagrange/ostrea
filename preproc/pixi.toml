@@ -1,0 +1,17 @@
+[workspace]
+authors = ["Willi Rath <wrath@geomar.de>"]
+channels = ["conda-forge"]
+name = "preproc"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+ipython = ">=9.10.0,<10"
+netcdf4 = ">=1.7.4,<2"
+xarray = ">=2026.1.0,<2027"
+pandas = ">=3.0.0,<4"
+geopandas = ">=1.1.2,<2"
+dask = ">=2026.1.2,<2027"
+matplotlib = ">=3.10.8,<4"
