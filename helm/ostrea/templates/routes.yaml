@@ -19,7 +19,6 @@ spec:
   to:
     kind: Service
     name: api
-    weight: 100
   wildcardPolicy: None
 ---
 apiVersion: route.openshift.io/v1
@@ -39,6 +38,5 @@ spec:
   to:
     kind: Service
     name: frontend
-    weight: 100
   wildcardPolicy: None
 {{- end }}
