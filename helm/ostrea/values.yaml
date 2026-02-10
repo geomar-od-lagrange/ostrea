@@ -12,6 +12,13 @@ openshift: false
 # Use "localhost" for local MicroShift testing
 host: ""
 
+# Route configuration (only used when openshift=true)
+route:
+  tls:
+    # Set to "edge" for TLS termination on production OpenShift.
+    # Leave empty for local MicroShift/kind (no certs).
+    termination: ""
+
 # Simulate OpenShift restricted SCC UID assignment.
 #
 # On production OpenShift, the restricted SCC injects a random non-root UID

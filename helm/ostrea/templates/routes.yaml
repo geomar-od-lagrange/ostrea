@@ -1,0 +1,44 @@
+{{- if .Values.openshift }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: ostrea-api
+  annotations:
+    haproxy.router.openshift.io/rewrite-target: /
+spec:
+{{- if .Values.host }}
+  host: {{ .Values.host }}
+{{- end }}
+  path: /api
+  port:
+    targetPort: http
+{{- if .Values.route.tls.termination }}
+  tls:
+    termination: {{ .Values.route.tls.termination }}
+{{- end }}
+  to:
+    kind: Service
+    name: api
+    weight: 100
+  wildcardPolicy: None
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: ostrea-frontend
+spec:
+{{- if .Values.host }}
+  host: {{ .Values.host }}
+{{- end }}
+  port:
+    targetPort: http
+{{- if .Values.route.tls.termination }}
+  tls:
+    termination: {{ .Values.route.tls.termination }}
+{{- end }}
+  to:
+    kind: Service
+    name: frontend
+    weight: 100
+  wildcardPolicy: None
+{{- end }}
