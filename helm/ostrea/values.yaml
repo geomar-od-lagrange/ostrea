@@ -2,6 +2,9 @@
 # The Docker pull path is quay.io/willirath/ostrea (NOT .../repository/...)
 image:
   repository: quay.io/willirath/ostrea
+  # Tag suffix appended to component tags (e.g. ostrea-api-<tag>).
+  # Default "latest"; set to a short git SHA to pin a specific build.
+  tag: latest
   pullPolicy: Always
 
 # OpenShift mode: use Routes for path-based routing

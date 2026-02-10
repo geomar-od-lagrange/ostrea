@@ -21,7 +21,7 @@ spec:
         {{- end }}
       containers:
         - name: api
-          image: {{ .Values.image.repository }}:ostrea-api-latest
+          image: {{ .Values.image.repository }}:ostrea-api-{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             allowPrivilegeEscalation: false

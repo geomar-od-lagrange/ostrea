@@ -21,7 +21,7 @@ spec:
         {{- end }}
       containers:
         - name: frontend
-          image: {{ .Values.image.repository }}:ostrea-frontend-latest
+          image: {{ .Values.image.repository }}:ostrea-frontend-{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             allowPrivilegeEscalation: false

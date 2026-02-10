@@ -22,23 +22,42 @@ docker login quay.io
 
 ## Build and push all images
 
+Each image is tagged with both `latest` and the current short git SHA:
+
 ```bash
 REPO=quay.io/willirath/ostrea
+GIT_REF=$(git rev-parse --short HEAD)
 
-docker build --platform linux/amd64,linux/arm64 -t $REPO:ostrea-api-latest --push api/
-docker build --platform linux/amd64,linux/arm64 -t $REPO:ostrea-frontend-latest --push frontend/
-docker build --platform linux/amd64,linux/arm64 -f database/Dockerfile.postgis-fedora -t $REPO:ostrea-db-latest --push database/
-docker build --platform linux/amd64,linux/arm64 -t $REPO:ostrea-db-init-latest --push database/init/
+for component_args in \
+  "ostrea-api api/" \
+  "ostrea-frontend frontend/" \
+  "ostrea-db -f database/Dockerfile.postgis-fedora database/" \
+  "ostrea-db-init database/init/"
+do
+  set -- $component_args
+  NAME=$1; shift
+  docker build --platform linux/amd64,linux/arm64 \
+    -t $REPO:${NAME}-latest \
+    -t $REPO:${NAME}-${GIT_REF} \
+    --push "$@"
+done
 ```
 
 ## Helm chart integration
 
-The chart pulls from the same registry via `image.repository` in `values.yaml`:
+The chart pulls from the same registry via `image.repository` and `image.tag` in `values.yaml`:
 
 ```yaml
 image:
   repository: quay.io/willirath/ostrea
+  tag: latest        # or a short git SHA like "abc1234"
   pullPolicy: Always
+```
+
+To deploy a pinned version:
+
+```bash
+helm upgrade ostrea ./helm/ostrea --set image.tag=abc1234
 ```
 
 No registry changes needed between local (kind/MicroShift) and production (OpenShift) — all environments pull from Quay.io.

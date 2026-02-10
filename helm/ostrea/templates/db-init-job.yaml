@@ -10,7 +10,7 @@ spec:
     spec:
       initContainers:
         - name: wait-for-db
-          image: {{ .Values.image.repository }}:ostrea-db-latest
+          image: {{ .Values.image.repository }}:ostrea-db-{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - sh
@@ -32,7 +32,7 @@ spec:
         {{- end }}
       containers:
         - name: db-init
-          image: {{ .Values.image.repository }}:ostrea-db-init-latest
+          image: {{ .Values.image.repository }}:ostrea-db-init-{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             allowPrivilegeEscalation: false
