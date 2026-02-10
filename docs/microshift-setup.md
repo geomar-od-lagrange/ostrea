@@ -13,19 +13,10 @@ Run a local OpenShift-compatible cluster using MicroShift in Docker. Useful for 
 
 kubectl reads connection details from a kubeconfig file. By setting the `KUBECONFIG` environment variable to point to MicroShift's kubeconfig, the same kubectl binary connects to MicroShift instead of Docker Desktop's Kubernetes cluster.
 
-## Create Docker Network
-
-Create a shared network so MicroShift and the image registry can communicate:
-
-```bash
-docker network create microshift-net
-```
-
 ## Start MicroShift
 
 ```bash
 docker run -d --name microshift --privileged \
-  --network microshift-net \
   -v microshift-data:/var/lib \
   -p 6443:6443 -p 5173:80 \
   quay.io/microshift/microshift-aio:latest
@@ -35,50 +26,7 @@ Port 5173 on the host maps to the OpenShift router (port 80) inside the containe
 
 Wait for the container to initialize (~1-2 minutes).
 
-## Start Image Registry
-
-MicroShift uses CRI-O which requires a registry to pull images from (no direct image loading like kind).
-
-Start the registry on the same network (using port 5001 since macOS uses 5000 for AirPlay):
-
-```bash
-docker run -d --name registry --network microshift-net -p 5001:5000 registry:2
-```
-
-Configure CRI-O to trust the insecure registry:
-
-```bash
-docker exec microshift bash -c 'mkdir -p /etc/containers/registries.conf.d && cat > /etc/containers/registries.conf.d/registry.conf << EOF
-[[registry]]
-location = "registry:5000"
-insecure = true
-EOF'
-
-docker exec microshift systemctl restart crio
-```
-
-Verify both sides can access the registry:
-
-```bash
-# From host
-curl -s http://localhost:5001/v2/_catalog
-
-# From MicroShift (uses container name as hostname)
-docker exec microshift curl -s http://registry:5000/v2/_catalog
-```
-
-Both should return `{"repositories":[]}`.
-
-## Push Images to Registry
-
-Tag and push images from your host using `localhost:5001`:
-
-```bash
-docker tag myimage:latest localhost:5001/myimage:latest
-docker push localhost:5001/myimage:latest
-```
-
-In Kubernetes manifests, reference images as `registry:5000/myimage:latest` (how MicroShift sees the registry on the Docker network).
+Images are pulled directly from Quay.io (see [image-building.md](image-building.md)).
 
 ## Configure kubectl
 
@@ -145,16 +93,10 @@ Core pods should be Running:
 
 ## Cleanup
 
-Stop and remove the containers:
+Stop and remove the container:
 
 ```bash
-docker stop microshift registry && docker rm microshift registry
-```
-
-Remove the Docker network:
-
-```bash
-docker network rm microshift-net
+docker stop microshift && docker rm microshift
 ```
 
 Remove the persistent volume:
@@ -178,33 +120,6 @@ ls -ltd $TMPDIR/tmp.* 2>/dev/null || ls -ltd /tmp/tmp.* 2>/dev/null
 ```
 
 Then remove the directory containing the kubeconfig.
-
-## Troubleshooting
-
-### `ErrImagePull`: HTTPS error pulling from registry
-
-```
-Failed to pull image "registry:5000/...": Get "https://registry:5000/v2/": http: server gave HTTP response to HTTPS client
-```
-
-CRI-O defaults to HTTPS for all registries. The insecure registry config (see [Start Image Registry](#start-image-registry)) must be in place before pulling images. This config can be lost if:
-
-- The MicroShift container was restarted (`docker restart microshift`)
-- CRI-O was restarted without the config file present
-- A new MicroShift container was created without re-running the setup
-
-Fix: re-apply the insecure registry config and restart CRI-O:
-
-```bash
-docker exec microshift bash -c 'cat > /etc/containers/registries.conf.d/registry.conf << EOF
-[[registry]]
-location = "registry:5000"
-insecure = true
-EOF'
-docker exec microshift systemctl restart crio
-```
-
-Then delete the failing pods to trigger a re-pull.
 
 ## Notes
 

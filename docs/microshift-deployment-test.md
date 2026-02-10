@@ -5,11 +5,10 @@ Test the full OSTREA application deployment on a local MicroShift cluster.
 ## Prerequisites
 
 Complete the MicroShift setup from [microshift-setup.md](microshift-setup.md):
-- Docker network `microshift-net` created
 - MicroShift container running (port 5173 mapped to router)
-- Registry container running at `localhost:5001`
-- CRI-O configured to trust the registry
 - `KUBECONFIG` exported
+
+Images are pulled from Quay.io (see [image-building.md](image-building.md)).
 
 Install Helm (if not available):
 ```bash
@@ -17,34 +16,6 @@ HELM_DIR=$(mktemp -d)
 curl -fsSL https://get.helm.sh/helm-v3.17.0-darwin-arm64.tar.gz | tar -xz -C "$HELM_DIR"
 export PATH="$HELM_DIR/darwin-arm64:$PATH"
 ```
-
-## Build and Push Images
-
-Build the project images:
-
-```bash
-docker build -t localhost:5001/ostrea-db:latest -f database/Dockerfile.postgis-fedora ./database
-docker build -t localhost:5001/ostrea-api:latest ./api
-docker build -t localhost:5001/ostrea-frontend:latest ./frontend
-docker build -t localhost:5001/ostrea-db-init:latest -f database/init/Dockerfile ./database
-```
-
-Push to registry:
-
-```bash
-docker push localhost:5001/ostrea-db:latest
-docker push localhost:5001/ostrea-api:latest
-docker push localhost:5001/ostrea-frontend:latest
-docker push localhost:5001/ostrea-db-init:latest
-```
-
-Verify images are in the registry:
-
-```bash
-curl -s http://localhost:5001/v2/_catalog
-```
-
-Expected: `{"repositories":["ostrea-api","ostrea-db","ostrea-db-init","ostrea-frontend"]}`
 
 ## Deploy to MicroShift
 
@@ -81,7 +52,6 @@ helm template ostrea ./helm/ostrea \
   --namespace ostrea \
   --set openshift=true \
   --set restrictedSCC=true \
-  --set registry=registry:5000/ \
   --set host=localhost \
   | kubectl apply --namespace ostrea -f -
 ```
@@ -117,7 +87,6 @@ kubectl create secret generic db-secret \
 helm template ostrea ./helm/ostrea \
   --namespace ostrea \
   --set openshift=true \
-  --set registry=registry:5000/ \
   --set host=localhost \
   | kubectl apply --namespace ostrea -f -
 ```
