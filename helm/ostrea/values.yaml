@@ -1,9 +1,8 @@
-# Image registry prefix (include trailing slash if set)
-# Examples:
-#   registry: ""                    # Local images (kind, Docker Desktop)
-#   registry: "registry:5000/"      # MicroShift with registry container
-#   registry: "myregistry.io/org/"  # Remote registry
-registry: ""
+# Image repository (all component images are tags in this single repo)
+# The Docker pull path is quay.io/willirath/ostrea (NOT .../repository/...)
+image:
+  repository: quay.io/willirath/ostrea
+  pullPolicy: Always
 
 # OpenShift mode: use Routes for path-based routing
 # Set to true for MicroShift/OpenShift, false for vanilla Kubernetes (kind)
