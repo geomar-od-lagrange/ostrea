@@ -9,7 +9,7 @@ All component images are pushed to a single repository on Quay.io, distinguished
 | API | `ostrea-api-latest` | `api/Dockerfile` | `api/` |
 | Frontend | `ostrea-frontend-latest` | `frontend/Dockerfile` | `frontend/` |
 | Database (PostGIS) | `ostrea-db-latest` | `database/Dockerfile.postgis-fedora` | `database/` |
-| DB init | `ostrea-db-init-latest` | `database/init/Dockerfile` | `database/init/` |
+| DB init | `ostrea-db-init-latest` | `database/init/Dockerfile` | `database/` |
 
 ## Prerequisites
 
@@ -32,7 +32,7 @@ for component_args in \
   "ostrea-api api/" \
   "ostrea-frontend frontend/" \
   "ostrea-db -f database/Dockerfile.postgis-fedora database/" \
-  "ostrea-db-init database/init/"
+  "ostrea-db-init -f database/init/Dockerfile database/"
 do
   set -- $component_args
   NAME=$1; shift
