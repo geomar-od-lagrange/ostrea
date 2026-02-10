@@ -10,8 +10,8 @@ spec:
     spec:
       initContainers:
         - name: wait-for-db
-          image: {{ .Values.registry }}ostrea-db:latest
-          imagePullPolicy: IfNotPresent
+          image: {{ .Values.image.repository }}:ostrea-db-latest
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - sh
             - -c
@@ -32,8 +32,8 @@ spec:
         {{- end }}
       containers:
         - name: db-init
-          image: {{ .Values.registry }}ostrea-db-init:latest
-          imagePullPolicy: IfNotPresent
+          image: {{ .Values.image.repository }}:ostrea-db-init-latest
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             allowPrivilegeEscalation: false
           env:
