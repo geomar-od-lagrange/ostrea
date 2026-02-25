@@ -90,6 +90,13 @@ button:focus-visible {
   bottom: 10px;
 }
 
+.info-box-container a {
+  color: #1a5aa0;
+}
+.info-box-container a:hover {
+  color: #0d3d72;
+}
+
 .info-box-wrapper {
   position: relative;
   width: calc(100vw - 40px);

@@ -1,6 +1,6 @@
 ### Methods
 
-Lagrangian particle simulations driven by [Copernicus reanalysis currents](https://data.marine.copernicus.eu/product/NORTHWESTSHELF_ANALYSIS_FORECAST_PHY_004_013) (~1.8 km, hourly, tidal) simulate passive drift across the North-West European shelf. Simulations cover the *O. edulis* reproductive season (May–August) for 2019–2022, with ~100,000 particles released per day, totalling ~48 million trajectories.
+Lagrangian particle simulations driven by Copernicus reanalysis currents (~1.8 km, hourly, tidal) simulate passive drift across the North-West European shelf. Simulations cover the *O. edulis* reproductive season (May–August) for 2019–2022, with ~100,000 particles released per day, totalling ~48 million trajectories.
 
 Particle trajectories are pre-aggregated into connectivity components on a hexagonal grid (~10 km cell radius), enabling fast interactive exploration without re-running simulations.
 
