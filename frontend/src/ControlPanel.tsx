@@ -197,8 +197,8 @@ export default function ControlPanel({
     </fieldset>
     <hr className="control-panel-legal-divider" />
     <div className="control-panel-legal">
-      <div><a href="https://www.geomar.de/en/impressum" target="_blank" rel="noopener noreferrer">Impressum</a></div>
       <div className="control-panel-legal-credits">Map: © <a href="https://openfreemap.org" target="_blank" rel="noopener noreferrer">OpenFreeMap</a>{" · "}© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors</div>
+      <div><a href="https://www.geomar.de/en/impressum" target="_blank" rel="noopener noreferrer">Impressum</a></div>
     </div>
     </div>
   );
