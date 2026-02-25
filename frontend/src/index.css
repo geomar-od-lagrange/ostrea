@@ -250,10 +250,6 @@ button:focus-visible {
   text-decoration: underline;
 }
 
-.control-panel-legal-credits {
-  white-space: nowrap;
-}
-
 .control-panel-legal-collapsed {
   display: block;
   font-size: 11px;
