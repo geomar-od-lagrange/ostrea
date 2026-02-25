@@ -125,6 +125,32 @@ button:focus-visible {
   cursor: default;
 }
 
+.info-box-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.info-box-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: inherit;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 2px 4px;
+  opacity: 0.6;
+  line-height: 1;
+  border-radius: 0;
+}
+
+.info-box-tab-btn[aria-selected="true"] {
+  border-bottom-color: currentColor;
+  opacity: 1;
+  font-weight: 600;
+}
+
 .info-box-content {
   max-height: 300px;
   overflow-y: auto;

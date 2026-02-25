@@ -3,14 +3,27 @@ import Markdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
-import infoText from "./info.md?raw";
+import aboutText from "./info-about.md?raw";
+import methodsText from "./info-methods.md?raw";
 
 type InfoBoxState = "collapsed" | "normal" | "maximized";
+type Tab = "about" | "methods";
+
+const mdProps = {
+  remarkPlugins: [remarkMath],
+  rehypePlugins: [rehypeKatex],
+  components: {
+    img: ({ ...props }) => (
+      <img {...props} style={{ maxWidth: "70%", height: "auto", display: "block" }} />
+    ),
+  },
+};
 
 export default function InfoBox() {
   const [state, setState] = React.useState<InfoBoxState>(() =>
     window.innerWidth <= 480 ? "collapsed" : "normal"
   );
+  const [tab, setTab] = React.useState<Tab>("about");
 
   if (state === "collapsed") {
     return (
@@ -42,17 +55,21 @@ export default function InfoBox() {
         >□</button>
         <button onClick={() => setState("collapsed")} className="info-box-btn" title="Close">✕</button>
       </div>
+      <div className="info-box-tabs">
+        <button
+          className="info-box-tab-btn"
+          aria-selected={tab === "about"}
+          onClick={() => setTab("about")}
+        >About</button>
+        <button
+          className="info-box-tab-btn"
+          aria-selected={tab === "methods"}
+          onClick={() => setTab("methods")}
+        >Methods</button>
+      </div>
       <div className="info-box-content" data-state={state}>
-        <Markdown
-          remarkPlugins={[remarkMath]}
-          rehypePlugins={[rehypeKatex]}
-          components={{
-            img: ({ ...props }) => (
-              <img {...props} style={{ maxWidth: "70%", height: "auto", display: "block" }} />
-            ),
-          }}
-        >
-          {infoText}
+        <Markdown {...mdProps}>
+          {tab === "about" ? aboutText : methodsText}
         </Markdown>
       </div>
     </div>
