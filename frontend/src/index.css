@@ -232,6 +232,32 @@ button:focus-visible {
 }
 
 
+.control-panel-legal-divider {
+  border: none;
+  border-top: 1px solid currentColor;
+  opacity: 0.2;
+  margin: 8px 0 6px;
+}
+
+.control-panel-legal {
+  font-size: 11px;
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+.control-panel-legal a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.control-panel-legal-collapsed {
+  display: block;
+  font-size: 11px;
+  color: inherit;
+  opacity: 0.7;
+  text-decoration: underline;
+}
+
 /* Vertical responsive: short viewport */
 @media (max-height: 820px) {
   .control-panel-container {
