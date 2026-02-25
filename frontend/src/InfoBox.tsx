@@ -56,14 +56,6 @@ export default function InfoBox() {
 
   return (
     <div className="info-box-wrapper" data-state={state}>
-      <div className="info-box-buttons">
-        <button
-          onClick={() => setState(state === "normal" ? "maximized" : "normal")}
-          className="info-box-btn"
-          title={state === "normal" ? "Maximize" : "Normal size"}
-        >□</button>
-        <button onClick={() => setState("collapsed")} className="info-box-btn" title="Close">✕</button>
-      </div>
       <div className="info-box-tabs">
         {TABS.map(t => (
           <button
@@ -73,6 +65,14 @@ export default function InfoBox() {
             onClick={() => setTab(t.id)}
           >{t.label}</button>
         ))}
+        <div style={{ marginLeft: "auto", display: "flex" }}>
+          <button
+            onClick={() => setState(state === "normal" ? "maximized" : "normal")}
+            className="info-box-btn"
+            title={state === "normal" ? "Maximize" : "Normal size"}
+          >□</button>
+          <button onClick={() => setState("collapsed")} className="info-box-btn" title="Close">✕</button>
+        </div>
       </div>
       <div className="info-box-content" data-state={state}>
         <Markdown {...mdProps}>

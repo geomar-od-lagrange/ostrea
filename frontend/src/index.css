@@ -100,14 +100,6 @@ button:focus-visible {
   max-width: 700px;
 }
 
-.info-box-buttons {
-  position: absolute;
-  top: 0;
-  right: 14px;
-  z-index: 1;
-  display: flex;
-  gap: 0;
-}
 
 .info-box-btn {
   background: transparent;
