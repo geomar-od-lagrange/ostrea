@@ -19,7 +19,7 @@ $$C_{\mathrm{target}} = \frac{N_{\mathrm{obsh}}}{N \cdot DT_{\mathrm{h}}}$$
 $N_{\mathrm{obsh}}$: cumulative particle-hours in target cell;
 $N$: particles released at source;
 $DT_{\mathrm{h}}$: window duration in hours.
-$C_{\mathrm{target}} \in [0,1]$ scales absolute pathogen load at source to expected concentration at target.
+$C_{\mathrm{target}} \in [0,1]$ is a relative concentration: multiplied by the pathogen load at the source, it gives the expected concentration at the target.
 
 **Important:** this metric quantifies potential co-location exposure, not infection probability or disease outcome.
 
