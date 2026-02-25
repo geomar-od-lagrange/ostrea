@@ -8,6 +8,14 @@ Connectivity data: [hdl.handle.net/20.500.12085/…](https://hdl.handle.net/20.5
 
 Analysis code: [doi.org/10.5281/zenodo.17061788](https://doi.org/10.5281/zenodo.17061788)
 
+Ocean currents: [Copernicus Marine Service NORTHWESTSHELF\_ANALYSIS\_FORECAST\_PHY\_004\_013](https://data.marine.copernicus.eu/product/NORTHWESTSHELF_ANALYSIS_FORECAST_PHY_004_013)
+
+Lagrangian simulations: [parcels-code.org](https://parcels-code.org)
+
+### Map
+
+© [OpenFreeMap](https://openfreemap.org) · © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors
+
 ### Tool contributors
 
 Willi Rath, Ingmar Eissfeldt, Felix Kirch, Lara Schmittmann

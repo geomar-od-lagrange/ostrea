@@ -51,31 +51,21 @@ export default function ControlPanel({
 
   if (collapsed) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
-        <button
-          onClick={() => setCollapsed(false)}
-          style={{
-            background: "transparent",
-            border: "none",
-            color: theme.ui.controlPanel.text,
-            fontSize: 12,
-            lineHeight: 1,
-            cursor: "pointer",
-            padding: 0,
-          }}
-          title="Show controls"
-        >
-          Controls
-        </button>
-        <a
-          href="https://www.geomar.de/en/impressum"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="control-panel-legal-collapsed"
-        >
-          Impressum
-        </a>
-      </div>
+      <button
+        onClick={() => setCollapsed(false)}
+        style={{
+          background: "transparent",
+          border: "none",
+          color: theme.ui.controlPanel.text,
+          fontSize: 12,
+          lineHeight: 1,
+          cursor: "pointer",
+          padding: 0,
+        }}
+        title="Show controls"
+      >
+        Controls
+      </button>
     );
   }
 
@@ -195,12 +185,6 @@ export default function ControlPanel({
       </div>
 
     </fieldset>
-    <hr className="control-panel-legal-divider" />
-    <div className="control-panel-legal">
-      <div style={{ whiteSpace: "nowrap" }}>© <a href="https://openfreemap.org" target="_blank" rel="noopener noreferrer">OpenFreeMap</a></div>
-      <div style={{ whiteSpace: "nowrap" }}>© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors</div>
-      <div><a href="https://www.geomar.de/en/impressum" target="_blank" rel="noopener noreferrer">Impressum</a></div>
-    </div>
     </div>
   );
 }
