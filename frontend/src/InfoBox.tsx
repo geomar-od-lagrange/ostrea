@@ -6,23 +6,21 @@ import "katex/dist/katex.min.css";
 import aboutText from "./info-about.md?raw";
 import methodsText from "./info-methods.md?raw";
 import creditsText from "./info-credits.md?raw";
-import impressumText from "./info-impressum.md?raw";
+
 
 type InfoBoxState = "collapsed" | "normal" | "maximized";
-type Tab = "about" | "methods" | "credits" | "impressum";
+type Tab = "about" | "methods" | "credits";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "about", label: "About" },
   { id: "methods", label: "Methods" },
   { id: "credits", label: "Credits" },
-  { id: "impressum", label: "Impressum" },
 ];
 
 const TAB_CONTENT: Record<Tab, string> = {
   about: aboutText,
   methods: methodsText,
   credits: creditsText,
-  impressum: impressumText,
 };
 
 const mdProps = {
@@ -65,6 +63,13 @@ export default function InfoBox() {
             onClick={() => setTab(t.id)}
           >{t.label}</button>
         ))}
+        <a
+          href="https://www.geomar.de/en/impressum"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="info-box-tab-btn"
+          style={{ textDecoration: "none" }}
+        >Impressum</a>
         <div style={{ marginLeft: "auto", display: "flex" }}>
           <button
             onClick={() => setState(state === "normal" ? "maximized" : "normal")}
