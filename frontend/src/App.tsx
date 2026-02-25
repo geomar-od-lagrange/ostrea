@@ -48,7 +48,7 @@ interface FeatureCollection {
 
 function App() {
   const [selectedDepths, setSelectedDepths] = useState<string[]>(['05m']);
-  const [selectedTimes, setSelectedTimes] = useState<string[]>(['00d-07d']);
+  const [selectedTimes, setSelectedTimes] = useState<string[]>(['07d-14d']);
   const [feature, setFeature] = useState<FeatureCollection | null>(null);
   const [metadata, setMetadata] = useState<Record<number, Metadata> | null>(null);
 
@@ -250,11 +250,11 @@ function App() {
           },
           getFillColor: (d: any) => {
             const id = d.properties.id;
-            if (isHabitableShown && metadata && (metadata[id]?.depth ?? 0) > 85) return theme.highlight.deepWater;
             if (id === hoveredId) return theme.hex.hovered;
             if (clickIds.includes(id)) return [...theme.highlight.selected] as [number, number, number, number];
             const w = weightMap.get(id);
             if (w !== undefined) return theme.hex.getWeightColor(w);
+            if (isHabitableShown && metadata && (metadata[id]?.depth ?? 0) > 85) return theme.highlight.deepWater;
             return theme.hex.default;
           },
         }),
