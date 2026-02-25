@@ -43,6 +43,31 @@ do
 done
 ```
 
+## Build and push staging images
+
+The staging deployment uses `*-staging` tags. When only one component changes,
+build that component fresh and retag the rest from `latest` using
+`docker buildx imagetools create` (copies the manifest list, no layer re-upload):
+
+```bash
+REPO=quay.io/willirath/ostrea
+GIT_REF=$(git rev-parse --short HEAD)
+
+# Build the changed component (e.g. frontend)
+docker build --platform linux/amd64,linux/arm64 \
+  -t $REPO:ostrea-frontend-staging \
+  -t $REPO:ostrea-frontend-${GIT_REF} \
+  --push \
+  frontend/
+
+# Retag unchanged components from latest → staging
+for NAME in ostrea-api ostrea-db ostrea-db-init; do
+  docker buildx imagetools create -t $REPO:${NAME}-staging $REPO:${NAME}-latest
+done
+```
+
+See [oc-deploy.md](oc-deploy.md) for how to deploy with `--set image.tag=staging`.
+
 ## Helm chart integration
 
 The chart pulls from the same registry via `image.repository` and `image.tag` in `values.yaml`:

@@ -43,7 +43,8 @@ The Helm chart (`helm/ostrea`) supports both vanilla K8s (kind) and OpenShift (M
 Images are pulled from Quay.io (`quay.io/willirath/ostrea`).
 
 See docs:
-- [docs/image-building.md](docs/image-building.md) - Building and pushing images
+- [docs/image-building.md](docs/image-building.md) - Building and pushing images (incl. staging tags)
+- [docs/oc-deploy.md](docs/oc-deploy.md) - OpenShift deployment (staging + production)
 - [docs/kind-deployment-test.md](docs/kind-deployment-test.md) - kind deployment (vanilla K8s)
 - [docs/microshift-setup.md](docs/microshift-setup.md) - MicroShift cluster setup
 - [docs/microshift-deployment-test.md](docs/microshift-deployment-test.md) - MicroShift deployment
