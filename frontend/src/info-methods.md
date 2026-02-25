@@ -22,13 +22,3 @@ $DT_{\mathrm{h}}$: window duration in hours.
 $C_{\mathrm{target}} \in [0,1]$ is a relative concentration: multiplied by the pathogen load at the source, it gives the expected concentration at the target.
 
 **Important:** this metric quantifies potential co-location exposure, not infection probability or disease outcome.
-
----
-
-Connectivity data: [hdl.handle.net/20.500.12085/…](https://hdl.handle.net/20.500.12085/11cc2d8f-4039-49d3-aaab-04ce0fb23190)
-
-Analysis code: [doi.org/10.5281/zenodo.17061788](https://doi.org/10.5281/zenodo.17061788)
-
-Manuscript: [doi.org/10.1038/s43247-026-03319-z](https://doi.org/10.1038/s43247-026-03319-z)
-
-**Contributors:** Willi Rath, Ingmar Eissfeldt, Felix Kirch, Lara Schmittmann

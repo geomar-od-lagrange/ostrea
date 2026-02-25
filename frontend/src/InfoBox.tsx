@@ -5,9 +5,25 @@ import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import aboutText from "./info-about.md?raw";
 import methodsText from "./info-methods.md?raw";
+import creditsText from "./info-credits.md?raw";
+import impressumText from "./info-impressum.md?raw";
 
 type InfoBoxState = "collapsed" | "normal" | "maximized";
-type Tab = "about" | "methods";
+type Tab = "about" | "methods" | "credits" | "impressum";
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: "about", label: "About" },
+  { id: "methods", label: "Methods" },
+  { id: "credits", label: "Credits" },
+  { id: "impressum", label: "Impressum" },
+];
+
+const TAB_CONTENT: Record<Tab, string> = {
+  about: aboutText,
+  methods: methodsText,
+  credits: creditsText,
+  impressum: impressumText,
+};
 
 const mdProps = {
   remarkPlugins: [remarkMath],
@@ -29,18 +45,11 @@ export default function InfoBox() {
     return (
       <button
         onClick={() => setState("normal")}
-        style={{
-          background: "transparent",
-          border: "none",
-          color: "inherit",
-          fontSize: 12,
-          lineHeight: 1,
-          cursor: "pointer",
-          padding: 0,
-        }}
+        className="info-box-tab-btn"
+        style={{ opacity: 1, padding: 0 }}
         title="Show info"
       >
-        Info
+        About
       </button>
     );
   }
@@ -56,20 +65,18 @@ export default function InfoBox() {
         <button onClick={() => setState("collapsed")} className="info-box-btn" title="Close">✕</button>
       </div>
       <div className="info-box-tabs">
-        <button
-          className="info-box-tab-btn"
-          aria-selected={tab === "about"}
-          onClick={() => setTab("about")}
-        >About</button>
-        <button
-          className="info-box-tab-btn"
-          aria-selected={tab === "methods"}
-          onClick={() => setTab("methods")}
-        >Methods</button>
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            className="info-box-tab-btn"
+            aria-selected={tab === t.id}
+            onClick={() => setTab(t.id)}
+          >{t.label}</button>
+        ))}
       </div>
       <div className="info-box-content" data-state={state}>
         <Markdown {...mdProps}>
-          {tab === "about" ? aboutText : methodsText}
+          {TAB_CONTENT[tab]}
         </Markdown>
       </div>
     </div>

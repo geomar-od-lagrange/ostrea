@@ -2,6 +2,8 @@
 
 **Oyster Spatio-Temporal Dispersal Atlas** — an interactive tool to explore dispersal of European flat oyster (*Ostrea edulis*) larvae and the pathogen *Bonamia ostreae*. Results from biophysical dispersal simulations are visualized for open exploration.
 
+![Connectivity](/methods.png)
+
 ### Why?
 
 European flat oysters were once widespread but are now locally extinct in many areas due to overharvesting, habitat destruction, and disease. Active reef restoration is underway through more than 40 projects coordinated by the [Native Oyster Restoration Alliance (NORA)](https://noraeurope.eu/).
@@ -15,3 +17,7 @@ European flat oysters were once widespread but are now locally extinct in many a
 - Use **Depth** and **Time range** to filter dispersal scenarios
 - Toggle **Highlights** to show aquaculture, restoration, and outbreak sites
 - Click **clear** to deselect all hexes
+
+---
+
+Schmittmann et al. (2026). *Pathogen dispersal can lead to high exposure risk at European flat oyster restoration sites.* Commun. Earth Environ. [doi.org/10.1038/s43247-026-03319-z](https://doi.org/10.1038/s43247-026-03319-z)
