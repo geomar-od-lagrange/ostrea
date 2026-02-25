@@ -10,10 +10,11 @@ European flat oysters were once widespread but are now locally extinct in many a
 
 ### How to use
 
-- **Click a hex** to select it as a source location
+- **Click a hex** to select it as a source location; click again to deselect
 - **Multi-select** by clicking additional hexes
 - Use **Depth** and **Time range** to filter dispersal scenarios
 - Toggle **Highlights** to show aquaculture, restoration, and outbreak sites
+- Toggle **Habitable (≤85m)** to dim hexes in water deeper than 85 m
 - Click **clear** to deselect all hexes
 
 ---

@@ -12,7 +12,9 @@ interface ControlPanelProps {
   isRestHighlighted: boolean;
   onRestChange: (newRest: boolean) => void;
   isDiseaseHighlighted: boolean;
-  onDiseaseChange: (newDisease: boolean) => void; 
+  onDiseaseChange: (newDisease: boolean) => void;
+  isHabitableShown: boolean;
+  onHabitableChange: (v: boolean) => void;
 }
 
 const depths = ["05m", "10m", "15m"];
@@ -33,7 +35,9 @@ export default function ControlPanel({
   isRestHighlighted,
   onRestChange,
   isDiseaseHighlighted,
-  onDiseaseChange
+  onDiseaseChange,
+  isHabitableShown,
+  onHabitableChange,
 }: ControlPanelProps) {
   const [collapsed, setCollapsed] = React.useState(() => window.innerWidth <= 480);
 
@@ -180,6 +184,16 @@ export default function ControlPanel({
               onChange={(e) => onDiseaseChange(e.target.checked)}
             />
             <span style={{ color: theme.colors.disease, fontWeight: 600 }}>Outbreaks</span>
+          </label>
+
+          <label className="control-panel-option">
+            <input
+              type="checkbox"
+              name="habitable"
+              checked={isHabitableShown}
+              onChange={(e) => onHabitableChange(e.target.checked)}
+            />
+            <span>Habitable (≤85m)</span>
           </label>
         </div>
       </div>

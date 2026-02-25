@@ -108,6 +108,7 @@ export const theme = {
     restoration: hexToRgba(colors.restoration) as RGBA,
     disease: hexToRgba(colors.disease) as RGBA,
     selected: hexToRgba(colors.selected) as RGBA,
+    deepWater: [70, 70, 70, 120] as RGBA,
   },
 
 

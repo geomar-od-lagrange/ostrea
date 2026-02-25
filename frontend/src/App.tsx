@@ -24,7 +24,7 @@ interface Metadata {
   id: number;
   lon: number;
   lat: number;
-  depth: string;
+  depth: number;
   disease: number;
   rest: number;
   aqc: number;
@@ -48,7 +48,7 @@ interface FeatureCollection {
 
 function App() {
   const [selectedDepths, setSelectedDepths] = useState<string[]>(['05m']);
-  const [selectedTimes, setSelectedTimes] = useState<string[]>(['00d-07d']);
+  const [selectedTimes, setSelectedTimes] = useState<string[]>(['07d-14d']);
   const [feature, setFeature] = useState<FeatureCollection | null>(null);
   const [metadata, setMetadata] = useState<Record<number, Metadata> | null>(null);
 
@@ -58,6 +58,7 @@ function App() {
   const [isAQCHighlighted, setAQC] = useState<boolean>(true);
   const [isRestHighlighted, setRest] = useState<boolean>(true);
   const [isDiseaseHighlighted, setDisease] = useState<boolean>(true);
+  const [isHabitableShown, setHabitable] = useState<boolean>(true);
   
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [clickIds, setClickIds] = useState<number[]>([]);
@@ -235,23 +236,29 @@ function App() {
           ...commonLayerProps,
           ...interactionHandlers,
           updateTriggers: {
-            getFillColor: [hoveredId, weightMap, clickIds],
-            getElevation: [weightMap, clickIds],
+            getFillColor: [hoveredId, weightMap, clickIds, isHabitableShown],
+            getElevation: [weightMap, clickIds, isHabitableShown],
           },
           getElevation: (d: any) => {
             const id = d.properties.id;
+            if (isHabitableShown && metadata && (metadata[id]?.depth ?? 0) > 85) return 0;
             const w = weightMap.get(id);
             const isSelected = clickIds.includes(id);
             if (w !== undefined) return theme.elevation.getElevation(w);
-            if (isSelected) return catHeight; // Give selected hexes some height
+            if (isSelected) return catHeight;
             return theme.elevation.default;
           },
           getFillColor: (d: any) => {
             const id = d.properties.id;
+            const isDeep = isHabitableShown && metadata && (metadata[id]?.depth ?? 0) > 85;
             if (id === hoveredId) return theme.hex.hovered;
             if (clickIds.includes(id)) return [...theme.highlight.selected] as [number, number, number, number];
             const w = weightMap.get(id);
-            if (w !== undefined) return theme.hex.getWeightColor(w);
+            if (w !== undefined) {
+              const c = theme.hex.getWeightColor(w);
+              return isDeep ? [Math.round(c[0]*0.45+70*0.55), Math.round(c[1]*0.45+70*0.55), Math.round(c[2]*0.45+70*0.55), c[3]] as [number,number,number,number] : c;
+            }
+            if (isDeep) return theme.highlight.deepWater;
             return theme.hex.default;
           },
         }),
@@ -351,6 +358,8 @@ function App() {
           onRestChange={setRest}
           isDiseaseHighlighted={isDiseaseHighlighted}
           onDiseaseChange={setDisease}
+          isHabitableShown={isHabitableShown}
+          onHabitableChange={setHabitable}
         />
       </div>
 
