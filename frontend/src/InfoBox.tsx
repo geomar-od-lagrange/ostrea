@@ -41,14 +41,23 @@ export default function InfoBox() {
 
   if (state === "collapsed") {
     return (
-      <button
-        onClick={() => setState("normal")}
-        className="info-box-tab-btn"
-        style={{ opacity: 1, padding: 0 }}
-        title="Show info"
-      >
-        About
-      </button>
+      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <button
+          onClick={() => setState("normal")}
+          className="info-box-tab-btn"
+          style={{ opacity: 1, padding: 0 }}
+          title="Show info"
+        >
+          About
+        </button>
+        <a
+          href="https://www.geomar.de/en/impressum"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="info-box-tab-btn"
+          style={{ opacity: 1, padding: 0, textDecoration: "none" }}
+        >Impressum</a>
+      </div>
     );
   }
 
