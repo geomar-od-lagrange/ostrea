@@ -250,11 +250,15 @@ function App() {
           },
           getFillColor: (d: any) => {
             const id = d.properties.id;
+            const isDeep = isHabitableShown && metadata && (metadata[id]?.depth ?? 0) > 85;
             if (id === hoveredId) return theme.hex.hovered;
             if (clickIds.includes(id)) return [...theme.highlight.selected] as [number, number, number, number];
             const w = weightMap.get(id);
-            if (w !== undefined) return theme.hex.getWeightColor(w);
-            if (isHabitableShown && metadata && (metadata[id]?.depth ?? 0) > 85) return theme.highlight.deepWater;
+            if (w !== undefined) {
+              const c = theme.hex.getWeightColor(w);
+              return isDeep ? [Math.round(c[0]*0.45+70*0.55), Math.round(c[1]*0.45+70*0.55), Math.round(c[2]*0.45+70*0.55), c[3]] as [number,number,number,number] : c;
+            }
+            if (isDeep) return theme.highlight.deepWater;
             return theme.hex.default;
           },
         }),
