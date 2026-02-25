@@ -24,7 +24,7 @@ interface Metadata {
   id: number;
   lon: number;
   lat: number;
-  depth: string;
+  depth: number;
   disease: number;
   rest: number;
   aqc: number;
