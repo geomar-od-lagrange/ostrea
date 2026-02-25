@@ -14,3 +14,6 @@ __pycache__/
 
 # Local tooling
 .local/
+
+# Manuscript drafts (local only)
+tmp_manuscript/
