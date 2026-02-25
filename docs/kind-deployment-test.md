@@ -14,9 +14,10 @@ Test the OSTREA Helm chart on a local Kubernetes cluster using [kind](https://ki
 | Feature | kind | MicroShift |
 |---------|------|------------|
 | Kubernetes flavor | Vanilla K8s | OpenShift-compatible |
-| Image loading | Direct from Docker | Requires registry |
 | Path routing | nginx deployment | OpenShift Routes |
 | Setup complexity | Simple | More complex |
+
+All environments pull images from Quay.io (see [image-building.md](image-building.md)).
 
 The Helm chart includes both OpenShift Routes (for MicroShift) and an nginx deployment (for kind/vanilla K8s). Use `kubectl port-forward` to access the nginx service.
 
@@ -41,23 +42,6 @@ Verify:
 
 ```bash
 kubectl cluster-info --context kind-ostrea
-```
-
-## Load Images
-
-Build the database image (see [microshift-deployment-test.md](microshift-deployment-test.md#database-image-ostrea-db) for background):
-
-```bash
-docker build -t ostrea-db:latest -f database/Dockerfile.postgis-fedora ./database
-```
-
-kind can load images directly from Docker (no registry needed):
-
-```bash
-kind load docker-image ostrea-db:latest --name ostrea
-kind load docker-image ostrea-api:latest --name ostrea
-kind load docker-image ostrea-frontend:latest --name ostrea
-kind load docker-image ostrea-db-init:latest --name ostrea
 ```
 
 ## Deploy with Helm

@@ -10,11 +10,16 @@ spec:
   host: {{ .Values.host }}
 {{- end }}
   path: /api
+  port:
+    targetPort: http
+{{- if .Values.route.tls.termination }}
+  tls:
+    termination: {{ .Values.route.tls.termination }}
+{{- end }}
   to:
     kind: Service
     name: api
-  port:
-    targetPort: 3000
+  wildcardPolicy: None
 ---
 apiVersion: route.openshift.io/v1
 kind: Route
@@ -24,9 +29,14 @@ spec:
 {{- if .Values.host }}
   host: {{ .Values.host }}
 {{- end }}
+  port:
+    targetPort: http
+{{- if .Values.route.tls.termination }}
+  tls:
+    termination: {{ .Values.route.tls.termination }}
+{{- end }}
   to:
     kind: Service
     name: frontend
-  port:
-    targetPort: 8080
+  wildcardPolicy: None
 {{- end }}
