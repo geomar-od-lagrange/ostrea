@@ -58,6 +58,7 @@ function App() {
   const [isAQCHighlighted, setAQC] = useState<boolean>(true);
   const [isRestHighlighted, setRest] = useState<boolean>(true);
   const [isDiseaseHighlighted, setDisease] = useState<boolean>(true);
+  const [isHabitableShown, setHabitable] = useState<boolean>(true);
   
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [clickIds, setClickIds] = useState<number[]>([]);
@@ -235,19 +236,21 @@ function App() {
           ...commonLayerProps,
           ...interactionHandlers,
           updateTriggers: {
-            getFillColor: [hoveredId, weightMap, clickIds],
-            getElevation: [weightMap, clickIds],
+            getFillColor: [hoveredId, weightMap, clickIds, isHabitableShown],
+            getElevation: [weightMap, clickIds, isHabitableShown],
           },
           getElevation: (d: any) => {
             const id = d.properties.id;
+            if (isHabitableShown && metadata && (metadata[id]?.depth ?? 0) > 85) return 0;
             const w = weightMap.get(id);
             const isSelected = clickIds.includes(id);
             if (w !== undefined) return theme.elevation.getElevation(w);
-            if (isSelected) return catHeight; // Give selected hexes some height
+            if (isSelected) return catHeight;
             return theme.elevation.default;
           },
           getFillColor: (d: any) => {
             const id = d.properties.id;
+            if (isHabitableShown && metadata && (metadata[id]?.depth ?? 0) > 85) return theme.highlight.deepWater;
             if (id === hoveredId) return theme.hex.hovered;
             if (clickIds.includes(id)) return [...theme.highlight.selected] as [number, number, number, number];
             const w = weightMap.get(id);
@@ -351,6 +354,8 @@ function App() {
           onRestChange={setRest}
           isDiseaseHighlighted={isDiseaseHighlighted}
           onDiseaseChange={setDisease}
+          isHabitableShown={isHabitableShown}
+          onHabitableChange={setHabitable}
         />
       </div>
 
