@@ -30,3 +30,5 @@ Connectivity data: [hdl.handle.net/20.500.12085/…](https://hdl.handle.net/20.5
 Analysis code: [doi.org/10.5281/zenodo.17061788](https://doi.org/10.5281/zenodo.17061788)
 
 Manuscript: [doi.org/10.1038/s43247-026-03319-z](https://doi.org/10.1038/s43247-026-03319-z)
+
+**Contributors:** Willi Rath, Ingmar Eissfeldt, Felix Kirch, Lara Schmittmann
