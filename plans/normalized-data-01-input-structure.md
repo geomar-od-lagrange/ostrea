@@ -24,9 +24,11 @@ Each file ~11 GB. All 9 are structurally identical.
 **On hex0 vs hex1 size:** N(hex0) and N(hex1) are not equal and may differ slightly across
 files. This is because random initial positions and land-killing of particles creates
 roundoff noise at hex edges — not all source hexes emit particles in every file.
-There is exactly **one** invalid target hex in hex1 (the out-of-domain escape hex, labeled
-with a special value in the hextraj coordinate system — see below). The full set of valid
-hexes is obtained by taking the union of hex0 and hex1 labels across all 9 files.
+There is exactly **one** invalid target hex in hex1 (the out-of-domain escape hex). Its
+label is `(0, 0, 0)` — `INTNaN` in hextraj is `np.array(np.nan).astype(int)` which
+evaluates to `0`, so the escape hex gets coords `(0, 0, 0)`. Exclude rows where
+`hex1 == b'(0, 0, 0)'` from output. The full set of valid hexes is obtained by taking
+the union of hex0 and hex1 labels across all 9 files.
 
 **On month/year aggregation:** For the current dashboard we average over both month and
 year. Since `obs` is a count, we can simply `sum(month, year)` — no weighting needed,
@@ -40,7 +42,7 @@ seasonal/interannual variability investigation.
 |------------|---------|-------|
 | hex0       | (hex0)  | byte-string label in hextraj format, e.g. `b'(-1, -19, 20)'` |
 | hex1       | (hex1)  | same format |
-| hex_label  | (hex0)  | TBC: may be duplicate of hex0 coordinate |
+| hex_label  | (hex0)  | same values as hex0 but unicode `<U14` dtype vs byte-string `\|S64`; used as join key in analysis code |
 | lon_hex0   | (hex0)  | centroid longitude |
 | lat_hex0   | (hex0)  | centroid latitude |
 | lon_hex1   | (hex1)  | centroid longitude |
@@ -87,7 +89,7 @@ Each exists in a `_hex0` and `_hex1` variant.
 | pop_count        | (hexN) | wild/current population sites per hex |
 | dss_count        | (hexN) | disease surveillance / *B. ostreae*-positive sites per hex |
 | his_count        | (hexN) | historical *O. edulis* bed sites per hex (Thurstan et al. 2024) |
-| hly_count        | (hexN) | *B. ostreae*-free / healthy sites per hex — used as habitable override alongside depth |
+| hly_count        | (hexN) | *B. ostreae*-free ("healthy") sites per hex — derived from same source as `dss_count` but where `infected == False`; used as habitable override |
 
 **Normalization (from manuscript):** "The number of particle positions at the target site
 was normalized by the area of the source hexagon to account for coastal hexagons that
@@ -122,5 +124,4 @@ files to ensure complete coverage.
 
 ## Open Questions
 
-- [ ] Is `hex_label` identical to `hex0` coordinate, or different?
-- [ ] Identify the hextraj invalid-hex label value (to exclude from output)
+None outstanding.
