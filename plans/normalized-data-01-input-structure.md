@@ -66,10 +66,9 @@ all files to capture hexes that appear in only some files.
 |------|-------------------------------|-------|
 | obs  | (month, year, hex0, hex1)     | raw particle counts; sparse (mostly NaN); ~11 GB |
 
-`obs(month, year, hex0, hex1)` counts particles released from hex0 that arrived in hex1
-within the time window, for a given simulation month and year.
-**Confirm from manuscript:** exact definition (are these per-release counts? per unit area?
-normalized in any way already?).
+`obs(month, year, hex0, hex1)` counts particle *positions* (not unique particles) from
+source hex0 found in target hex1 within the time window, for a given simulation month and
+year. Raw counts — not yet normalized by source area or target area.
 
 ### Per-hex metadata
 
@@ -83,16 +82,25 @@ Each exists in a `_hex0` and `_hex1` variant.
 | depth_mean       | (hexN) | mean depth of wet gridboxes |
 | depth_median     | (hexN) | median depth of wet gridboxes |
 | depth_std        | (hexN) | std of depth of wet gridboxes |
-| aqc_count        | (hexN) | aquaculture sites per hex |
-| rst_count        | (hexN) | restoration sites per hex |
-| pop_count        | (hexN) | wild population sites per hex |
-| dss_count        | (hexN) | disease surveillance sites per hex |
-| hly_count        | (hexN) | unknown — TBC |
-| his_count        | (hexN) | unknown — TBC |
+| aqc_count        | (hexN) | aquaculture (*O. edulis*) sites per hex |
+| rst_count        | (hexN) | restoration sites (NORA projects) per hex |
+| pop_count        | (hexN) | wild/current population sites per hex |
+| dss_count        | (hexN) | disease surveillance / *B. ostreae*-positive sites per hex |
+| his_count        | (hexN) | historical *O. edulis* bed sites per hex (Thurstan et al. 2024) |
+| hly_count        | (hexN) | unknown — not described in manuscript |
 
-**Normalization:** `water_fraction` is present and the formula from
-`normalized-data-00-preproc.md` applies. Confirm exact formula against manuscript before
-implementing.
+**Normalization (from manuscript):** "The number of particle positions at the target site
+was normalized by the area of the source hexagon to account for coastal hexagons that
+partially overlapped with land and thus released fewer particles." In practice this means
+dividing by `water_fraction_hex0` (proxy for effective source area) and by
+`water_fraction_hex1` (to get concentration at target). Formula from
+`normalized-data-00-preproc.md` stands:
+
+```
+F = (obs / N_hex0) * (wf_hex0 / wf_hex1)
+```
+
+where `N_hex0 = sum(obs over all hex1)` including the escape hex.
 
 **Depth-based habitable filtering (future issue):** The current app uses a ≤85m depth
 threshold on median/mean depth. For steep-shelf areas (e.g. Norwegian coast), these
@@ -114,8 +122,6 @@ files to ensure complete coverage.
 
 ## Open Questions
 
-- [ ] Confirm exact definition of `obs` against manuscript
-- [ ] Confirm normalization formula against manuscript
 - [ ] Is `hex_label` identical to `hex0` coordinate, or different?
-- [ ] What do `hly_count` and `his_count` stand for?
+- [ ] What does `hly_count` stand for?
 - [ ] Identify the hextraj invalid-hex label value (to exclude from output)
