@@ -87,7 +87,7 @@ Each exists in a `_hex0` and `_hex1` variant.
 | pop_count        | (hexN) | wild/current population sites per hex |
 | dss_count        | (hexN) | disease surveillance / *B. ostreae*-positive sites per hex |
 | his_count        | (hexN) | historical *O. edulis* bed sites per hex (Thurstan et al. 2024) |
-| hly_count        | (hexN) | unknown — not described in manuscript |
+| hly_count        | (hexN) | *B. ostreae*-free / healthy sites per hex — used as habitable override alongside depth |
 
 **Normalization (from manuscript):** "The number of particle positions at the target site
 was normalized by the area of the source hexagon to account for coastal hexagons that
@@ -123,5 +123,4 @@ files to ensure complete coverage.
 ## Open Questions
 
 - [ ] Is `hex_label` identical to `hex0` coordinate, or different?
-- [ ] What does `hly_count` stand for?
 - [ ] Identify the hextraj invalid-hex label value (to exclude from output)
