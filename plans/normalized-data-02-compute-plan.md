@@ -74,9 +74,26 @@ depth:    string   — e.g. "05m"
 weight:   float64  — F value
 ```
 
+## Data access
+
+The published files at `data.geomar.de` are **uncompressed** (~11 GB each, ~100 GB total)
+— deflate was not applied before publication. OPeNDAP would transfer 100 GB of mostly NaN;
+not practical. Processing runs on the GEOMAR cluster where the original files are local:
+
+```
+/gxfs_work/geomar/smomw400/git_projects/2022_north-sea_oysters/output_data/
+  040_connectivity_analysis_{05m,10m,15m}/
+    040_connectivity_analysis_{depth}_{time}.nc
+```
+
+The notebook uses OPeNDAP URLs for development/inspection only (metadata, small slices).
+Swap `BASE_URL` for the local path when running the full processing on the cluster.
+
+**Future:** re-publish with deflate compression — files would shrink to a few hundred MB each.
+
 ## Processing steps
 
-1. Load all 9 files via OPeNDAP (metadata only — lazy loading)
+1. Open all 9 files (local paths on cluster; OPeNDAP for dev)
 2. Build global hex label → int ID mapping from union of all hex0/hex1 labels
 3. For each file:
    a. Sum obs over month and year
@@ -96,3 +113,5 @@ weight:   float64  — F value
   and were generated from old test data — we regenerate both alongside `connectivity.pq`
 
 YOUR NOTES:
+
+:+1:
