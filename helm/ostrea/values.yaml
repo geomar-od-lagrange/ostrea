@@ -1,9 +1,11 @@
-# Image registry prefix (include trailing slash if set)
-# Examples:
-#   registry: ""                    # Local images (kind, Docker Desktop)
-#   registry: "registry:5000/"      # MicroShift with registry container
-#   registry: "myregistry.io/org/"  # Remote registry
-registry: ""
+# Image repository (all component images are tags in this single repo)
+# The Docker pull path is quay.io/willirath/ostrea (NOT .../repository/...)
+image:
+  repository: quay.io/willirath/ostrea
+  # Tag suffix appended to component tags (e.g. ostrea-api-<tag>).
+  # Default "latest"; set to a short git SHA to pin a specific build.
+  tag: latest
+  pullPolicy: Always
 
 # OpenShift mode: use Routes for path-based routing
 # Set to true for MicroShift/OpenShift, false for vanilla Kubernetes (kind)
@@ -12,6 +14,13 @@ openshift: false
 # Hostname for OpenShift Routes (only used when openshift=true)
 # Use "localhost" for local MicroShift testing
 host: ""
+
+# Route configuration (only used when openshift=true)
+route:
+  tls:
+    # Set to "edge" for TLS termination on production OpenShift.
+    # Leave empty for local MicroShift/kind (no certs).
+    termination: ""
 
 # Simulate OpenShift restricted SCC UID assignment.
 #
