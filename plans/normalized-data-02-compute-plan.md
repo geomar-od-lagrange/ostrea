@@ -47,6 +47,8 @@ n_months_years = ds.obs.sizes["month"] * ds.obs.sizes["year"]
 F = (obs_sum / (N_hex0_sum * DT_h * n_months_years)) * (wf_hex0 / wf_hex1)
 ```
 
+Yes, summing over obs is the way!
+
 ## Filtering
 
 - **Exclude escape hex:** drop rows where `hex1 == b'(0, 0, 0)'` before output
@@ -86,10 +88,11 @@ weight:   float64  — F value
 4. Concatenate all 9 → single DataFrame
 5. Write to `database/data/connectivity.pq`
 
-## Open Questions
+## Assumptions / pending confirmation
 
-YOUR QUESTIONS/NOTES:
-- [ ] Confirm DT_h values: 168/168/504 — correct?
-- [ ] Confirm aggregation: sum obs over month+year first, then normalize (vs mean of F)?
-- [ ] Does the hex label → int ID mapping need to match existing hexes.geojson exactly,
-      or will we regenerate that too from the new data?
+- **DT_h:** using 168/168/504 hours — please correct if wrong
+- **Aggregation:** sum obs over month+year first, then normalize (confirmed above)
+- **Hex ID mapping:** existing `hexes.geojson` and `meta.json` have no hex label strings
+  and were generated from old test data — we regenerate both alongside `connectivity.pq`
+
+YOUR NOTES:
