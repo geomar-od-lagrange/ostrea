@@ -16,75 +16,106 @@ Each file ~11 GB. All 9 are structurally identical.
 | Dim    | Size | Notes |
 |--------|------|-------|
 | hex0   | 8364 | source hexes |
-| hex1   | 8397 | target hexes; 33 more than hex0 — likely includes escape/out-of-domain hex(es) |
-| month  | 5    | float64 0.0–4.0 (5 simulation months) |
-| year   | 4    | float64 0.0–3.0 (4 simulation years) |
+| hex1   | 8397 | target hexes |
+| month  | 5    | float64 0-based index (0.0–4.0) |
+| year   | 4    | float64 0-based index (0.0–3.0) |
 | corner | 7    | hex polygon corners; geometry only |
+
+**On hex0 vs hex1 size:** N(hex0) and N(hex1) are not equal and may differ slightly across
+files. This is because random initial positions and land-killing of particles creates
+roundoff noise at hex edges — not all source hexes emit particles in every file.
+There is exactly **one** invalid target hex in hex1 (the out-of-domain escape hex, labeled
+with a special value in the hextraj coordinate system — see below). The full set of valid
+hexes is obtained by taking the union of hex0 and hex1 labels across all 9 files.
+
+**On month/year aggregation:** For the current dashboard we average over both month and
+year. Since `obs` is a count, we can simply `sum(month, year)` — no weighting needed,
+no loss of information. The processing script should be structured to also support
+outputting per-month climatologies (mean over year, keeping month) for future
+seasonal/interannual variability investigation.
 
 ## Coordinates
 
-| Name       | Dims   | Notes |
-|------------|--------|-------|
-| hex0       | (hex0) | byte-string label, format `b'(-1, -19, 20)'` — NOT H3 index |
-| hex1       | (hex1) | same format |
-| hex_label  | (hex0) | appears to be a duplicate of hex0 coordinate — TBC |
-| lon_hex0   | (hex0) | centroid longitude |
-| lat_hex0   | (hex0) | centroid latitude |
-| lon_hex1   | (hex1) | centroid longitude |
-| lat_hex1   | (hex1) | centroid latitude |
+| Name       | Dims    | Notes |
+|------------|---------|-------|
+| hex0       | (hex0)  | byte-string label in hextraj format, e.g. `b'(-1, -19, 20)'` |
+| hex1       | (hex1)  | same format |
+| hex_label  | (hex0)  | TBC: may be duplicate of hex0 coordinate |
+| lon_hex0   | (hex0)  | centroid longitude |
+| lat_hex0   | (hex0)  | centroid latitude |
+| lon_hex1   | (hex1)  | centroid longitude |
+| lat_hex1   | (hex1)  | centroid latitude |
 | month      | (month) | |
-| year       | (year) | |
+| year       | (year)  | |
+
+**Hex label format:** Labels like `(-1, -19, 20)` are in the custom coordinate system
+from [hextraj](https://github.com/willirath/hextraj). This is a regional hex grid
+(not H3 global) that avoids H3's 1→7 hierarchy jumps and ignores pentagons.
+The byte-string labels are stable IDs usable across all 9 files.
+For the ostrea app, map these to sequential integers.
+
+**Corner coordinates** (`lon/lat_hex{0,1}_corners`, `corner` dim = 7) are present and
+needed for constructing GeoJSON polygon layers. The full set should be assembled across
+all files to capture hexes that appear in only some files.
 
 ## Data Variables
 
-### The one that matters
+### obs — the one that matters
 
-| Name | Dims | Notes |
-|------|------|-------|
-| obs  | (month, year, hex0, hex1) | raw particle counts; sparse (mostly NaN); 11 GB |
+| Name | Dims                          | Notes |
+|------|-------------------------------|-------|
+| obs  | (month, year, hex0, hex1)     | raw particle counts; sparse (mostly NaN); ~11 GB |
 
-### Per-hex metadata — hex0 and hex1 variants of each
+`obs(month, year, hex0, hex1)` counts particles released from hex0 that arrived in hex1
+within the time window, for a given simulation month and year.
+**Confirm from manuscript:** exact definition (are these per-release counts? per unit area?
+normalized in any way already?).
 
-| Stem | Dims | Notes |
-|------|------|-------|
-| water_fraction | (hexN) | fraction of hex covered by water — needed for normalization |
-| gridbox_count  | (hexN) | number of ocean model gridboxes in hex |
-| water_count    | (hexN) | number of wet gridboxes in hex |
-| depth_mean     | (hexN) | mean depth of wet gridboxes |
-| depth_median   | (hexN) | median depth |
-| depth_std      | (hexN) | std of depth |
-| aqc_count      | (hexN) | aquaculture sites per hex |
-| rst_count      | (hexN) | restoration sites per hex |
-| pop_count      | (hexN) | wild population sites per hex |
-| dss_count      | (hexN) | disease surveillance sites per hex (?) |
-| hly_count      | (hexN) | (TBC) |
-| his_count      | (hexN) | (TBC) |
+### Per-hex metadata
 
-### Geometry (low priority)
+Each exists in a `_hex0` and `_hex1` variant.
 
-| Name | Dims |
-|------|------|
-| lon_hex0_corners | (corner, hex0) |
-| lat_hex0_corners | (corner, hex0) |
-| lon_hex1_corners | (corner, hex1) |
-| lat_hex1_corners | (corner, hex1) |
+| Stem             | Dims   | Notes |
+|------------------|--------|-------|
+| water_fraction   | (hexN) | fraction of hex area covered by water — used in normalization |
+| gridbox_count    | (hexN) | number of ocean model gridboxes intersecting hex |
+| water_count      | (hexN) | number of wet gridboxes in hex |
+| depth_mean       | (hexN) | mean depth of wet gridboxes |
+| depth_median     | (hexN) | median depth of wet gridboxes |
+| depth_std        | (hexN) | std of depth of wet gridboxes |
+| aqc_count        | (hexN) | aquaculture sites per hex |
+| rst_count        | (hexN) | restoration sites per hex |
+| pop_count        | (hexN) | wild population sites per hex |
+| dss_count        | (hexN) | disease surveillance sites per hex |
+| hly_count        | (hexN) | unknown — TBC |
+| his_count        | (hexN) | unknown — TBC |
 
-## Notes / Open Questions
+**Normalization:** `water_fraction` is present and the formula from
+`normalized-data-00-preproc.md` applies. Confirm exact formula against manuscript before
+implementing.
 
-- `water_fraction_hex0/hex1` IS present (was hidden in xarray's truncated repr) — the
-  normalization formula from `normalized-data-00-preproc.md` still applies as written.
-- `hex_label` on hex0: is this identical to the hex0 coordinate, or different? If identical,
-  we can ignore it; if not, we need to understand why two label vars exist.
-- The hex label format `(-1, -19, 20)` is not a standard H3 index string. Need to confirm
-  what coordinate system this represents and how it maps to the integer IDs in
-  `database/data/hexes.geojson`.
-- hex1 has 33 more entries than hex0. Need to identify which are the "escape" hexes
-  (particles that left the domain) and exclude them from output rows.
-- `month` and `year` are float64 0-based indices, not calendar values. Climatological mean
-  averages over both dimensions.
+**Depth-based habitable filtering (future issue):** The current app uses a ≤85m depth
+threshold on median/mean depth. For steep-shelf areas (e.g. Norwegian coast), these
+aggregates are poor indicators of whether a hex is at least partially habitable — they
+tend to exclude too much valid area. Will need a better depth label (e.g. minimum depth,
+or fraction of gridboxes shallower than 85m). Track as a separate issue.
 
-YOUR QUESTIONS/NOTES:
+### Geometry
+
+| Name              | Dims           |
+|-------------------|----------------|
+| lon_hex0_corners  | (corner, hex0) |
+| lat_hex0_corners  | (corner, hex0) |
+| lon_hex1_corners  | (corner, hex1) |
+| lat_hex1_corners  | (corner, hex1) |
+
+Already largely present in `database/data/hexes.geojson`. Assemble union across all 9
+files to ensure complete coverage.
+
+## Open Questions
+
+- [ ] Confirm exact definition of `obs` against manuscript
+- [ ] Confirm normalization formula against manuscript
+- [ ] Is `hex_label` identical to `hex0` coordinate, or different?
 - [ ] What do `hly_count` and `his_count` stand for?
-- [ ] Is `hex_label` == `hex0` coordinate, or something else?
-- [ ] What is the `(-1, -19, 20)` hex label format? Cube coordinates? Custom index?
-- [ ] Are the 33 extra hex1 entries the escape hex, or something else?
+- [ ] Identify the hextraj invalid-hex label value (to exclude from output)
