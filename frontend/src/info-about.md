@@ -6,7 +6,7 @@
 
 European flat oysters were once widespread but are now locally extinct in many areas due to overharvesting, habitat destruction, and disease. Active reef restoration is underway through more than 40 scientifically-led restoration projects under the umbrella of the [Native Oyster Restoration Alliance (NORA)](https://noraeurope.eu/).
 
-*Bonamia ostreae* is a unicellular parasite that infects oyster immune cells and causes mass mortality. Even when human-mediated transport is controlled, ocean currents can carry free pathogen cells or infected larvae across large distances — a dispersal pathway that biosecurity screening cannot prevent. Understanding these pathways is essential for site selection, disease zoning, and biosecurity planning.
+*Bonamia ostreae* is a unicellular parasite that infects oyster immune cells and causes mass mortality. Even when human-mediated transport is controlled, ocean currents can carry free pathogen cells or infected larvae across large distances, a dispersal pathway that biosecurity screening cannot prevent. Understanding these pathways is essential for site selection, disease zoning, and biosecurity planning.
 
 ### How to use
 
