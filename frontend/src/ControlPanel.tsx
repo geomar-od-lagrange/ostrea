@@ -18,7 +18,7 @@ interface ControlPanelProps {
 }
 
 const depths = ["05m", "10m", "15m"];
-const times = ["00d-07d", "07d-14d", "14d-28d"];
+const times = ["00d-07d", "07d-14d", "07d-28d"];
 
 // helper to toggle values in an array
 const toggle = (list: string[], value: string) =>

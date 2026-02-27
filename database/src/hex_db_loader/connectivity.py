@@ -68,14 +68,6 @@ def load_connectivity(engine, data_path=None, chunksize=100_000):
             schema=SCHEMA,
         )
 
-    # Create index (concurrently) and analyze after loading
-    with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
-        conn.execute(text(f'''
-            CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_connect_dtr_inc
-            ON "{SCHEMA}"."{CONNECTIVITY_TABLE_NAME}" (depth, time_range, start_id)
-            INCLUDE (end_id, weight);
-        '''))
-        conn.execute(text(f'ANALYZE "{SCHEMA}"."{CONNECTIVITY_TABLE_NAME}";'))
 
 
 def main():

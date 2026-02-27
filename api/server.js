@@ -31,20 +31,22 @@ function validateArray(arr, maxLength, itemValidator) {
 
 function isValidId(id) {
   const num = Number(id);
-  return Number.isInteger(num) && num > 0;
+  return Number.isInteger(num) && num >= 0;
 }
 
 function normalize(data) {
-  const weights = data.map(d => d.weight);
+  const positive = data.filter(d => d.weight > 0);
+  if (positive.length === 0) return [];
+
+  const weights = positive.map(d => d.weight);
   const min = Math.min(...weights);
   const max = Math.max(...weights);
-  
+
   if (max === min) {
-    // All values identical (or only one item)
-    return data.map(d => ({ ...d, weight: 1 }));
+    return positive.map(d => ({ ...d, weight: 1 }));
   }
 
-  return data.map(d => ({
+  return positive.map(d => ({
     ...d,
     weight: (Math.log(d.weight) - Math.log(min)) / (Math.log(max) - Math.log(min))
   }));
@@ -168,7 +170,6 @@ app.get('/feature', async (req, res) => {
       geometry: JSON.parse(row.geometry),
       properties: {
         id: row.id,
-        depth: row.depth,
       },
     }));
 

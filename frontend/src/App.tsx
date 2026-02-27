@@ -85,7 +85,7 @@ function App() {
         return res.json();
       })
       .then(data => {
-        setMetadata(data);
+        setMetadata(Object.fromEntries(data.map((m: Metadata) => [m.id, m])));
       })
       .catch(console.error);  
   }, []);
@@ -198,7 +198,7 @@ function App() {
           `rest: ${escapeHtml(data.rest)}`,
           `aqc: ${escapeHtml(data.aqc)}`,
           `pop: ${escapeHtml(data.pop)}`,
-          ...(weight !== undefined ? [`wgt: ${escapeHtml(weight.toExponential(2))}`] : []),
+          ...(weight != null ? [`wgt: ${escapeHtml(weight.toExponential(2))}`] : []),
         ].join('\n'),
       });
     } else {
