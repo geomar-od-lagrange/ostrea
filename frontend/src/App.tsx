@@ -178,7 +178,7 @@ function App() {
     filled: true,
     stroked: true,
     extruded: true,
-    wireframe: true,
+    wireframe: false,
     getLineColor: theme.stroke.default,
     getLineWidth: 1,
     lineWidthMinPixels: 3,
