@@ -168,6 +168,7 @@ function App() {
 
   // Calculate connectivity height for a hex
   const getConnHeight = (id: number) => {
+    if (isHabitableShown && metadata && (metadata[id]?.depth ?? 0) > 85) return 0;
     const w = weightMap.get(id);
     return w !== undefined ? theme.elevation.getElevation(w) : 0;
   };
