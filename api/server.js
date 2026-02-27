@@ -31,7 +31,7 @@ function validateArray(arr, maxLength, itemValidator) {
 
 function isValidId(id) {
   const num = Number(id);
-  return Number.isInteger(num) && num > 0;
+  return Number.isInteger(num) && num >= 0;
 }
 
 function normalize(data) {
