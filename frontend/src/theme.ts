@@ -29,11 +29,11 @@ const colors = {
   noMetadataAlpha: 180,
 
   // Highlight colors (chosen to not interfere with concentration scale)
-  aquaculture: '#00c8ff',   // cyan
-  restoration: '#00ff64',   // bright green
-  disease: '#ff00ff',       // magenta
+  aquaculture: '#56B4E9',   // sky blue   (Wong/Okabe-Ito)
+  restoration: '#009E73',   // blue-green (Wong/Okabe-Ito)
+  disease: '#D55E00',       // vermillion (Wong/Okabe-Ito)
   selected: '#ff6600',      // orange
-  historic: '#1F78B4',      // dark blue (ColorBrewer Paired)
+  historic: '#0072B2',      // blue       (Wong/Okabe-Ito)
 
   // Relative concentration color scale (white to dark purple)
   concentration: [
