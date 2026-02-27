@@ -29,20 +29,19 @@ const colors = {
   noMetadataAlpha: 180,
 
   // Highlight colors (chosen to not interfere with concentration scale)
-  aquaculture: '#56B4E9',   // sky blue   (Wong/Okabe-Ito)
-  restoration: '#009E73',   // blue-green (Wong/Okabe-Ito)
-  disease: '#D55E00',       // vermillion (Wong/Okabe-Ito)
-  selected: '#ff6600',      // orange
-  historic: '#0072B2',      // blue       (Wong/Okabe-Ito)
+  aquaculture: '#94CBEC',   // light blue  (Tol Muted)
+  restoration: '#337538',   // green       (Tol Muted)
+  disease: '#2E2585',       // indigo      (Tol Muted)
+  selected: '#ff6600',      // orange      (UI state, unchanged)
+  historic: '#5DA899',      // teal        (Tol Muted)
 
-  // Relative concentration color scale (white to dark purple)
+  // Relative concentration color scale (Tol Muted sequential)
   concentration: [
-    '#ffffff',
-    '#feedb0',
-    '#f29567',
-    '#ce4356',
-    '#821c63',
-    '#2f0f3e',
+    '#ffffff',  // zero / no data
+    '#DCCD7D',  // tan/gold
+    '#C26A77',  // rose
+    '#9F4A96',  // purple
+    '#7E2954',  // dark wine
   ],
 
   // UI colors
