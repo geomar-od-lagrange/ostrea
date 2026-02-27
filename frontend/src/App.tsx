@@ -173,7 +173,6 @@ function App() {
     stroked: true,
     extruded: true,
     wireframe: true,
-    material: false,   // disable deck.gl lighting → stable flat colors regardless of tilt
     getLineColor: theme.stroke.default,
     getLineWidth: 1,
     lineWidthMinPixels: 3,
@@ -193,7 +192,7 @@ function App() {
         x: info.x,
         y: info.y,
         content: [
-          ...(weight != null ? [`relative dilution: ${escapeHtml(weight.toExponential(2))}`] : []),
+          `relative concentration: ${weight != null ? escapeHtml(weight.toExponential(2)) : '0'}`,
           `disease: ${escapeHtml(data.disease)}  rest: ${escapeHtml(data.rest)}  aqc: ${escapeHtml(data.aqc)}`,
           `pop: ${escapeHtml(data.pop)}  his: ${escapeHtml(data.his)}`,
           `lat: ${escapeHtml(data.lat.toFixed(2))}  lon: ${escapeHtml(data.lon.toFixed(2))}`,

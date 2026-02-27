@@ -215,7 +215,9 @@ export default function ControlPanel({
     </fieldset>
 
       <div className="control-panel-section" style={{ marginTop: 4 }}>
-        <div className="control-panel-section-label">Relative dilution (log scale)</div>
+        <div className="control-panel-section-label">
+          Relative concentration<br/>(logarithmic scale)
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
           <span style={{ fontSize: 10, opacity: 0.7 }}>low</span>
           <div style={{
