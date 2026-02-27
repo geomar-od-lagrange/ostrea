@@ -15,6 +15,8 @@ interface ControlPanelProps {
   onDiseaseChange: (newDisease: boolean) => void;
   isHabitableShown: boolean;
   onHabitableChange: (v: boolean) => void;
+  isHistoricHighlighted: boolean;
+  onHistoricChange: (v: boolean) => void;
 }
 
 const depths = ["05m", "10m", "15m"];
@@ -38,6 +40,8 @@ export default function ControlPanel({
   onDiseaseChange,
   isHabitableShown,
   onHabitableChange,
+  isHistoricHighlighted,
+  onHistoricChange,
 }: ControlPanelProps) {
   const [collapsed, setCollapsed] = React.useState(() => window.innerWidth <= 480);
 
@@ -159,6 +163,16 @@ export default function ControlPanel({
           <label className="control-panel-option">
             <input
               type="checkbox"
+              name="historic"
+              checked={isHistoricHighlighted}
+              onChange={(e) => onHistoricChange(e.target.checked)}
+            />
+            <span style={{ color: theme.colors.historic, fontWeight: 600 }}>Historic populations</span>
+          </label>
+
+          <label className="control-panel-option">
+            <input
+              type="checkbox"
               name="aqc"
               checked={isAQCHighlighted}
               onChange={(e) => onAQCChange(e.target.checked)}
@@ -199,6 +213,20 @@ export default function ControlPanel({
       </div>
 
     </fieldset>
+
+      <div className="control-panel-section" style={{ marginTop: 4 }}>
+        <div className="control-panel-section-label">Relative dilution (log scale)</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+          <span style={{ fontSize: 10, opacity: 0.7 }}>low</span>
+          <div style={{
+            flex: 1,
+            height: 8,
+            borderRadius: 2,
+            background: `linear-gradient(to right, ${theme.colorScale.join(', ')})`,
+          }} />
+          <span style={{ fontSize: 10, opacity: 0.7 }}>high</span>
+        </div>
+      </div>
     </div>
   );
 }

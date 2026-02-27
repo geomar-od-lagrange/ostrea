@@ -33,6 +33,7 @@ const colors = {
   restoration: '#00ff64',   // bright green
   disease: '#ff00ff',       // magenta
   selected: '#ff6600',      // orange
+  historic: '#1F78B4',      // dark blue (ColorBrewer Paired)
 
   // Relative concentration color scale (white to dark purple)
   concentration: [
@@ -108,6 +109,7 @@ export const theme = {
     restoration: hexToRgba(colors.restoration) as RGBA,
     disease: hexToRgba(colors.disease) as RGBA,
     selected: hexToRgba(colors.selected) as RGBA,
+    historic: hexToRgba(colors.historic) as RGBA,
     deepWater: [70, 70, 70, 120] as RGBA,
   },
 

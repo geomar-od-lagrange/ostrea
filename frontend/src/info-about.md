@@ -16,6 +16,7 @@ European flat oysters were once widespread but are now locally extinct in many a
 - Toggle **Highlights** to show aquaculture, restoration, and outbreak sites
 - Toggle **Habitable (≤85m)** to dim hexes in water deeper than 85 m
 - Click **clear** to deselect all hexes
+- Hex colour shows **relative dilution** on a **log scale** (darker = higher; exact value in hover tooltip)
 
 ---
 

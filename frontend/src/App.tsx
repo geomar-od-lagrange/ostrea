@@ -29,6 +29,7 @@ interface Metadata {
   rest: number;
   aqc: number;
   pop: number;
+  his: number;
 }
 
 interface FeatureProperties {
@@ -59,6 +60,7 @@ function App() {
   const [isRestHighlighted, setRest] = useState<boolean>(true);
   const [isDiseaseHighlighted, setDisease] = useState<boolean>(true);
   const [isHabitableShown, setHabitable] = useState<boolean>(true);
+  const [isHistoricHighlighted, setHistoric] = useState<boolean>(true);
   
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [clickIds, setClickIds] = useState<number[]>([]);
@@ -171,6 +173,7 @@ function App() {
     stroked: true,
     extruded: true,
     wireframe: true,
+    material: false,   // disable deck.gl lighting → stable flat colors regardless of tilt
     getLineColor: theme.stroke.default,
     getLineWidth: 1,
     lineWidthMinPixels: 3,
@@ -190,15 +193,12 @@ function App() {
         x: info.x,
         y: info.y,
         content: [
-          `Id: ${escapeHtml(data.id)}`,
-          `lon: ${escapeHtml(data.lon.toFixed(2))}`,
-          `lat: ${escapeHtml(data.lat.toFixed(2))}`,
-          `depth: ${escapeHtml(data.depth)}`,
-          `disease: ${escapeHtml(data.disease)}`,
-          `rest: ${escapeHtml(data.rest)}`,
-          `aqc: ${escapeHtml(data.aqc)}`,
-          `pop: ${escapeHtml(data.pop)}`,
-          ...(weight != null ? [`wgt: ${escapeHtml(weight.toExponential(2))}`] : []),
+          ...(weight != null ? [`relative dilution: ${escapeHtml(weight.toExponential(2))}`] : []),
+          `disease: ${escapeHtml(data.disease)}  rest: ${escapeHtml(data.rest)}  aqc: ${escapeHtml(data.aqc)}`,
+          `pop: ${escapeHtml(data.pop)}  his: ${escapeHtml(data.his)}`,
+          `lat: ${escapeHtml(data.lat.toFixed(2))}  lon: ${escapeHtml(data.lon.toFixed(2))}`,
+          `depth: ${escapeHtml(data.depth)} m`,
+          `id: ${escapeHtml(data.id)}`,
         ].join('\n'),
       });
     } else {
@@ -226,7 +226,7 @@ function App() {
 
   const catHeight = theme.elevation.categoryHeight;
 
-  // Build layers: Connectivity at base, then REST, AQC, OUTBREAK stacked on top
+  // Build layers: Connectivity at base, then HISTORIC, REST, AQC, OUTBREAK stacked on top
   const layers = feature
     ? [
         // Layer 1: Base/Connectivity - z=0, height=weight-based or default
@@ -263,23 +263,43 @@ function App() {
           },
         }),
 
-        // Layer 2: REST - stacked on top of connectivity
-        ...(isRestHighlighted && metadata ? [new GeoJsonLayer({
-          id: 'rest-layer',
+        // Layer 2: HISTORIC - stacked on top of connectivity
+        ...(isHistoricHighlighted && metadata ? [new GeoJsonLayer({
+          id: 'historic-layer',
           data: {
             type: 'FeatureCollection',
             features: feature.features
-              .filter((f: Feature) => metadata[f.properties.id]?.rest > 0)
+              .filter((f: Feature) => metadata[f.properties.id]?.his > 0)
               .map((f: Feature) => featureWithZ(f, getConnHeight(f.properties.id))),
           },
           ...commonLayerProps,
           ...interactionHandlers,
           updateTriggers: { data: [weightMap], getFillColor: [hoveredId] },
           getElevation: catHeight,
+          getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.historic,
+        })] : []),
+
+        // Layer 3: REST - stacked on top of historic
+        ...(isRestHighlighted && metadata ? [new GeoJsonLayer({
+          id: 'rest-layer',
+          data: {
+            type: 'FeatureCollection',
+            features: feature.features
+              .filter((f: Feature) => metadata[f.properties.id]?.rest > 0)
+              .map((f: Feature) => {
+                const id = f.properties.id;
+                const baseZ = getConnHeight(id) + (isHistoricHighlighted && metadata[id]?.his > 0 ? catHeight : 0);
+                return featureWithZ(f, baseZ);
+              }),
+          },
+          ...commonLayerProps,
+          ...interactionHandlers,
+          updateTriggers: { data: [weightMap, isHistoricHighlighted], getFillColor: [hoveredId] },
+          getElevation: catHeight,
           getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.restoration,
         })] : []),
 
-        // Layer 3: AQC - stacked on top of REST
+        // Layer 4: AQC - stacked on top of REST
         ...(isAQCHighlighted && metadata ? [new GeoJsonLayer({
           id: 'aqc-layer',
           data: {
@@ -288,18 +308,21 @@ function App() {
               .filter((f: Feature) => metadata[f.properties.id]?.aqc > 0)
               .map((f: Feature) => {
                 const id = f.properties.id;
-                const baseZ = getConnHeight(id) + (isRestHighlighted && metadata[id]?.rest > 0 ? catHeight : 0);
+                const data = metadata[id];
+                const baseZ = getConnHeight(id)
+                  + (isHistoricHighlighted && data?.his > 0 ? catHeight : 0)
+                  + (isRestHighlighted && data?.rest > 0 ? catHeight : 0);
                 return featureWithZ(f, baseZ);
               }),
           },
           ...commonLayerProps,
           ...interactionHandlers,
-          updateTriggers: { data: [weightMap, isRestHighlighted], getFillColor: [hoveredId] },
+          updateTriggers: { data: [weightMap, isHistoricHighlighted, isRestHighlighted], getFillColor: [hoveredId] },
           getElevation: catHeight,
           getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.aquaculture,
         })] : []),
 
-        // Layer 4: OUTBREAK/Disease - stacked on top of AQC
+        // Layer 5: OUTBREAK/Disease - stacked on top of AQC
         ...(isDiseaseHighlighted && metadata ? [new GeoJsonLayer({
           id: 'disease-layer',
           data: {
@@ -310,6 +333,7 @@ function App() {
                 const id = f.properties.id;
                 const data = metadata[id];
                 const baseZ = getConnHeight(id)
+                  + (isHistoricHighlighted && data?.his > 0 ? catHeight : 0)
                   + (isRestHighlighted && data?.rest > 0 ? catHeight : 0)
                   + (isAQCHighlighted && data?.aqc > 0 ? catHeight : 0);
                 return featureWithZ(f, baseZ);
@@ -317,7 +341,7 @@ function App() {
           },
           ...commonLayerProps,
           ...interactionHandlers,
-          updateTriggers: { data: [weightMap, isRestHighlighted, isAQCHighlighted], getFillColor: [hoveredId] },
+          updateTriggers: { data: [weightMap, isHistoricHighlighted, isRestHighlighted, isAQCHighlighted], getFillColor: [hoveredId] },
           getElevation: catHeight,
           getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.disease,
         })] : []),
@@ -360,6 +384,8 @@ function App() {
           onDiseaseChange={setDisease}
           isHabitableShown={isHabitableShown}
           onHabitableChange={setHabitable}
+          isHistoricHighlighted={isHistoricHighlighted}
+          onHistoricChange={setHistoric}
         />
       </div>
 
