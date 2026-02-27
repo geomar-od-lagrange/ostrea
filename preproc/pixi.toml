@@ -9,7 +9,7 @@ version = "0.1.0"
 
 [dependencies]
 xarray = ">=2026.1.0,<2027"
-pandas = ">=3.0.0,<4"
+pandas = ">=2.0.0,<4"
 geopandas = ">=1.1.2,<2"
 dask = ">=2026.1.2,<2027"
 matplotlib = ">=3.10.8,<4"
@@ -19,4 +19,3 @@ jupyter = ">=1.1,<2"
 jupyterlab = ">=4.3,<5"
 papermill = ">=2.6,<3"
 tqdm = ">=4.67,<5"
-copernicusmarine = ">=2.3,<3"
