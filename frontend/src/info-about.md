@@ -4,19 +4,20 @@
 
 ### Why?
 
-European flat oysters were once widespread but are now locally extinct in many areas due to overharvesting, habitat destruction, and disease. Active reef restoration is underway through more than 40 projects coordinated by the [Native Oyster Restoration Alliance (NORA)](https://noraeurope.eu/).
+European flat oysters were once widespread but are now locally extinct in many areas due to overharvesting, habitat destruction, and disease. Active reef restoration is underway through more than 40 scientifically-led restoration projects under the umbrella of the [Native Oyster Restoration Alliance (NORA)](https://noraeurope.eu/).
 
-*Bonamia ostreae* is a unicellular parasite that infects oyster immune cells and causes mass mortality. Ocean currents can transport free pathogen cells or infected larvae to sites with no direct human connection to diseased populations — dispersal-driven exposure that biosecurity protocols cannot prevent. Understanding these pathways is essential for site selection, disease zoning, and biosecurity planning.
+*Bonamia ostreae* is a unicellular parasite that infects oyster immune cells and causes mass mortality. Even when human-mediated transport is controlled, ocean currents can carry free pathogen cells or infected larvae across large distances — a dispersal pathway that biosecurity screening cannot prevent. Understanding these pathways is essential for site selection, disease zoning, and biosecurity planning.
 
 ### How to use
 
-- **Click a hex** to select it as a source location; click again to deselect
+- **Click a hex** to select it as a source location for pathogen or infected larval release; click again to deselect
+- Connected target hexes are coloured by the **relative concentration** of pathogen reaching each target from that source
 - **Multi-select** by clicking additional hexes
-- Use **Depth** and **Time range** to filter dispersal scenarios
-- Toggle **Highlights** to show aquaculture, restoration, and outbreak sites
-- Toggle **Habitable (≤85m)** to dim hexes in water deeper than 85 m
+- Use **Drifting Depth** and **Time range** to filter dispersal scenarios
+- Toggle **Highlights** to show historic populations, aquaculture, restoration, and outbreak sites
+- Enable **habitable only** to dim hexes deeper than 85 m
 - Click **clear** to deselect all hexes
-- Hex colour shows **relative concentration** on a **logarithmic scale** (darker = higher; exact value in hover tooltip)
+- Hex colour shows **relative concentration** on a **logarithmic scale** (green = higher; hover for exact value as *a* · 10ⁿ)
 
 ---
 

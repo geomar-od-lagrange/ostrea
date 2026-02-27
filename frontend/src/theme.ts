@@ -29,26 +29,26 @@ const colors = {
   noMetadataAlpha: 180,
 
   // Highlight colors (chosen to not interfere with concentration scale)
-  aquaculture: '#94CBEC',   // light blue  (Tol Muted)
-  restoration: '#337538',   // green       (Tol Muted)
-  disease: '#2E2585',       // indigo      (Tol Muted)
+  aquaculture: '#4477AA',   // blue        (Tol Bright qualitative)
+  restoration: '#CCBB44',   // yellow      (Tol Bright qualitative — high luminance, visible after shading)
+  disease: '#AA3377',       // purple      (Tol Bright qualitative)
   selected: '#ff6600',      // orange      (UI state, unchanged)
-  historic: '#5DA899',      // teal        (Tol Muted)
+  historic: '#66CCEE',      // cyan        (Tol Bright qualitative)
 
-  // Relative concentration color scale (Tol Muted sequential)
+  // Relative concentration color scale (green sequential, ColorBrewer Greens)
   concentration: [
     '#ffffff',  // zero / no data
-    '#DCCD7D',  // tan/gold
-    '#C26A77',  // rose
-    '#9F4A96',  // purple
-    '#7E2954',  // dark wine
+    '#c7e9c0',  // light green
+    '#74c476',  // medium green
+    '#238b45',  // dark green
+    '#00441b',  // very dark green
   ],
 
   // UI colors
-  controlPanelBg: '#000000',
-  controlPanelBgAlpha: 0.9,
-  controlPanelText: '#ffffff',
-  infoBoxBg: '#dcdcdc',
+  controlPanelBg: '#f5f5f5',
+  controlPanelBgAlpha: 0.97,
+  controlPanelText: '#1a1a1a',
+  infoBoxBg: '#cecece',
   infoBoxBgAlpha: 0.95,
   infoBoxText: '#333333',
   tooltipBg: '#000000',
@@ -124,11 +124,11 @@ export const theme = {
   // UI panel colors (CSS strings)
   ui: {
     controlPanel: {
-      background: `rgba(0,0,0,${colors.controlPanelBgAlpha})`,
+      background: `rgba(245,245,245,${colors.controlPanelBgAlpha})`,
       text: colors.controlPanelText,
     },
     infoBox: {
-      background: `rgba(220,220,220,${colors.infoBoxBgAlpha})`,
+      background: `rgba(206,206,206,${colors.infoBoxBgAlpha})`,
       text: colors.infoBoxText,
     },
     tooltip: {

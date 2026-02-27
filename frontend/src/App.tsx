@@ -18,6 +18,7 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 type Connection = {
   end_id: number;
   weight: number;
+  raw_weight?: number;
 };
 
 interface Metadata {
@@ -142,6 +143,10 @@ function App() {
     () => new Map<number, number>(connections.map(c => [c.end_id, c.weight])),
     [connections]
   );
+  const rawWeightMap = useMemo(
+    () => new Map<number, number>(connections.filter(c => c.raw_weight != null).map(c => [c.end_id, c.raw_weight!])),
+    [connections]
+  );
 
   // Helper: add z-coordinate to all positions in a geometry
   const addZToGeometry = (geometry: any, z: number): any => {
@@ -176,6 +181,8 @@ function App() {
     getLineColor: theme.stroke.default,
     getLineWidth: 1,
     lineWidthMinPixels: 3,
+    // High ambient reduces side-face darkening and limits hue shift from directional light
+    material: { ambient: 0.7, diffuse: 0.3, shininess: 0, specularColor: [0, 0, 0] as [number, number, number] },
   };
 
   // Shared hover handler for all layers (base + category)
@@ -187,18 +194,31 @@ function App() {
         String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
       const data = metadata[info.object.properties.id];
       if (!data) return;
-      const weight = weightMap.get(info.object.properties.id);
+      const rawWeight = rawWeightMap.get(info.object.properties.id);
+      const concLine = (() => {
+        if (rawWeight == null || rawWeight <= 0) return 'rel conc 0';
+        const exp = Math.floor(Math.log10(rawWeight));
+        const mantissa = rawWeight / Math.pow(10, exp);
+        return `rel conc ${mantissa.toFixed(2)} \u00b7 10<sup>${exp}</sup>`;
+      })();
+      const categories = [
+        data.disease > 0 && 'outbreak',
+        data.rest    > 0 && 'restoration',
+        data.aqc     > 0 && 'aquaculture',
+        data.pop     > 0 && 'population',
+        data.his     > 0 && 'historic',
+      ].filter(Boolean) as string[];
+      const catLine = categories.length > 0 ? categories.join(' · ') : '·';
+      const lines = [
+        concLine,
+        catLine,
+        `${Math.abs(data.lat).toFixed(1)}\u00b0${data.lat < 0 ? 'S' : 'N'} ${Math.abs(data.lon).toFixed(1)}\u00b0${data.lon < 0 ? 'W' : 'E'} \u00b7 ${data.depth} m`,
+        `hex ${escapeHtml(data.id)}`,
+      ];
       setTooltip({
         x: info.x,
         y: info.y,
-        content: [
-          `relative concentration: ${weight != null ? escapeHtml(weight.toExponential(2)) : '0'}`,
-          `disease: ${escapeHtml(data.disease)}  rest: ${escapeHtml(data.rest)}  aqc: ${escapeHtml(data.aqc)}`,
-          `pop: ${escapeHtml(data.pop)}  his: ${escapeHtml(data.his)}`,
-          `lat: ${escapeHtml(data.lat.toFixed(2))}  lon: ${escapeHtml(data.lon.toFixed(2))}`,
-          `depth: ${escapeHtml(data.depth)} m`,
-          `id: ${escapeHtml(data.id)}`,
-        ].join('\n'),
+        content: lines.join('\n'),
       });
     } else {
       setHoveredId(null);
@@ -236,22 +256,19 @@ function App() {
           ...interactionHandlers,
           updateTriggers: {
             getFillColor: [hoveredId, weightMap, clickIds, isHabitableShown],
-            getElevation: [weightMap, clickIds, isHabitableShown],
+            getElevation: [weightMap, isHabitableShown],
           },
           getElevation: (d: any) => {
             const id = d.properties.id;
             if (isHabitableShown && metadata && (metadata[id]?.depth ?? 0) > 85) return 0;
             const w = weightMap.get(id);
-            const isSelected = clickIds.includes(id);
             if (w !== undefined) return theme.elevation.getElevation(w);
-            if (isSelected) return catHeight;
             return theme.elevation.default;
           },
           getFillColor: (d: any) => {
             const id = d.properties.id;
             const isDeep = isHabitableShown && metadata && (metadata[id]?.depth ?? 0) > 85;
             if (id === hoveredId) return theme.hex.hovered;
-            if (clickIds.includes(id)) return [...theme.highlight.selected] as [number, number, number, number];
             const w = weightMap.get(id);
             if (w !== undefined) {
               const c = theme.hex.getWeightColor(w);
@@ -344,6 +361,31 @@ function App() {
           getElevation: catHeight,
           getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.disease,
         })] : []),
+
+        // Layer 6: SELECTED - one catHeight above all category layers
+        ...(clickIds.length > 0 && metadata ? [new GeoJsonLayer({
+          id: 'selected-layer',
+          data: {
+            type: 'FeatureCollection',
+            features: feature.features
+              .filter((f: Feature) => clickIds.includes(f.properties.id))
+              .map((f: Feature) => {
+                const id = f.properties.id;
+                const data = metadata[id];
+                const baseZ = getConnHeight(id)
+                  + (isHistoricHighlighted && (data?.his ?? 0) > 0 ? catHeight : 0)
+                  + (isRestHighlighted     && (data?.rest ?? 0) > 0 ? catHeight : 0)
+                  + (isAQCHighlighted      && (data?.aqc ?? 0) > 0 ? catHeight : 0)
+                  + (isDiseaseHighlighted  && (data?.disease ?? 0) > 0 ? catHeight : 0);
+                return featureWithZ(f, baseZ);
+              }),
+          },
+          ...commonLayerProps,
+          ...interactionHandlers,
+          updateTriggers: { data: [weightMap, clickIds, isHistoricHighlighted, isRestHighlighted, isAQCHighlighted, isDiseaseHighlighted], getFillColor: [hoveredId] },
+          getElevation: catHeight,
+          getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.selected,
+        })] : []),
       ]
     : [];
 
@@ -420,9 +462,8 @@ function App() {
           whiteSpace: "pre",
           overscrollBehavior: 'none',
         }}
-      >
-        {tooltip.content}
-      </div>
+        dangerouslySetInnerHTML={{ __html: tooltip.content }}
+      />
     )}
     </div>
   );

@@ -291,6 +291,18 @@ button:focus-visible {
   }
 }
 
+/* Compact horizontal layout: hide the color scale entirely */
+@media (max-height: 820px) {
+  .control-panel-scale-section {
+    display: none;
+  }
+
+  .control-panel-actions {
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+}
+
 /* Short + narrow: hide section labels, keep options inline, reset enlarged touch targets */
 @media (max-height: 820px) and (max-width: 700px) {
   .control-panel-section-label {

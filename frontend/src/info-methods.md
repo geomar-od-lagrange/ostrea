@@ -10,8 +10,6 @@ Three dispersal time windows reflect distinct biological modes:
 - **7–14 days** — larvae undergoing rapid development
 - **7–28 days** — larvae at maximum pelagic duration
 
-Simulations start from four source types: known *B. ostreae*-positive sites, *O. edulis* aquaculture sites, historic oyster beds, and the full potentially habitable area (depth < 85 m).
-
 Relative pathogen exposure at each target hexagon:
 
 $$C_{\mathrm{target}} = \frac{N_{\mathrm{obsh}}}{N \cdot DT_{\mathrm{h}}}$$

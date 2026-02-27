@@ -19,8 +19,16 @@ interface ControlPanelProps {
   onHistoricChange: (v: boolean) => void;
 }
 
-const depths = ["05m", "10m", "15m"];
-const times = ["00d-07d", "07d-14d", "07d-28d"];
+const depths = [
+  { value: "05m",     label: "5 meters" },
+  { value: "10m",     label: "10 meters" },
+  { value: "15m",     label: "15 meters" },
+];
+const times = [
+  { value: "00d-07d", label: "0–7 days" },
+  { value: "07d-14d", label: "7–14 days" },
+  { value: "07d-28d", label: "7–28 days" },
+];
 
 // helper to toggle values in an array
 const toggle = (list: string[], value: string) =>
@@ -87,71 +95,70 @@ export default function ControlPanel({
       }}
     >
     <fieldset className="control-panel-fieldset">
-      <div className="control-panel-section" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div className="control-panel-section-inner">
-          <div className="control-panel-section-label">Depth</div>
+      <div className="control-panel-section control-panel-actions">
+        <button
+          onClick={() => setCollapsed(true)}
+          style={{
+            background: "transparent",
+            border: "none",
+            color: theme.ui.controlPanel.text,
+            fontSize: 14,
+            cursor: "pointer",
+            padding: "2px 4px",
+            lineHeight: 1,
+          }}
+          title="Collapse"
+        >
+          ✕
+        </button>
+        <button
+          type="button"
+          onClick={() => clearHex?.({ depths: selectedDepths, times: selectedTimes })}
+          style={{
+            background: "transparent",
+            border: "none",
+            color: theme.ui.controlPanel.text,
+            fontSize: 12,
+            cursor: "pointer",
+            padding: 0,
+            lineHeight: 1,
+          }}
+        >
+          clear
+        </button>
+      </div>
+
+      <div className="control-panel-section">
+        <div className="control-panel-section-label">Drifting Depth</div>
         <div className="control-panel-section-options">
-          {depths.map(d => (
-            <label key={d} className="control-panel-option">
+          {depths.map(({ value, label }) => (
+            <label key={value} className="control-panel-option">
               <input
                 type="checkbox"
                 name="depth"
-                value={d}
-                checked={selectedDepths.includes(d)}
+                value={value}
+                checked={selectedDepths.includes(value)}
                 onChange={handleDepthChange}
               />
-              {d}
+              {label}
             </label>
           ))}
-        </div>
-        </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
-          <button
-            type="button"
-            onClick={() => clearHex?.({ depths: selectedDepths, times: selectedTimes })}
-            style={{
-              background: "transparent",
-              border: "none",
-              color: theme.ui.controlPanel.text,
-              fontSize: 12,
-              cursor: "pointer",
-              padding: 0,
-              lineHeight: 1,
-            }}
-          >
-            clear
-          </button>
-          <button
-            onClick={() => setCollapsed(true)}
-            style={{
-              background: "transparent",
-              border: "none",
-              color: theme.ui.controlPanel.text,
-              fontSize: 14,
-              cursor: "pointer",
-              padding: "2px 6px",
-              lineHeight: 1,
-            }}
-            title="Collapse"
-          >
-            ✕
-          </button>
         </div>
       </div>
 
       <div className="control-panel-section">
         <div className="control-panel-section-label">Time range</div>
         <div className="control-panel-section-options">
-          {times.map(t => (
-            <label key={t} className="control-panel-option">
+          {times.map(({ value, label }) => (
+            <label key={value} className="control-panel-option">
               <input
                 type="checkbox"
                 name="time"
-                value={t}
-                checked={selectedTimes.includes(t)}
+                value={value}
+                checked={selectedTimes.includes(value)}
                 onChange={handleTimeChange}
               />
-              {t}
+              {label}
             </label>
           ))}
         </div>
@@ -166,8 +173,9 @@ export default function ControlPanel({
               name="historic"
               checked={isHistoricHighlighted}
               onChange={(e) => onHistoricChange(e.target.checked)}
+              style={{ accentColor: theme.colors.historic }}
             />
-            <span style={{ color: theme.colors.historic, fontWeight: 600 }}>Historic populations</span>
+            <span>Historic population</span>
           </label>
 
           <label className="control-panel-option">
@@ -176,8 +184,9 @@ export default function ControlPanel({
               name="aqc"
               checked={isAQCHighlighted}
               onChange={(e) => onAQCChange(e.target.checked)}
+              style={{ accentColor: theme.colors.aquaculture }}
             />
-            <span style={{ color: theme.colors.aquaculture, fontWeight: 600 }}>Aquacultures</span>
+            <span>Aquaculture</span>
           </label>
 
           <label className="control-panel-option">
@@ -186,8 +195,9 @@ export default function ControlPanel({
               name="rest"
               checked={isRestHighlighted}
               onChange={(e) => onRestChange(e.target.checked)}
+              style={{ accentColor: theme.colors.restoration }}
             />
-            <span style={{ color: theme.colors.restoration, fontWeight: 600 }}>Restoration</span>
+            <span>Restoration</span>
           </label>
 
           <label className="control-panel-option">
@@ -196,37 +206,60 @@ export default function ControlPanel({
               name="disease"
               checked={isDiseaseHighlighted}
               onChange={(e) => onDiseaseChange(e.target.checked)}
+              style={{ accentColor: theme.colors.disease }}
             />
-            <span style={{ color: theme.colors.disease, fontWeight: 600 }}>Outbreaks</span>
-          </label>
-
-          <label className="control-panel-option">
-            <input
-              type="checkbox"
-              name="habitable"
-              checked={isHabitableShown}
-              onChange={(e) => onHabitableChange(e.target.checked)}
-            />
-            <span>Habitable (≤85m)</span>
+            <span>Outbreak</span>
           </label>
         </div>
       </div>
 
     </fieldset>
 
+      {/* Habitable toggle — separate from highlights */}
       <div className="control-panel-section" style={{ marginTop: 4 }}>
-        <div className="control-panel-section-label">
-          Relative concentration<br/>(logarithmic scale)
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <input
+            id="habitable-toggle"
+            type="checkbox"
+            checked={isHabitableShown}
+            onChange={(e) => onHabitableChange(e.target.checked)}
+            style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }}
+          />
+          <label htmlFor="habitable-toggle" style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <div style={{ position: 'relative', flexShrink: 0, width: 34, height: 18 }}>
+              <div style={{
+                position: 'absolute', inset: 0,
+                backgroundColor: isHabitableShown ? '#4a9eff' : '#555',
+                borderRadius: 9, transition: 'background-color .2s',
+              }}>
+                <div style={{
+                  position: 'absolute', top: 2, width: 14, height: 14,
+                  left: isHabitableShown ? 18 : 2,
+                  backgroundColor: 'white', borderRadius: '50%', transition: 'left .2s',
+                }} />
+              </div>
+            </div>
+            <div style={{ lineHeight: 1.3 }}>
+              <div style={{ whiteSpace: 'nowrap' }}>habitable only</div>
+              <div style={{ opacity: 0.65 }}>(≤ 85 m depth)</div>
+            </div>
+          </label>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-          <span style={{ fontSize: 10, opacity: 0.7 }}>low</span>
+      </div>
+
+      <div className="control-panel-section control-panel-scale-section" style={{ marginTop: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ opacity: 0.7 }}>low</span>
           <div style={{
             flex: 1,
             height: 8,
             borderRadius: 2,
             background: `linear-gradient(to right, ${theme.colorScale.join(', ')})`,
           }} />
-          <span style={{ fontSize: 10, opacity: 0.7 }}>high</span>
+          <span style={{ opacity: 0.7 }}>high</span>
+        </div>
+        <div style={{ marginTop: 3, opacity: 0.75, fontWeight: 'normal' }}>
+          Relative concentration (logarithmic scale)
         </div>
       </div>
     </div>

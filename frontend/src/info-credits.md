@@ -19,3 +19,5 @@ Lagrangian simulations: [parcels-code.org](https://parcels-code.org)
 ### Tool contributors
 
 Willi Rath, Ingmar Eissfeldt, Felix Kirch, Lara Schmittmann
+
+Source: [github.com/geomar-od-lagrange/ostrea](https://github.com/geomar-od-lagrange/ostrea)

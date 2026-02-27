@@ -43,11 +43,12 @@ function normalize(data) {
   const max = Math.max(...weights);
 
   if (max === min) {
-    return positive.map(d => ({ ...d, weight: 1 }));
+    return positive.map(d => ({ ...d, raw_weight: d.weight, weight: 1 }));
   }
 
   return positive.map(d => ({
     ...d,
+    raw_weight: d.weight,
     weight: (Math.log(d.weight) - Math.log(min)) / (Math.log(max) - Math.log(min))
   }));
 }
