@@ -5,6 +5,7 @@ Checks if tables already exist and only loads data if needed.
 """
 import sys
 import logging
+from pathlib import Path
 from sqlalchemy import inspect
 from hex_db_loader import (
     get_db_engine,
@@ -14,6 +15,7 @@ from hex_db_loader import (
     GEO_TABLE_NAME,
     METADATA_TABLE_NAME,
     CONNECTIVITY_TABLE_NAME,
+    SCHEMA,
 )
 
 # Setup logging
@@ -67,8 +69,23 @@ try:
     df = load_metadata(engine)
     logger.info(f"Metadata loaded: {len(df)} records")
 
-    logger.info("Loading connectivity data (this takes ~3 minutes)...")
-    load_connectivity(engine)
+    data_dir = Path(__file__).parent / "data"
+    pq_files = sorted(data_dir.glob("connectivity_*.pq"))
+    if not pq_files:
+        raise FileNotFoundError(f"No connectivity_*.pq files found in {data_dir}")
+    logger.info(f"Loading connectivity data from {len(pq_files)} files...")
+    for pq_file in pq_files:
+        logger.info(f"  Loading {pq_file.name}...")
+        load_connectivity(engine, data_path=pq_file)
+
+    logger.info("Building connectivity index and running ANALYZE...")
+    with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+        conn.execute(text(f'''
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_connect_dtr_inc
+            ON "{SCHEMA}"."{CONNECTIVITY_TABLE_NAME}" (depth, time_range, start_id)
+            INCLUDE (end_id, weight);
+        '''))
+        conn.execute(text(f'ANALYZE "{SCHEMA}"."{CONNECTIVITY_TABLE_NAME}";'))
     logger.info("Connectivity data loaded with index and ANALYZE")
 
     # Mark initialization as complete
