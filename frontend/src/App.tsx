@@ -203,10 +203,10 @@ function App() {
       })();
       const categories = [
         data.disease > 0 && 'outbreak',
-        data.rest    > 0 && 'restoration',
         data.aqc     > 0 && 'aquaculture',
-        data.pop     > 0 && 'population',
+        data.rest    > 0 && 'restoration',
         data.his     > 0 && 'historic',
+        data.pop     > 0 && 'population',
       ].filter(Boolean) as string[];
       const catLine = categories.length > 0 ? categories.join(' · ') : '·';
       const lines = [

@@ -170,12 +170,12 @@ export default function ControlPanel({
           <label className="control-panel-option">
             <input
               type="checkbox"
-              name="historic"
-              checked={isHistoricHighlighted}
-              onChange={(e) => onHistoricChange(e.target.checked)}
-              style={{ accentColor: theme.colors.historic }}
+              name="disease"
+              checked={isDiseaseHighlighted}
+              onChange={(e) => onDiseaseChange(e.target.checked)}
+              style={{ accentColor: theme.colors.disease }}
             />
-            <span>Historic population</span>
+            <span>Outbreak</span>
           </label>
 
           <label className="control-panel-option">
@@ -203,12 +203,12 @@ export default function ControlPanel({
           <label className="control-panel-option">
             <input
               type="checkbox"
-              name="disease"
-              checked={isDiseaseHighlighted}
-              onChange={(e) => onDiseaseChange(e.target.checked)}
-              style={{ accentColor: theme.colors.disease }}
+              name="historic"
+              checked={isHistoricHighlighted}
+              onChange={(e) => onHistoricChange(e.target.checked)}
+              style={{ accentColor: theme.colors.historic }}
             />
-            <span>Outbreak</span>
+            <span>Historic population</span>
           </label>
         </div>
       </div>

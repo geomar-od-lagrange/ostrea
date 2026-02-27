@@ -29,8 +29,8 @@ const colors = {
   noMetadataAlpha: 180,
 
   // Highlight colors (chosen to not interfere with concentration scale)
-  aquaculture: '#4477AA',   // blue        (Tol Bright qualitative)
-  restoration: '#CCBB44',   // yellow      (Tol Bright qualitative — high luminance, visible after shading)
+  aquaculture: '#CCBB44',   // yellow      (Tol Bright qualitative)
+  restoration: '#4477AA',   // blue        (Tol Bright qualitative)
   disease: '#AA3377',       // purple      (Tol Bright qualitative)
   selected: '#ff6600',      // orange      (UI state, unchanged)
   historic: '#66CCEE',      // cyan        (Tol Bright qualitative)
