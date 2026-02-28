@@ -45,7 +45,8 @@ RUN INSTALL_PKGS="rsync tar gettext postgresql-server postgresql-contrib nss_wra
     INSTALL_PKGS+=" findutils xz" && \
     INSTALL_PKGS+=" pgaudit pgvector" && \
     INSTALL_PKGS+=" postgis" && \
-    dnf -y --setopt=tsflags=nodocs --setopt=timeout=300 --setopt=minrate=100 install $INSTALL_PKGS && \
+    dnf -y --setopt=tsflags=nodocs --setopt=timeout=300 --setopt=minrate=100 \
+        --setopt=ip_resolve=4 --setopt=deltarpm=0 install $INSTALL_PKGS && \
     rpm -V $INSTALL_PKGS && \
     postgres -V | grep -qe "$POSTGRESQL_VERSION\." && echo "Found VERSION $POSTGRESQL_VERSION" && \
     dnf clean all && \
