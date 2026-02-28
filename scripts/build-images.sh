@@ -13,13 +13,22 @@ GIT_REF=$(git rev-parse --short HEAD)
 SUFFIX=${SUFFIX:-}
 SEP=${SUFFIX:+-}
 
+# Ensure a docker-container builder exists (required for type=registry cache)
+BUILDER_NAME=ostrea-multiarch
+if ! docker buildx inspect "$BUILDER_NAME" &>/dev/null; then
+  docker buildx create --name "$BUILDER_NAME" --driver docker-container --use
+else
+  docker buildx use "$BUILDER_NAME"
+fi
+
 build() {
   local NAME=$1; shift
-  docker build --platform linux/amd64,linux/arm64 \
+  local CACHE_TAG="${NAME}-buildcache${SEP}${SUFFIX}"
+  docker buildx build --platform linux/amd64,linux/arm64 \
     -t "${REPO}:${NAME}-latest${SEP}${SUFFIX}" \
     -t "${REPO}:${NAME}-${GIT_REF}${SEP}${SUFFIX}" \
-    --cache-from "type=registry,ref=${REPO}:${NAME}-latest${SEP}${SUFFIX}" \
-    --cache-to "type=inline" \
+    --cache-from "type=registry,ref=${REPO}:${CACHE_TAG}" \
+    --cache-to "type=registry,ref=${REPO}:${CACHE_TAG},mode=max" \
     --push "$@"
 }
 
