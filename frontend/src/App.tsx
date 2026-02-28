@@ -169,7 +169,7 @@ function App() {
 
   // Calculate connectivity height for a hex
   const getConnHeight = (id: number) => {
-    if (isHabitableShown && metadata && metadata[id]?.habitable === 0) return 0;
+    if (isHabitableShown && metadata && metadata[id]?.habitable == 0) return 0;
     const w = weightMap.get(id);
     return w !== undefined ? theme.elevation.getElevation(w) : 0;
   };
@@ -262,14 +262,14 @@ function App() {
           },
           getElevation: (d: any) => {
             const id = d.properties.id;
-            if (isHabitableShown && metadata && metadata[id]?.habitable === 0) return 0;
+            if (isHabitableShown && metadata && metadata[id]?.habitable == 0) return 0;
             const w = weightMap.get(id);
             if (w !== undefined) return theme.elevation.getElevation(w);
             return theme.elevation.default;
           },
           getFillColor: (d: any) => {
             const id = d.properties.id;
-            const isDeep = isHabitableShown && metadata && metadata[id]?.habitable === 0;
+            const isDeep = isHabitableShown && metadata && metadata[id]?.habitable == 0;
             if (id === hoveredId) return theme.hex.hovered;
             const w = weightMap.get(id);
             if (w !== undefined) {
