@@ -104,7 +104,20 @@ app.get('/connectivity', async (req, res) => {
     }
     const data = result.rows;
     
-    const mean = xs => xs.reduce((a,b)=>a+b,0) / (xs.length || 1);
+    // Time-weighted mean: weight each row by the duration of its time window.
+    // Windows are non-overlapping (00d-07d, 07d-14d, 14d-28d), so this gives
+    // a physically meaningful average rate over the selected period.
+    // Depth rows are weighted equally (no natural physical weighting for depth).
+    const DT_H = { '00d-07d': 168, '07d-14d': 168, '14d-28d': 336 };
+    const timeWeightedMean = rows => {
+      let totalHours = 0, totalWeighted = 0;
+      for (const r of rows) {
+        const h = DT_H[r.time_range] ?? 168;
+        totalHours += h;
+        totalWeighted += +r.weight * h;
+      }
+      return totalWeighted / (totalHours || 1);
+    };
 
     const byEndId = data.reduce((acc, r) => {
       (acc[r.end_id] ??= []).push(r);
@@ -113,7 +126,7 @@ app.get('/connectivity', async (req, res) => {
 
     const aggregates = Object.entries(byEndId).map(([end_id, rows]) => ({
       end_id: typeof rows[0].end_id === 'number' ? Number(end_id) : String(end_id),
-      weight: mean(rows.map(r => +r.weight)),
+      weight: timeWeightedMean(rows),
     }));
         
     const responsePayload = normalize(aggregates);
