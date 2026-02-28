@@ -1,5 +1,6 @@
 import * as React from "react";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
@@ -27,7 +28,7 @@ const TAB_CONTENT: Record<Tab, string> = {
 };
 
 const mdProps = {
-  remarkPlugins: [remarkMath],
+  remarkPlugins: [remarkGfm, remarkMath],
   rehypePlugins: [rehypeKatex],
   components: {
     img: ({ ...props }) => (
