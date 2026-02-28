@@ -9,6 +9,10 @@
 - Click **clear** to deselect all hexes
 - Hex colour shows **relative concentration** on a **logarithmic scale** (green = higher; hover for exact value as *a* · 10ⁿ)
 
+#### Drifting depth checkboxes
+
+Selecting multiple depths computes the **arithmetic mean** of the relative concentration across those depths. Each depth is weighted equally — there is no physical reason to prefer one depth over another.
+
 #### Time range checkboxes
 
 The three time windows are **non-overlapping**:
