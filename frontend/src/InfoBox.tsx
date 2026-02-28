@@ -5,21 +5,24 @@ import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import aboutText from "./info-about.md?raw";
 import methodsText from "./info-methods.md?raw";
+import howtoText from "./info-howto.md?raw";
 import creditsText from "./info-credits.md?raw";
 
 
 type InfoBoxState = "collapsed" | "normal" | "maximized";
-type Tab = "about" | "methods" | "credits";
+type Tab = "about" | "methods" | "howto" | "credits";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "about", label: "About" },
   { id: "methods", label: "Methods" },
+  { id: "howto", label: "How to use" },
   { id: "credits", label: "Credits" },
 ];
 
 const TAB_CONTENT: Record<Tab, string> = {
   about: aboutText,
   methods: methodsText,
+  howto: howtoText,
   credits: creditsText,
 };
 

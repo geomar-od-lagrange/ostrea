@@ -8,7 +8,7 @@ Three dispersal time windows reflect distinct biological modes:
 
 - **0–7 days** — free *B. ostreae* cells drifting in seawater
 - **7–14 days** — larvae undergoing rapid development
-- **7–28 days** — larvae at maximum pelagic duration
+- **14–28 days** — larvae at maximum pelagic duration
 
 Relative pathogen exposure at each target hexagon:
 
