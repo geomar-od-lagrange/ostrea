@@ -18,6 +18,8 @@ build() {
   docker build --platform linux/amd64,linux/arm64 \
     -t "${REPO}:${NAME}-latest${SEP}${SUFFIX}" \
     -t "${REPO}:${NAME}-${GIT_REF}${SEP}${SUFFIX}" \
+    --cache-from "type=registry,ref=${REPO}:${NAME}-latest${SEP}${SUFFIX}" \
+    --cache-to "type=inline" \
     --push "$@"
 }
 
