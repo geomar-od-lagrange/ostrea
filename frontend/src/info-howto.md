@@ -5,7 +5,7 @@
 - **Multi-select** by clicking additional hexes
 - Use **Drifting Depth** and **Time range** to filter dispersal scenarios
 - Toggle **Highlights** to show historic populations, aquaculture, restoration, and outbreak sites
-- Enable **habitable only** to dim hexes deeper than 85 m
+- Enable **habitable only** to dim hexes that are neither shallow (≤ 85 m) nor coastal
 - Click **clear** to deselect all hexes
 - Hex colour shows **relative concentration** on a **logarithmic scale** (green = higher; hover for exact value as *a* · 10ⁿ)
 

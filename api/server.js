@@ -142,7 +142,7 @@ app.get('/connectivity', async (req, res) => {
 app.get('/metadata', async (req, res) => {
   try {
     const queryText = `
-      SELECT id, lon, lat, depth, disease, rest, aqc, pop, his
+      SELECT id, lon, lat, depth, disease, rest, aqc, pop, his, habitable
       FROM ${META_TABLE_NAME}
     `; 
     const result = await pool.query(queryText);
