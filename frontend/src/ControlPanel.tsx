@@ -27,7 +27,7 @@ const depths = [
 const times = [
   { value: "00d-07d", label: "0–7 days" },
   { value: "07d-14d", label: "7–14 days" },
-  { value: "07d-28d", label: "7–28 days" },
+  { value: "14d-28d", label: "14–28 days" },
 ];
 
 // helper to toggle values in an array
