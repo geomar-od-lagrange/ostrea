@@ -241,7 +241,7 @@ export default function ControlPanel({
             </div>
             <div style={{ lineHeight: 1.3 }}>
               <div style={{ whiteSpace: 'nowrap' }}>habitable only</div>
-              <div style={{ opacity: 0.65 }}>(≤ 85 m or coastal)</div>
+              <div style={{ opacity: 0.65 }}>(shallow or coastal)</div>
             </div>
           </label>
         </div>
