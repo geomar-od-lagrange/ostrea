@@ -11,7 +11,7 @@
 
 #### Drifting depth checkboxes
 
-Selecting multiple depths computes the **arithmetic mean** of the relative concentration across those depths. Each depth is weighted equally — there is no physical reason to prefer one depth over another.
+Selecting multiple depths computes the **arithmetic mean** of the relative concentration across those depths.
 
 #### Time range checkboxes
 
