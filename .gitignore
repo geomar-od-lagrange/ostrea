@@ -17,3 +17,9 @@ __pycache__/
 
 # Manuscript drafts (local only)
 tmp_manuscript/
+
+# Generated notebook outputs
+*.exec.ipynb
+
+# Generated plots / analysis artifacts
+database/data/*.png
