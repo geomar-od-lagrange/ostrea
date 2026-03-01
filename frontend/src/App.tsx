@@ -3,7 +3,7 @@ import DeckGL from '@deck.gl/react';
 import { GeoJsonLayer } from '@deck.gl/layers';
 import StaticMap from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
-import ControlPanel, { type DepthWeights } from './ControlPanel';
+import ControlPanel, { type DepthWeights, type TimeWeights } from './ControlPanel';
 import InfoBox from './InfoBox';
 import { theme, type RGBA } from './theme';
 
@@ -59,7 +59,7 @@ interface FeatureCollection {
 
 function App() {
   const [depthWeights, setDepthWeights] = useState<DepthWeights>({ '05m': 1, '10m': 1, '15m': 1 });
-  const [selectedTimes, setSelectedTimes] = useState<string[]>(['07d-14d']);
+  const [timeWeights, setTimeWeights] = useState<TimeWeights>({ '00d-07d': 1, '07d-14d': 1, '14d-28d': 1 });
   const [feature, setFeature] = useState<FeatureCollection | null>(null);
   const [metadata, setMetadata] = useState<Record<number, Metadata> | null>(null);
 
@@ -77,11 +77,17 @@ function App() {
   const [clickIds, setClickIds] = useState<number[]>([]);
   const [tooltip, setTooltip] = useState<{x: number; y: number; content: string} | null>(null);
 
-  // Derive depth params for API: only depths with weight > 0, with normalised weights
+  // Derive depth params for API
   const activeDepths = Object.entries(depthWeights).filter(([, w]) => w > 0);
-  const depthTotal = activeDepths.reduce((s, [, w]) => s + w, 0);
-  const depthParam  = activeDepths.map(([d]) => d).join(',');
-  const weightParam = activeDepths.map(([, w]) => (w / depthTotal).toFixed(4)).join(',');
+  const depthTotal   = activeDepths.reduce((s, [, w]) => s + w, 0);
+  const depthParam   = activeDepths.map(([d]) => d).join(',');
+  const depthWeightParam = activeDepths.map(([, w]) => (w / depthTotal).toFixed(4)).join(',');
+
+  // Derive time params for API
+  const activeTimes  = Object.entries(timeWeights).filter(([, w]) => w > 0);
+  const timeTotal    = activeTimes.reduce((s, [, w]) => s + w, 0);
+  const timeParam    = activeTimes.map(([t]) => t).join(',');
+  const timeWeightParam = activeTimes.map(([, w]) => (w / timeTotal).toFixed(4)).join(',');
 
   //fetch geojson features for display
   useEffect(() => {
@@ -128,12 +134,12 @@ function App() {
 
   // Downstream fetch
   useEffect(() => {
-    if (direction !== 'downstream' || !clickIds?.length || !depthParam) {
+    if (direction !== 'downstream' || !clickIds?.length || !depthParam || !timeParam) {
       setConnections([]);
       return;
     }
     const ctrl = new AbortController();
-    const fetchURL = `api/connectivity?depth=${depthParam}&depth_weight=${weightParam}&time_range=${selectedTimes.join(',')}&start_id=${clickIds.join(',')}`;
+    const fetchURL = `api/connectivity?depth=${depthParam}&depth_weight=${depthWeightParam}&time_range=${timeParam}&time_weight=${timeWeightParam}&start_id=${clickIds.join(',')}`;
     console.log('Trying to fetch:', fetchURL);
     (async () => {
       try {
@@ -146,16 +152,16 @@ function App() {
       }
     })();
     return () => ctrl.abort();
-  }, [clickIds, selectedTimes, depthParam, weightParam, direction]);
+  }, [clickIds, timeParam, timeWeightParam, depthParam, depthWeightParam, direction]);
 
   // Upstream fetch
   useEffect(() => {
-    if (direction !== 'upstream' || !clickIds?.length || !depthParam) {
+    if (direction !== 'upstream' || !clickIds?.length || !depthParam || !timeParam) {
       setSourceConnections([]);
       return;
     }
     const ctrl = new AbortController();
-    const fetchURL = `api/connectivity-sources?depth=${depthParam}&depth_weight=${weightParam}&time_range=${selectedTimes.join(',')}&end_id=${clickIds.join(',')}&habitable=${isHabitableShown}`;
+    const fetchURL = `api/connectivity-sources?depth=${depthParam}&depth_weight=${depthWeightParam}&time_range=${timeParam}&time_weight=${timeWeightParam}&end_id=${clickIds.join(',')}&habitable=${isHabitableShown}`;
     console.log('Trying to fetch:', fetchURL);
     (async () => {
       try {
@@ -168,7 +174,7 @@ function App() {
       }
     })();
     return () => ctrl.abort();
-  }, [clickIds, selectedTimes, depthParam, weightParam, direction, isHabitableShown]);
+  }, [clickIds, timeParam, timeWeightParam, depthParam, depthWeightParam, direction, isHabitableShown]);
 
   const clearHex = () => {
     setClickIds([]);
@@ -514,8 +520,8 @@ function App() {
         <ControlPanel
           depthWeights={depthWeights}
           onDepthWeightsChange={setDepthWeights}
-          selectedTimes={selectedTimes}
-          onTimeChange={setSelectedTimes}
+          timeWeights={timeWeights}
+          onTimeWeightsChange={setTimeWeights}
           clearHex={clearHex}
           isAQCHighlighted={isAQCHighlighted}
           onAQCChange={setAQC}

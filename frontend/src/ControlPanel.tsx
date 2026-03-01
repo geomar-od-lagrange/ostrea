@@ -2,14 +2,15 @@ import * as React from "react";
 import { theme } from "./theme";
 import type { ConnDirection } from "./App";
 
-// depthWeights: relative weight per depth key (0 = excluded)
+// relative weight per key (0 = excluded)
 export type DepthWeights = Record<string, number>;
+export type TimeWeights  = Record<string, number>;
 
 interface ControlPanelProps {
   depthWeights: DepthWeights;
   onDepthWeightsChange: (w: DepthWeights) => void;
-  selectedTimes: string[];
-  onTimeChange: (newTimes: string[]) => void;
+  timeWeights: TimeWeights;
+  onTimeWeightsChange: (w: TimeWeights) => void;
   clearHex?: (payload: { depths: string[]; times: string[] }) => void;
   isAQCHighlighted: boolean;
   onAQCChange: (newAQC: boolean) => void;
@@ -36,14 +37,11 @@ const times = [
   { value: "14d-28d", label: "14–28 days" },
 ];
 
-const toggle = (list: string[], value: string) =>
-  list.includes(value) ? list.filter(v => v !== value) : [...list, value];
-
 export default function ControlPanel({
   depthWeights,
   onDepthWeightsChange,
-  selectedTimes,
-  onTimeChange,
+  timeWeights,
+  onTimeWeightsChange,
   clearHex,
   isAQCHighlighted,
   onAQCChange,
@@ -68,8 +66,12 @@ export default function ControlPanel({
     onDepthWeightsChange({ ...depthWeights, [value]: raw });
   };
 
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onTimeChange(toggle(selectedTimes, e.target.value));
+  const timeTotal = Object.values(timeWeights).reduce((s, v) => s + v, 0);
+  const timePct = (value: string) =>
+    timeTotal > 0 ? Math.round((timeWeights[value] ?? 0) / timeTotal * 100) : 0;
+
+  const handleTimeSlider = (value: string, raw: number) => {
+    onTimeWeightsChange({ ...timeWeights, [value]: raw });
   };
 
   const stopScroll = (e: React.WheelEvent | React.TouchEvent) => {
@@ -124,7 +126,7 @@ export default function ControlPanel({
         </button>
         <button
           type="button"
-          onClick={() => clearHex?.({ depths: Object.keys(depthWeights).filter(d => depthWeights[d] > 0), times: selectedTimes })}
+          onClick={() => clearHex?.({ depths: Object.keys(depthWeights).filter(d => depthWeights[d] > 0), times: Object.keys(timeWeights).filter(t => timeWeights[t] > 0) })}
           style={{
             background: "transparent",
             border: "none",
@@ -164,18 +166,23 @@ export default function ControlPanel({
 
       <div className="control-panel-section">
         <div className="control-panel-section-label">Time range</div>
-        <div className="control-panel-section-options">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {times.map(({ value, label }) => (
-            <label key={value} className="control-panel-option">
+            <div key={value} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 54, flexShrink: 0 }}>{label}</span>
               <input
-                type="checkbox"
-                name="time"
-                value={value}
-                checked={selectedTimes.includes(value)}
-                onChange={handleTimeChange}
+                type="range"
+                min={0}
+                max={10}
+                step={1}
+                value={timeWeights[value] ?? 0}
+                onChange={e => handleTimeSlider(value, Number(e.target.value))}
+                style={{ flex: 1, minWidth: 0 }}
               />
-              {label}
-            </label>
+              <span style={{ width: 32, textAlign: 'right', opacity: timeWeights[value] ? 1 : 0.35 }}>
+                {timePct(value)}%
+              </span>
+            </div>
           ))}
         </div>
       </div>

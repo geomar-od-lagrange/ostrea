@@ -76,6 +76,7 @@ app.get('/connectivity', async (req, res) => {
   const time_ranges = (req.query.time_range || "").split(",").filter(Boolean);
   const start_ids = (req.query.start_id || '').split(',').filter(Boolean);
   const depthWeights = parseDepthWeights(depths, req.query.depth_weight);
+  const timeWeights  = parseDepthWeights(time_ranges, req.query.time_weight);
 
   // Validate inputs
   if (!validateArray(depths, 10)) {
@@ -118,13 +119,11 @@ app.get('/connectivity', async (req, res) => {
     }
     const data = result.rows;
     
-    // Time-and-depth-weighted mean.
-    // Each row is weighted by its time-window duration (hours) × user-supplied depth weight.
-    const DT_H = { '00d-07d': 168, '07d-14d': 168, '14d-28d': 336 };
+    // Weighted mean: each row weighted by user-supplied depth weight × time weight.
     const weightedMean = rows => {
       let totalW = 0, totalWeighted = 0;
       for (const r of rows) {
-        const w = (DT_H[r.time_range] ?? 168) * (depthWeights[r.depth] ?? 1);
+        const w = (depthWeights[r.depth] ?? 1) * (timeWeights[r.time_range] ?? 1);
         totalW += w;
         totalWeighted += +r.weight * w;
       }
@@ -160,6 +159,7 @@ app.get('/connectivity-sources', async (req, res) => {
   const end_ids    = (req.query.end_id     || '').split(',').filter(Boolean);
   const habitable  = req.query.habitable === 'true';
   const depthWeights = parseDepthWeights(depths, req.query.depth_weight);
+  const timeWeights  = parseDepthWeights(time_ranges, req.query.time_weight);
 
   if (!validateArray(depths, 10)) {
     return res.status(400).json({ error: 'Invalid depth parameter. Must be array with max 10 items' });
@@ -203,12 +203,11 @@ app.get('/connectivity-sources', async (req, res) => {
 
     const data = result.rows;
 
-    // Time-and-depth-weighted mean per source
-    const DT_H = { '00d-07d': 168, '07d-14d': 168, '14d-28d': 336 };
+    // Weighted mean per source: depth weight × time weight
     const weightedMean = rows => {
       let totalW = 0, totalWeighted = 0;
       for (const r of rows) {
-        const w = (DT_H[r.time_range] ?? 168) * (depthWeights[r.depth] ?? 1);
+        const w = (depthWeights[r.depth] ?? 1) * (timeWeights[r.time_range] ?? 1);
         totalW += w;
         totalWeighted += +r.weight * w;
       }
