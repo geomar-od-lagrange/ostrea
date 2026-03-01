@@ -15,8 +15,16 @@ import { theme } from './theme';
 // - https://demotiles.maplibre.org/style.json (original colorful demo)
 const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 
+export type ConnDirection = 'downstream' | 'upstream';
+
 type Connection = {
   end_id: number;
+  weight: number;
+  raw_weight?: number;
+};
+
+type SourceConnection = {
+  start_id: number;
   weight: number;
   raw_weight?: number;
 };
@@ -64,6 +72,7 @@ function App() {
   const [isHabitableShown, setHabitable] = useState<boolean>(true);
   const [isHistoricHighlighted, setHistoric] = useState<boolean>(true);
   
+  const [direction, setDirection] = useState<ConnDirection>('downstream');
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [clickIds, setClickIds] = useState<number[]>([]);
   const [tooltip, setTooltip] = useState<{x: number; y: number; content: string} | null>(null);
@@ -109,45 +118,70 @@ function App() {
   };
 
   const [connections, setConnections] = useState<Connection[]>([]);
+  const [sourceConnections, setSourceConnections] = useState<SourceConnection[]>([]);
 
-  // Fetch connectivity whenever (clickId, selectedTime, selectedDepth) change
+  // Downstream fetch
   useEffect(() => {
-    if (clickIds?.length) {
-
-      // TODO: Add request timeout (10s) for better UX
-      const ctrl = new AbortController();
-      const fetchURL = `api/connectivity?depth=${selectedDepths.join(',')}&time_range=${selectedTimes.join(',')}&start_id=${clickIds.join(',')}&op=mean`;
-      console.log("Trying to fetch: ", fetchURL);
-    
-      (async () => {
-        try {
-          const res = await fetch(fetchURL, { signal: ctrl.signal });
-          if (!res.ok) throw new Error(res.statusText);
-          const data: Connection[] = await res.json();
-          setConnections(data);
-        } catch (e: any) {
-          if (e.name !== 'AbortError') console.error('Fetch error:', e);
-        }
-      })();
-    return () => ctrl.abort();
+    if (direction !== 'downstream' || !clickIds?.length) {
+      setConnections([]);
+      return;
     }
-    setConnections([]);
-  }, [clickIds, selectedTimes, selectedDepths]);
+    const ctrl = new AbortController();
+    const fetchURL = `api/connectivity?depth=${selectedDepths.join(',')}&time_range=${selectedTimes.join(',')}&start_id=${clickIds.join(',')}&op=mean`;
+    console.log('Trying to fetch:', fetchURL);
+    (async () => {
+      try {
+        const res = await fetch(fetchURL, { signal: ctrl.signal });
+        if (!res.ok) throw new Error(res.statusText);
+        const data: Connection[] = await res.json();
+        setConnections(data);
+      } catch (e: any) {
+        if (e.name !== 'AbortError') console.error('Fetch error:', e);
+      }
+    })();
+    return () => ctrl.abort();
+  }, [clickIds, selectedTimes, selectedDepths, direction]);
+
+  // Upstream fetch
+  useEffect(() => {
+    if (direction !== 'upstream' || !clickIds?.length) {
+      setSourceConnections([]);
+      return;
+    }
+    const ctrl = new AbortController();
+    const fetchURL = `api/connectivity-sources?depth=${selectedDepths.join(',')}&time_range=${selectedTimes.join(',')}&end_id=${clickIds.join(',')}&habitable=${isHabitableShown}`;
+    console.log('Trying to fetch:', fetchURL);
+    (async () => {
+      try {
+        const res = await fetch(fetchURL, { signal: ctrl.signal });
+        if (!res.ok) throw new Error(res.statusText);
+        const data: SourceConnection[] = await res.json();
+        setSourceConnections(data);
+      } catch (e: any) {
+        if (e.name !== 'AbortError') console.error('Fetch error:', e);
+      }
+    })();
+    return () => ctrl.abort();
+  }, [clickIds, selectedTimes, selectedDepths, direction, isHabitableShown]);
 
   const clearHex = () => {
     setClickIds([]);
     setConnections([]);
+    setSourceConnections([]);
   }
 
-  // Derive weights from the latest connections; new Map reference whenever connections changes
-  const weightMap = useMemo(
-    () => new Map<number, number>(connections.map(c => [c.end_id, c.weight])),
-    [connections]
-  );
-  const rawWeightMap = useMemo(
-    () => new Map<number, number>(connections.filter(c => c.raw_weight != null).map(c => [c.end_id, c.raw_weight!])),
-    [connections]
-  );
+  // Derive weights from the active direction's connections
+  const weightMap = useMemo(() => {
+    if (direction === 'downstream')
+      return new Map<number, number>(connections.map(c => [c.end_id, c.weight]));
+    return new Map<number, number>(sourceConnections.map(c => [c.start_id, c.weight]));
+  }, [direction, connections, sourceConnections]);
+
+  const rawWeightMap = useMemo(() => {
+    if (direction === 'downstream')
+      return new Map<number, number>(connections.filter(c => c.raw_weight != null).map(c => [c.end_id, c.raw_weight!]));
+    return new Map<number, number>(sourceConnections.filter(c => c.raw_weight != null).map(c => [c.start_id, c.raw_weight!]));
+  }, [direction, connections, sourceConnections]);
 
   // Helper: add z-coordinate to all positions in a geometry
   const addZToGeometry = (geometry: any, z: number): any => {
@@ -198,7 +232,10 @@ function App() {
       if (!data) return;
       const rawWeight = rawWeightMap.get(info.object.properties.id);
       const concLine = (() => {
-        if (rawWeight == null || rawWeight <= 0) return 'rel conc 0';
+        if (rawWeight == null || rawWeight <= 0) return direction === 'upstream' ? 'source contrib 0%' : 'rel conc 0';
+        if (direction === 'upstream') {
+          return `source contrib ${(rawWeight * 100).toFixed(2)}%`;
+        }
         const exp = Math.floor(Math.log10(rawWeight));
         const mantissa = rawWeight / Math.pow(10, exp);
         return `rel conc ${mantissa.toFixed(2)} \u00b7 10<sup>${exp}</sup>`;
@@ -429,6 +466,8 @@ function App() {
           onHabitableChange={setHabitable}
           isHistoricHighlighted={isHistoricHighlighted}
           onHistoricChange={setHistoric}
+          direction={direction}
+          onDirectionChange={setDirection}
         />
       </div>
 

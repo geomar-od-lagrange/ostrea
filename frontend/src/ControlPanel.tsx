@@ -1,5 +1,6 @@
 import * as React from "react";
 import { theme } from "./theme";
+import type { ConnDirection } from "./App";
 
 interface ControlPanelProps {
   selectedDepths: string[];
@@ -17,6 +18,8 @@ interface ControlPanelProps {
   onHabitableChange: (v: boolean) => void;
   isHistoricHighlighted: boolean;
   onHistoricChange: (v: boolean) => void;
+  direction: ConnDirection;
+  onDirectionChange: (d: ConnDirection) => void;
 }
 
 const depths = [
@@ -50,6 +53,8 @@ export default function ControlPanel({
   onHabitableChange,
   isHistoricHighlighted,
   onHistoricChange,
+  direction,
+  onDirectionChange,
 }: ControlPanelProps) {
   const [collapsed, setCollapsed] = React.useState(() => window.innerWidth <= 480);
 
@@ -215,6 +220,38 @@ export default function ControlPanel({
 
     </fieldset>
 
+      {/* Upstream toggle */}
+      <div className="control-panel-section" style={{ marginTop: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <input
+            id="upstream-toggle"
+            type="checkbox"
+            checked={direction === 'upstream'}
+            onChange={(e) => onDirectionChange(e.target.checked ? 'upstream' : 'downstream')}
+            style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }}
+          />
+          <label htmlFor="upstream-toggle" style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <div style={{ position: 'relative', flexShrink: 0, width: 34, height: 18 }}>
+              <div style={{
+                position: 'absolute', inset: 0,
+                backgroundColor: direction === 'upstream' ? '#4a9eff' : '#555',
+                borderRadius: 9, transition: 'background-color .2s',
+              }}>
+                <div style={{
+                  position: 'absolute', top: 2, width: 14, height: 14,
+                  left: direction === 'upstream' ? 18 : 2,
+                  backgroundColor: 'white', borderRadius: '50%', transition: 'left .2s',
+                }} />
+              </div>
+            </div>
+            <div style={{ lineHeight: 1.3 }}>
+              <div style={{ whiteSpace: 'nowrap' }}>upstream</div>
+              <div style={{ opacity: 0.65, whiteSpace: 'nowrap' }}>{direction === 'upstream' ? 'click target · see sources' : 'click source · see targets'}</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
       {/* Habitable toggle — separate from highlights */}
       <div className="control-panel-section" style={{ marginTop: 4 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -259,7 +296,7 @@ export default function ControlPanel({
           <span style={{ opacity: 0.7 }}>high</span>
         </div>
         <div style={{ marginTop: 3, opacity: 0.75, fontWeight: 'normal' }}>
-          Relative concentration (logarithmic scale)
+          {direction === 'upstream' ? 'Source contribution (logarithmic scale)' : 'Relative concentration (logarithmic scale)'}
         </div>
       </div>
     </div>
