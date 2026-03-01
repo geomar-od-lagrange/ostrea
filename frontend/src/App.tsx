@@ -3,7 +3,7 @@ import DeckGL from '@deck.gl/react';
 import { GeoJsonLayer } from '@deck.gl/layers';
 import StaticMap from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
-import ControlPanel from './ControlPanel';
+import ControlPanel, { type DepthWeights } from './ControlPanel';
 import InfoBox from './InfoBox';
 import { theme, type RGBA } from './theme';
 
@@ -58,7 +58,7 @@ interface FeatureCollection {
 }
 
 function App() {
-  const [selectedDepths, setSelectedDepths] = useState<string[]>(['05m']);
+  const [depthWeights, setDepthWeights] = useState<DepthWeights>({ '05m': 1, '10m': 1, '15m': 1 });
   const [selectedTimes, setSelectedTimes] = useState<string[]>(['07d-14d']);
   const [feature, setFeature] = useState<FeatureCollection | null>(null);
   const [metadata, setMetadata] = useState<Record<number, Metadata> | null>(null);
@@ -76,6 +76,12 @@ function App() {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [clickIds, setClickIds] = useState<number[]>([]);
   const [tooltip, setTooltip] = useState<{x: number; y: number; content: string} | null>(null);
+
+  // Derive depth params for API: only depths with weight > 0, with normalised weights
+  const activeDepths = Object.entries(depthWeights).filter(([, w]) => w > 0);
+  const depthTotal = activeDepths.reduce((s, [, w]) => s + w, 0);
+  const depthParam  = activeDepths.map(([d]) => d).join(',');
+  const weightParam = activeDepths.map(([, w]) => (w / depthTotal).toFixed(4)).join(',');
 
   //fetch geojson features for display
   useEffect(() => {
@@ -122,12 +128,12 @@ function App() {
 
   // Downstream fetch
   useEffect(() => {
-    if (direction !== 'downstream' || !clickIds?.length) {
+    if (direction !== 'downstream' || !clickIds?.length || !depthParam) {
       setConnections([]);
       return;
     }
     const ctrl = new AbortController();
-    const fetchURL = `api/connectivity?depth=${selectedDepths.join(',')}&time_range=${selectedTimes.join(',')}&start_id=${clickIds.join(',')}&op=mean`;
+    const fetchURL = `api/connectivity?depth=${depthParam}&depth_weight=${weightParam}&time_range=${selectedTimes.join(',')}&start_id=${clickIds.join(',')}`;
     console.log('Trying to fetch:', fetchURL);
     (async () => {
       try {
@@ -140,16 +146,16 @@ function App() {
       }
     })();
     return () => ctrl.abort();
-  }, [clickIds, selectedTimes, selectedDepths, direction]);
+  }, [clickIds, selectedTimes, depthParam, weightParam, direction]);
 
   // Upstream fetch
   useEffect(() => {
-    if (direction !== 'upstream' || !clickIds?.length) {
+    if (direction !== 'upstream' || !clickIds?.length || !depthParam) {
       setSourceConnections([]);
       return;
     }
     const ctrl = new AbortController();
-    const fetchURL = `api/connectivity-sources?depth=${selectedDepths.join(',')}&time_range=${selectedTimes.join(',')}&end_id=${clickIds.join(',')}&habitable=${isHabitableShown}`;
+    const fetchURL = `api/connectivity-sources?depth=${depthParam}&depth_weight=${weightParam}&time_range=${selectedTimes.join(',')}&end_id=${clickIds.join(',')}&habitable=${isHabitableShown}`;
     console.log('Trying to fetch:', fetchURL);
     (async () => {
       try {
@@ -162,7 +168,7 @@ function App() {
       }
     })();
     return () => ctrl.abort();
-  }, [clickIds, selectedTimes, selectedDepths, direction, isHabitableShown]);
+  }, [clickIds, selectedTimes, depthParam, weightParam, direction, isHabitableShown]);
 
   const clearHex = () => {
     setClickIds([]);
@@ -506,8 +512,8 @@ function App() {
         } as React.CSSProperties}
       >
         <ControlPanel
-          selectedDepths={selectedDepths}
-          onDepthChange={setSelectedDepths}
+          depthWeights={depthWeights}
+          onDepthWeightsChange={setDepthWeights}
           selectedTimes={selectedTimes}
           onTimeChange={setSelectedTimes}
           clearHex={clearHex}

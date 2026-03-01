@@ -54,6 +54,19 @@ function normalize(data) {
 }
 
 
+// Parse depth_weight param into a map { depth: normalised_weight }.
+// Falls back to equal weights if absent or mismatched length.
+function parseDepthWeights(depthArr, weightStr) {
+  const rawWeights = (weightStr || '').split(',').map(Number).filter(w => !isNaN(w));
+  if (rawWeights.length !== depthArr.length) {
+    // equal weights fallback
+    const eq = 1 / (depthArr.length || 1);
+    return Object.fromEntries(depthArr.map(d => [d, eq]));
+  }
+  const total = rawWeights.reduce((s, w) => s + w, 0) || 1;
+  return Object.fromEntries(depthArr.map((d, i) => [d, rawWeights[i] / total]));
+}
+
 // most used fetch
 // takes a list of depths, time ranges, ids
 // returns a table of connectivity data, averaged over all perumations of the input
@@ -62,6 +75,7 @@ app.get('/connectivity', async (req, res) => {
   const depths = (req.query.depth || "").split(",").filter(Boolean);
   const time_ranges = (req.query.time_range || "").split(",").filter(Boolean);
   const start_ids = (req.query.start_id || '').split(',').filter(Boolean);
+  const depthWeights = parseDepthWeights(depths, req.query.depth_weight);
 
   // Validate inputs
   if (!validateArray(depths, 10)) {
@@ -104,19 +118,17 @@ app.get('/connectivity', async (req, res) => {
     }
     const data = result.rows;
     
-    // Time-weighted mean: weight each row by the duration of its time window.
-    // Windows are non-overlapping (00d-07d, 07d-14d, 14d-28d), so this gives
-    // a physically meaningful average rate over the selected period.
-    // Depth rows are weighted equally (no natural physical weighting for depth).
+    // Time-and-depth-weighted mean.
+    // Each row is weighted by its time-window duration (hours) × user-supplied depth weight.
     const DT_H = { '00d-07d': 168, '07d-14d': 168, '14d-28d': 336 };
-    const timeWeightedMean = rows => {
-      let totalHours = 0, totalWeighted = 0;
+    const weightedMean = rows => {
+      let totalW = 0, totalWeighted = 0;
       for (const r of rows) {
-        const h = DT_H[r.time_range] ?? 168;
-        totalHours += h;
-        totalWeighted += +r.weight * h;
+        const w = (DT_H[r.time_range] ?? 168) * (depthWeights[r.depth] ?? 1);
+        totalW += w;
+        totalWeighted += +r.weight * w;
       }
-      return totalWeighted / (totalHours || 1);
+      return totalWeighted / (totalW || 1);
     };
 
     const byEndId = data.reduce((acc, r) => {
@@ -126,7 +138,7 @@ app.get('/connectivity', async (req, res) => {
 
     const aggregates = Object.entries(byEndId).map(([end_id, rows]) => ({
       end_id: typeof rows[0].end_id === 'number' ? Number(end_id) : String(end_id),
-      weight: timeWeightedMean(rows),
+      weight: weightedMean(rows),
     }));
         
     const responsePayload = normalize(aggregates);
@@ -147,6 +159,7 @@ app.get('/connectivity-sources', async (req, res) => {
   const time_ranges = (req.query.time_range || '').split(',').filter(Boolean);
   const end_ids    = (req.query.end_id     || '').split(',').filter(Boolean);
   const habitable  = req.query.habitable === 'true';
+  const depthWeights = parseDepthWeights(depths, req.query.depth_weight);
 
   if (!validateArray(depths, 10)) {
     return res.status(400).json({ error: 'Invalid depth parameter. Must be array with max 10 items' });
@@ -190,16 +203,16 @@ app.get('/connectivity-sources', async (req, res) => {
 
     const data = result.rows;
 
-    // Time-weighted mean per source, aggregated across all selected end_ids, depths, time_ranges
+    // Time-and-depth-weighted mean per source
     const DT_H = { '00d-07d': 168, '07d-14d': 168, '14d-28d': 336 };
-    const timeWeightedMean = rows => {
-      let totalHours = 0, totalWeighted = 0;
+    const weightedMean = rows => {
+      let totalW = 0, totalWeighted = 0;
       for (const r of rows) {
-        const h = DT_H[r.time_range] ?? 168;
-        totalHours += h;
-        totalWeighted += +r.weight * h;
+        const w = (DT_H[r.time_range] ?? 168) * (depthWeights[r.depth] ?? 1);
+        totalW += w;
+        totalWeighted += +r.weight * w;
       }
-      return totalWeighted / (totalHours || 1);
+      return totalWeighted / (totalW || 1);
     };
 
     const byStartId = data.reduce((acc, r) => {
@@ -209,7 +222,7 @@ app.get('/connectivity-sources', async (req, res) => {
 
     const aggregates = Object.entries(byStartId).map(([start_id, rows]) => ({
       start_id: Number(start_id),
-      weight: timeWeightedMean(rows),
+      weight: weightedMean(rows),
     }));
 
     // Fractional shares: divide each source weight by the sum over all active sources
