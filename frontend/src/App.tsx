@@ -5,7 +5,7 @@ import StaticMap from 'react-map-gl';
 import maplibregl from 'maplibre-gl';
 import ControlPanel from './ControlPanel';
 import InfoBox from './InfoBox';
-import { theme } from './theme';
+import { theme, type RGBA } from './theme';
 
 // Free map styles (no API key required):
 // - https://tiles.openfreemap.org/styles/positron (minimal light gray)
@@ -183,6 +183,54 @@ function App() {
     return new Map<number, number>(sourceConnections.filter(c => c.raw_weight != null).map(c => [c.start_id, c.raw_weight!]));
   }, [direction, connections, sourceConnections]);
 
+  // Visual state for each hex — single source of truth for elevation and color.
+  // Separates rendering concerns from raw data (rawWeightMap is used only for tooltips).
+  //
+  //  connected        – in weightMap, shown with weight-based elevation + color
+  //  connected-dimmed – in weightMap but non-habitable in downstream+habitable mode
+  //                     shown flat with a de-saturated color (de-emphasised target)
+  //  excluded         – NOT in weightMap, non-habitable, upstream+habitable ON
+  //                     shown flat in light gray (excluded from the calculation)
+  //  dimmed           – NOT in weightMap, non-habitable, downstream+habitable ON
+  //                     shown flat in dark gray (deep/uninhabitable area)
+  type HexDisplayState =
+    | { kind: 'connected';        weight: number }
+    | { kind: 'connected-dimmed'; weight: number }
+    | { kind: 'excluded' }
+    | { kind: 'dimmed' };
+
+  const hexDisplayMap = useMemo(() => {
+    const map = new Map<number, HexDisplayState>();
+    if (!metadata) return map;
+
+    const isNonHabitable = (id: number) => {
+      const m = metadata[id];
+      return m != null && m.habitable == 0;
+    };
+
+    // Pass 1: all hexes in weightMap
+    for (const [id, w] of weightMap) {
+      if (isNonHabitable(id) && isHabitableShown && direction === 'downstream') {
+        map.set(id, { kind: 'connected-dimmed', weight: w });
+      } else {
+        map.set(id, { kind: 'connected', weight: w });
+      }
+    }
+
+    // Pass 2: non-habitable unconnected hexes when habitable filter is on
+    if (isHabitableShown) {
+      for (const idKey of Object.keys(metadata)) {
+        const id = Number(idKey);
+        if (map.has(id)) continue;
+        if (isNonHabitable(id)) {
+          map.set(id, direction === 'upstream' ? { kind: 'excluded' } : { kind: 'dimmed' });
+        }
+      }
+    }
+
+    return map;
+  }, [weightMap, metadata, isHabitableShown, direction]);
+
   // Helper: add z-coordinate to all positions in a geometry
   const addZToGeometry = (geometry: any, z: number): any => {
     const addZ = (coords: any): any => {
@@ -201,11 +249,11 @@ function App() {
     geometry: addZToGeometry(f.geometry, z),
   });
 
-  // Calculate connectivity height for a hex
+  // Calculate connectivity height for a hex (used to stack category layers)
   const getConnHeight = (id: number) => {
-    if (isHabitableShown && metadata && metadata[id]?.habitable == 0) return 0;
-    const w = weightMap.get(id);
-    return w !== undefined ? theme.elevation.getElevation(w) : 0;
+    const state = hexDisplayMap.get(id);
+    if (!state || state.kind !== 'connected') return 0;
+    return theme.elevation.getElevation(state.weight);
   };
 
   // Common layer properties
@@ -294,27 +342,34 @@ function App() {
           ...commonLayerProps,
           ...interactionHandlers,
           updateTriggers: {
-            getFillColor: [hoveredId, weightMap, clickIds, isHabitableShown],
-            getElevation: [weightMap, isHabitableShown],
+            getFillColor: [hexDisplayMap, hoveredId],
+            getElevation: [hexDisplayMap],
           },
           getElevation: (d: any) => {
-            const id = d.properties.id;
-            if (isHabitableShown && metadata && metadata[id]?.habitable == 0) return 0;
-            const w = weightMap.get(id);
-            if (w !== undefined) return theme.elevation.getElevation(w);
-            return theme.elevation.default;
+            const state = hexDisplayMap.get(d.properties.id);
+            if (!state || state.kind !== 'connected') return 0;
+            return theme.elevation.getElevation(state.weight);
           },
           getFillColor: (d: any) => {
             const id = d.properties.id;
-            const isDeep = isHabitableShown && metadata && metadata[id]?.habitable == 0;
             if (id === hoveredId) return theme.hex.hovered;
-            const w = weightMap.get(id);
-            if (w !== undefined) {
-              const c = theme.hex.getWeightColor(w);
-              return isDeep ? [Math.round(c[0]*0.45+70*0.55), Math.round(c[1]*0.45+70*0.55), Math.round(c[2]*0.45+70*0.55), c[3]] as [number,number,number,number] : c;
+            const state = hexDisplayMap.get(id);
+            if (!state) return theme.hex.default;
+            switch (state.kind) {
+              case 'connected':
+                return theme.hex.getWeightColor(state.weight);
+              case 'connected-dimmed': {
+                // connected but non-habitable target (downstream+habitable): flat, de-saturated
+                const c = theme.hex.getWeightColor(state.weight);
+                return [Math.round(c[0]*0.4+150*0.6), Math.round(c[1]*0.4+150*0.6), Math.round(c[2]*0.4+150*0.6), 180] as RGBA;
+              }
+              case 'excluded':
+                // upstream+habitable: non-habitable source excluded from calc, shown flat in light gray
+                return [180, 180, 180, 220] as RGBA;
+              case 'dimmed':
+                // downstream+habitable: non-habitable area, shown flat in dark gray
+                return [90, 90, 90, 200] as RGBA;
             }
-            if (isDeep) return theme.highlight.deepWater;
-            return theme.hex.default;
           },
         }),
 
@@ -329,7 +384,7 @@ function App() {
           },
           ...commonLayerProps,
           ...interactionHandlers,
-          updateTriggers: { data: [weightMap], getFillColor: [hoveredId] },
+          updateTriggers: { data: [hexDisplayMap], getFillColor: [hoveredId] },
           getElevation: catHeight,
           getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.historic,
         })] : []),
@@ -349,7 +404,7 @@ function App() {
           },
           ...commonLayerProps,
           ...interactionHandlers,
-          updateTriggers: { data: [weightMap, isHistoricHighlighted], getFillColor: [hoveredId] },
+          updateTriggers: { data: [hexDisplayMap, isHistoricHighlighted], getFillColor: [hoveredId] },
           getElevation: catHeight,
           getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.restoration,
         })] : []),
@@ -372,7 +427,7 @@ function App() {
           },
           ...commonLayerProps,
           ...interactionHandlers,
-          updateTriggers: { data: [weightMap, isHistoricHighlighted, isRestHighlighted], getFillColor: [hoveredId] },
+          updateTriggers: { data: [hexDisplayMap, isHistoricHighlighted, isRestHighlighted], getFillColor: [hoveredId] },
           getElevation: catHeight,
           getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.aquaculture,
         })] : []),
@@ -396,7 +451,7 @@ function App() {
           },
           ...commonLayerProps,
           ...interactionHandlers,
-          updateTriggers: { data: [weightMap, isHistoricHighlighted, isRestHighlighted, isAQCHighlighted], getFillColor: [hoveredId] },
+          updateTriggers: { data: [hexDisplayMap, isHistoricHighlighted, isRestHighlighted, isAQCHighlighted], getFillColor: [hoveredId] },
           getElevation: catHeight,
           getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.disease,
         })] : []),
@@ -421,7 +476,7 @@ function App() {
           },
           ...commonLayerProps,
           ...interactionHandlers,
-          updateTriggers: { data: [weightMap, clickIds, isHistoricHighlighted, isRestHighlighted, isAQCHighlighted, isDiseaseHighlighted], getFillColor: [hoveredId] },
+          updateTriggers: { data: [hexDisplayMap, clickIds, isHistoricHighlighted, isRestHighlighted, isAQCHighlighted, isDiseaseHighlighted], getFillColor: [hoveredId] },
           getElevation: catHeight,
           getFillColor: (d: any) => d.properties.id === hoveredId ? theme.hex.hovered : theme.highlight.selected,
         })] : []),
