@@ -1,6 +1,6 @@
 ## OSTREA
 
-**Oyster Spatio-Temporal Dispersal Atlas** — an interactive tool to explore dispersal of European flat oyster (*Ostrea edulis*) larvae and the pathogen *Bonamia ostreae*. Results from biophysical dispersal simulations are visualized for open exploration.
+**Oyster Spatio-Temporal Dispersal Atlas** — a digital twin of dispersal of European flat oyster (*Ostrea edulis*) larvae and the pathogen *Bonamia ostreae*. Results from biophysical dispersal simulations are visualized for open exploration.
 
 ### Why?
 
