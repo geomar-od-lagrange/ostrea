@@ -16,7 +16,7 @@ Lagrangian simulations: [parcels-code.org](https://parcels-code.org)
 
 © [OpenFreeMap](https://openfreemap.org) · © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors
 
-### Tool contributors
+### Contributors
 
 Willi Rath, Ingmar Eissfeldt, Felix Kirch, Lara Schmittmann
 
