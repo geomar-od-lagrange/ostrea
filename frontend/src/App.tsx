@@ -208,12 +208,14 @@ function App() {
         data.aqc     > 0 && 'aquaculture',
         data.rest    > 0 && 'restoration',
         data.his     > 0 && 'historic',
-        data.pop     > 0 && 'population',
       ].filter(Boolean) as string[];
-      const catLine = categories.length > 0 ? categories.join(' · ') : '·';
+      const split = Math.ceil(categories.length / 2);
+      const catLine1 = categories.slice(0, split).join(' · ') || '\u00a0';
+      const catLine2 = categories.slice(split).join(' · ') || '\u00a0';
       const lines = [
         concLine,
-        catLine,
+        catLine1,
+        catLine2,
         `${Math.abs(data.lat).toFixed(1)}\u00b0${data.lat < 0 ? 'S' : 'N'} ${Math.abs(data.lon).toFixed(1)}\u00b0${data.lon < 0 ? 'W' : 'E'} \u00b7 ${data.depth} m`,
         `hex ${escapeHtml(data.id)}`,
       ];

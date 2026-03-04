@@ -208,7 +208,7 @@ export default function ControlPanel({
               onChange={(e) => onHistoricChange(e.target.checked)}
               style={{ accentColor: theme.colors.historic }}
             />
-            <span>Historic population</span>
+            <span>Historic</span>
           </label>
         </div>
       </div>
